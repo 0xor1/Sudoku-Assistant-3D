@@ -33,7 +33,7 @@
 				this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((this._nSqrd - 1) * (cSize + cSpace) + (this._n - 1) * sgSpace);
 				this._cells[i][j].position.z = 0
 				
-				threePanel.addClickable(this._cells[i][j]);
+				this._threePanel.addClickable(this._cells[i][j]);
 				
 				this._cells[i][j].addEventListener("mouseDown", cellSelected.bind(this), false);
 			}
@@ -59,13 +59,6 @@
 
 
 	gb3d.subGridSpacing = 40;
-
-
-	gb3d.prototype = {
-
-		constructor : gb3d
-
-	};
 
 
 	var cap, clashAnimProps = {
