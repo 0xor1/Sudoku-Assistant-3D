@@ -12,6 +12,8 @@
 
 		this.cells = new Utils.MultiArray(this.nSqrd, this.nSqrd);
 
+        this._startingConfiguration = [];
+
 		for(var i = 0; i < this.nSqrd; i++) {
 			for(var j = 0; j < this.nSqrd; j++) {
 				this.cells[i][j] = new Sudoku.GameBoardCell();
@@ -22,7 +24,45 @@
 	gb.prototype = {
 		
 		constructor : gb,
-		
+
+        saveStartingConfig : function(){
+            var val;
+            for(var i = 0; i < this.nSqrd; i++) {
+                for(var j = 0; j < this.nSqrd; j++) {
+                    if(val = this.cells[i][j].getValue() !== Sudoku.GameBoardCell.empty){
+                        this._startingConfiguration.push({
+                            i : i,
+                            j : j,
+                            value : val
+                        });
+                    }
+                }
+            }
+            this.dispatchEvent({
+                type : 'startingConfigurationSaved',
+                configuration : this._startingConfiguration
+            });
+        },
+
+
+        resetGame : function(){
+             var config;
+            for(var i = 0; i < this.nSqrd; i++) {
+                for(var j = 0; j < this.nSqrd; j++) {
+                    this.clearValue(i,j);
+                }
+            }
+            for(var i = 0, l = this._startingConfiguration.length; i<l; i++){
+                config = this._startingConfiguration[i];
+                this.enterValue(config.i, config.j, config.value);
+            }
+            this.dispatchEvent({
+                type : 'gameReset',
+                configuration : this._startingConfiguration
+            });
+        },
+
+
 		getSubGridBounds : function(i, j) {
 
 			var iLower = Math.floor(i / this.n) * this.n, iUpper = iLower + this.n - 1, iSubGrid = iLower / this.n, jLower = Math.floor(j / this.n) * this.n, jUpper = jLower + this.n - 1, jSubGrid = jLower / this.n;

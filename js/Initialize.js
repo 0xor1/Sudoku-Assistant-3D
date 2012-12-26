@@ -3,7 +3,7 @@
     function initialize() {
 
         var threePanel = new UIControls.ThreePanel();
-        var gb3d = new Sudoku.GameBoard3D(threePanel, 4);
+        var gb3d = new Sudoku.GameBoard3D(threePanel, 3);
         threePanel.injectIntoContainer(masterViewport);
         threePanel.start();
 
