@@ -29,18 +29,18 @@
 			vertexShader : vertexShader,
 			fragmentShader : fragmentShader
 		});
-		
+
+        this.texture = this.uniforms.texture.value;
+
+        this.texture.needsUpdate = true;
+
+        this.material.side = THREE.DoubleSide;
+
+        this.color = this.uniforms.color.value;
+
 		this.i = i;
 		
 		this.j = j;
-		
-		this.texture = this.uniforms.texture.value;
-		
-		this.texture.needsUpdate = true;
-
-		this.material.side = THREE.DoubleSide;
-		
-		this.color = this.uniforms.color.value;
 		
 		gameBoardCell.addEventListener("valueSet",cellValueChangedAnimation.bind(this));
 		

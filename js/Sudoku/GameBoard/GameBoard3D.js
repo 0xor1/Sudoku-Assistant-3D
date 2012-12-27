@@ -1,16 +1,14 @@
 (function () {
 
-    Sudoku = Sudoku || {};
 
-
-    var gb3d = Sudoku.GameBoard3D = function (threePanel, n) {
+    var gb3d = Sudoku.GameBoard3D = function (gameBoard, threePanel) {
 
         var cSpace, sgSpace, cSize, gSGB;
         cSpace = gb3d.cellSpacing;
         sgSpace = gb3d.subGridSpacing;
         cSize = gb3d.cellSize;
 
-        this._gameBoard = new Sudoku.GameBoard(n || 3);
+        this._gameBoard = gameBoard;
         gSGB = this._gameBoard.getSubGridBounds.bind(this._gameBoard);
         this._threePanel = threePanel;
 

@@ -1,10 +1,7 @@
 (function() {
 
-
-	var Sudoku = window.Sudoku = window.Sudoku || {};
 	
-	
-	var c = Sudoku.Cell = function(val){
+	Sudoku.Cell = function(val){
 		
 		Utils.EventTarget.call(this);
 		
@@ -13,10 +10,10 @@
 	};
 	
 	
-	c.prototype = {
+	Sudoku.Cell.prototype = {
 		
 		
-		constructor : c,
+		constructor : Sudoku.Cell,
 		
 		
 		getValue : function(){

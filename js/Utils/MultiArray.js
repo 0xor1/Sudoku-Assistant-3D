@@ -1,6 +1,6 @@
 (function(){
 	
-	var Utils = window.Utils = window.Utils || {};
+	window.Utils = window.Utils || {};
 	
 	Utils.MultiArray = (function() {
 

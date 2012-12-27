@@ -1,9 +1,6 @@
 (function() {
 
 
-	var Sudoku = window.Sudoku = window.Sudoku || {};
-	
-
 	var pcs = Sudoku.PossibilityCubeCell = function() {
 
 		Sudoku.Cell.call(this, pcs.active);

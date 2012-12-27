@@ -44,7 +44,7 @@
 
         } else {
 
-            throw new Utils.Error("ThreePanel.add only accepts THREE.Mesh objects or derivaties thereof.");
+            throw new Utils.Error("ThreePanel.add only accepts THREE.Mesh objects or derivatives thereof.");
 
         }
         return this;

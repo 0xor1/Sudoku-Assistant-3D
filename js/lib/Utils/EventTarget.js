@@ -5,7 +5,7 @@
 (function () {
 
 
-    var Utils = window.Utils = window.Utils || {};
+    window.Utils = window.Utils || {};
 
 
     Utils.EventTarget = function () {

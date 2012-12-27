@@ -1,6 +1,6 @@
 (function(){
 	
-	var Sudoku = window.Sudoku = window.Sudoku || {};
+	window.Sudoku = {};
 	
 	Sudoku.textures = [
 		THREE.ImageUtils.loadTexture("textures/empty.png"),

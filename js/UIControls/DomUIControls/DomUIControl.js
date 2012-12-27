@@ -4,7 +4,7 @@
 
         UIControls.UIControl.call(this);
 
-        p = p || {}; //{tag, dom, style}
+        p = p || {}; //{tag, dom}
 
         if (typeof p.dom !== "undefined") {
             this._dom = p.dom;
@@ -27,8 +27,6 @@
         con._dom.style.background = this._dom.style.background;
         con._dom.appendChild(this._dom);
 
-        this.resize();
-
         this._dom.style.margin = 0;
         this._dom.style.padding = 0;
         this._dom.style.position = 'absolute';
@@ -36,7 +34,7 @@
         this._dom.style.height = '100%';
         this._dom.style.overflow = "hidden";
 
-        this._rect = this._dom.getBoundingClientRect();
+        this.resize();
 
         con.addEventListener('resize', this.resize.bind(this));
 

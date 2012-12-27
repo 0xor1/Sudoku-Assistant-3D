@@ -16,6 +16,8 @@
         , Utils = window.Utils = window.Utils || {}
         ;
 
+    window.Utils = window.Utils || {};
+
     Utils.FrameRateMonitor = new Utils.EventTarget();
 
     Utils.FrameRateMonitor.setCriticalFps = function (val) {

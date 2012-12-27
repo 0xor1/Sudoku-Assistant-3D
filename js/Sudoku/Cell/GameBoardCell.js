@@ -1,9 +1,6 @@
 (function() {
 
 
-	var Sudoku = window.Sudoku = window.Sudoku || {};
-
-	
 	var gbc = Sudoku.GameBoardCell = function() {
 
 		Sudoku.Cell.call(this, gbc.empty);

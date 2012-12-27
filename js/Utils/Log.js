@@ -1,6 +1,6 @@
 (function() {
 	
-	var Utils = window.Utils = window.Utils || {};
+	window.Utils = window.Utils || {};
 	
 	Utils.log = function(msg){
 		

@@ -25,7 +25,8 @@
 		
 		this.dispatchEvent({
 			type : "click",
-			obj : this
+			obj : this,
+            info : event
 		});
 		return this;
 		
@@ -36,7 +37,8 @@
 		
 		this.dispatchEvent({
 			type : "mouseDown",
-			obj : this
+			obj : this,
+            info : event
 		});
 		return this;
 	};
@@ -46,9 +48,44 @@
 		
 		this.dispatchEvent({
 			type : "mouseUp",
-			obj : this
+			obj : this,
+            info : event
 		});
 		return this;
 	};
+
+
+    UIControls.ClickableMesh.prototype.mouseEnter = function(event){
+
+        this.dispatchEvent({
+            type : "mouseEnter",
+            obj : this,
+            info : event
+        });
+        return this;
+    };
+
+
+    UIControls.ClickableMesh.prototype.mouseLeave = function(event){
+
+        this.dispatchEvent({
+            type : "mouseLeave",
+            obj : this,
+            info : event
+        });
+        return this;
+    };
+
+
+    UIControls.ClickableMesh.prototype.mouseMove = function(event){
+
+        this.dispatchEvent({
+            type : "mouseMove",
+            obj : this,
+            info : event
+        });
+        return this;
+    };
+
 	
 })();

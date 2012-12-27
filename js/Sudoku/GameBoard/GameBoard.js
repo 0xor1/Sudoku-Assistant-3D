@@ -1,6 +1,5 @@
 (function() {
 
-	Sudoku = Sudoku || {};
 	
 	var gb = Sudoku.GameBoard = function(n) {
 		
