@@ -37,13 +37,13 @@
             }
         }
 
-        cellSelected.call(this, {obj:this._cells[0][0]});
+        this._selectedCell = this._cells[0][0].select();
 
-        this._gameBoard.addEventListener("clash", clashAnimation.bind(this));
+        gameBoard.addEventListener("clash", clashAnimation.bind(this));
 
-        this._gameBoard.addEventListener("gameComplete", gameCompleteAnimation.bind(this));
+        gameBoard.addEventListener("gameComplete", gameCompleteAnimation.bind(this));
 
-        this.window.addEventListener("keydown", keyPress.bind(this), false);
+        this.addUIEventListener(window, "keydown", keyPress.bind(this), false);
 
         centerCamera.call(this);
 

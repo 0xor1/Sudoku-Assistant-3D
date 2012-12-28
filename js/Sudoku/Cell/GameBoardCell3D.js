@@ -38,13 +38,11 @@
 
         this.color = this.uniforms.color.value;
 
-
         //states
         this._isSelected = false;
+        this._isStartingCell = false;
 		this._isSecondaryClasher = false;
         this._isPrimaryClasher = false;
-        this._isStartingCell = false;
-
 
 		gameBoardCell.addEventListener("valueSet",cellValueChangedAnimation.bind(this));
 		
@@ -56,14 +54,43 @@
 
     gbc3d.prototype.select = function(){
 
-        if(this._isSelected){
+        if(this._isSelected || this._isStartingCell){
             return this;
         }
 
+        this.dispatchEvent({
+            type : "selected",
+            cell : this
+        });
 
+        this._isSelected = true;
 
+        cellSelectedAnimation.call(this);
+
+        return this;
 
     };
+
+
+    gbc3d.prototype.deselect = function(){
+
+        if(!this._isSelected){
+            return this;
+        }
+
+        this.dispatchEvent({
+            type : "deselected",
+            cell : this
+        });
+
+        this._isSelected = false;
+
+        cellDeselectedAnimation.call(this);
+
+        return this;
+
+    };
+
 
     gbc3d.prototype.isSelected = function(){
 
@@ -71,7 +98,68 @@
 
     };
 
-	
+
+    gbc3d.prototype.setAsStartingCell = function(){
+
+        if(this._isStartingCell){
+            return this;
+        }
+
+        if(this._isSelected){
+            this.deselect();
+        }
+
+        this.dispatchEvent({
+            type : "setAsStartingCell",
+            obj : this
+        });
+
+        this._isStartingCell = true;
+
+        setAsStartingCellAnimation.call(this);
+
+    };
+
+
+    gbc3d.prototype.unsetAsStartingCell = function(){
+
+        if(!this._isStartingCell){
+            return this;
+        }
+
+        this.dispatchEvent({
+            type : "unsetAsStartingCell",
+            obj : this
+        });
+
+        this._isStartingCell = false;
+
+        unsetAsStartingCellAnimation.call(this);
+
+    };
+
+
+    gbc3d.prototype.isStartingCell = function(){
+
+        return this._isStartingCell;
+
+    };
+
+
+    gbc3d.prototype.setAsPrimaryClasher = function(){
+
+        //TODO
+
+    };
+
+
+    gbc3d.prototype.setAsSecondaryClasher = function(){
+
+        //TODO
+
+    };
+
+
 	function cellValueChangedAnimation(event) {
 		
 		var len = 500;
