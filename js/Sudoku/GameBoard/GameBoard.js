@@ -5,85 +5,68 @@
 		
 		Utils.EventTarget.call(this);
 
-		this.n = n || 3;
-		this.nSqrd = this.n * this.n;
-		this.emptyCellCount = this.nSqrd * this.nSqrd;
+		n = n || 3;
 
-		this.cells = new Utils.MultiArray(this.nSqrd, this.nSqrd);
+		var nSqrd = n * n;
 
-        this._startingConfiguration = [];
+		this._emptyCellCount = nSqrd * nSqrd;
+        this._cells = new Utils.MultiArray(nSqrd, nSqrd);
 
-		for(var i = 0; i < this.nSqrd; i++) {
-			for(var j = 0; j < this.nSqrd; j++) {
-				this.cells[i][j] = new Sudoku.GameBoardCell();
+		for(var i = 0; i < nSqrd; i++) {
+			for(var j = 0; j < nSqrd; j++) {
+				this._cells[i][j] = new Sudoku.GameBoardCell();
 			}
 		}
 	};
 
+
 	gb.prototype = {
-		
+
+
 		constructor : gb,
 
-        saveStartingConfig : function(){
-            var val;
-            for(var i = 0; i < this.nSqrd; i++) {
-                for(var j = 0; j < this.nSqrd; j++) {
-                    if(val = this.cells[i][j].getValue() !== Sudoku.GameBoardCell.empty){
-                        this._startingConfiguration.push({
-                            i : i,
-                            j : j,
-                            value : val
-                        });
-                    }
-                }
-            }
-            this.dispatchEvent({
-                type : 'startingConfigurationSaved',
-                configuration : this._startingConfiguration
-            });
+
+        getGameSize : function(){
+
+            return Math.sqrt(this._cells.dims[0]);
+
         },
 
 
-        resetGame : function(){
-             var config;
-            for(var i = 0; i < this.nSqrd; i++) {
-                for(var j = 0; j < this.nSqrd; j++) {
-                    this.clearValue(i,j);
-                }
-            }
-            for(var i = 0, l = this._startingConfiguration.length; i<l; i++){
-                config = this._startingConfiguration[i];
-                this.enterValue(config.i, config.j, config.value);
-            }
-            this.dispatchEvent({
-                type : 'gameReset',
-                configuration : this._startingConfiguration
-            });
+        getSubGridBounds : function(i, j) {
+
+            var n = this.getGameSize()
+                , iLower = Math.floor(i / n) * n
+                , iUpper = iLower + n - 1
+                , iSubGrid = iLower / n
+                , jLower = Math.floor(j / n) * n
+                , jUpper = jLower + n - 1
+                , jSubGrid = jLower / n
+                ;
+
+            return {
+                iLower : iLower,
+                iUpper : iUpper,
+                iSubGrid : iSubGrid,
+                jLower : jLower,
+                jUpper : jUpper,
+                jSubGrid : jSubGrid
+            };
         },
 
-
-		getSubGridBounds : function(i, j) {
-
-			var iLower = Math.floor(i / this.n) * this.n, iUpper = iLower + this.n - 1, iSubGrid = iLower / this.n, jLower = Math.floor(j / this.n) * this.n, jUpper = jLower + this.n - 1, jSubGrid = jLower / this.n;
-
-			return {
-				iLower : iLower,
-				iUpper : iUpper,
-				iSubGrid : iSubGrid,
-				jLower : jLower,
-				jUpper : jUpper,
-				jSubGrid : jSubGrid
-			};
-		},
 		
 		enterValue : function(i, j, val) {
 
-			if(
-				this.cells[i][j].getValue() === Sudoku.GameBoardCell.empty &&
+            var n = this.getGameSize()
+                , nSqrd = n * n
+                ;
+
+            if(
+				this._cells[i][j].getValue() === Sudoku.GameBoardCell.empty &&
 				!entryClash.call(this, i, j, val) &&
-				val <= this.nSqrd
+				val <= nSqrd
 			) {
-				this.cells[i][j].enterValue(val);
+				this._cells[i][j].enterValue(val);
 				decrementEmptyCellCount.call(this);
 			}
 
@@ -91,8 +74,8 @@
 		
 		clearValue : function(i,j){
 			
-			if(this.cells[i][j].getValue() !== Sudoku.GameBoardCell.empty){
-				this.cells[i][j].clearValue();
+			if(this._cells[i][j].getValue() !== Sudoku.GameBoardCell.empty){
+				this._cells[i][j].clearValue();
 				incrementEmptyCellCount.call(this);
 			}	
 			
@@ -104,13 +87,18 @@
 
 	function entryClash(i, j, val) {
 
-		var subGridBounds = this.getSubGridBounds(i, j), subGridClashFound = false, clashOccurred = false;
+		var n = this.getGameSize()
+            , nSqrd = n * n
+            , subGridBounds = this.getSubGridBounds(i, j)
+            , subGridClashFound = false
+            , clashOccurred = false
+            ;
 		
-		for(var k = 0; k < this.nSqrd; k++) {
+		for(var k = 0; k < nSqrd; k++) {
 			if(k>=subGridBounds.jLower && k<=subGridBounds.jUpper){
 				continue;
 			}
-			if(this.cells[i][k].getValue() === val) {
+			if(this._cells[i][k].getValue() === val) {
 				this.dispatchEvent({
 					type : "clash",
 					subType : "row",
@@ -121,11 +109,11 @@
 				break;
 			}
 		}
-		for(var k = 0; k < this.nSqrd; k++) {
+		for(var k = 0; k < nSqrd; k++) {
 			if(k>=subGridBounds.iLower && k<=subGridBounds.iUpper){
 				continue;
 			}
-			if(this.cells[k][j].getValue() === val) {
+			if(this._cells[k][j].getValue() === val) {
 				this.dispatchEvent({
 					type : "clash",
 					subType : "column",
@@ -139,7 +127,7 @@
 
 		for(var k = subGridBounds.iLower; k <= subGridBounds.iUpper; k++) {
 			for(var l = subGridBounds.jLower; l <= subGridBounds.jUpper; l++) {
-				if(this.cells[k][l].getValue() === val) {
+				if(this._cells[k][l].getValue() === val) {
 					this.dispatchEvent({
 						type : "clash",
 						subType : "subGrid",
@@ -158,10 +146,15 @@
 
 
 	function decrementEmptyCellCount(){
+
+        if(this._emptyCellCount === 0){
+            throw new Utils.Error('Can\'t decrement _emptyCellCount below zero');
+            return;
+        }
+
+		this._emptyCellCount--;
 	
-		this.emptyCellCount--;
-	
-		if(this.emptyCellCount === 0){
+		if(this._emptyCellCount === 0){
 	
 			this.dispatchEvent({
 				type:"gameComplete"
@@ -174,7 +167,7 @@
 
 	function incrementEmptyCellCount(){
 	
-		this.emptyCellCount++;
+		this._emptyCellCount++;
 	
 	}
 

@@ -24,15 +24,15 @@
 		
 		return function() {
 
-			var length = arguments.length - 1, array = new Array(arguments[0]), dims = [length];
+			var array = new Array(arguments[0]), dims = [arguments.length - 1];
 			
-			array.dims = [length+1];
+			array.dims = [arguments.length];
 			
-			for(var i = 0; i < length+1; i++){
+			for(var i = 0, l = arguments.length; i < l; i++){
 				array.dims[i] = arguments[i];
 			}
 			
-			for(var i = 0; i < length; i++) {
+			for(var i = 0, l = arguments.length - 1; i < l; i++) {
 				dims[i] = arguments[i + 1];
 			}
 

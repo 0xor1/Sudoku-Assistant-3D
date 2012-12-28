@@ -3,35 +3,35 @@
 
     var gb3d = Sudoku.GameBoard3D = function (gameBoard, threePanel) {
 
-        var cSpace, sgSpace, cSize, gSGB;
+        var n, nSqrd, cSpace, sgSpace, cSize, gSGB;
+        n = gameBoard.getGameSize();
+        nSqrd = n * n;
         cSpace = gb3d.cellSpacing;
         sgSpace = gb3d.subGridSpacing;
         cSize = gb3d.cellSize;
+        gSGB = gameBoard.getSubGridBounds.bind(gameBoard);
 
-        this._gameBoard = gameBoard;
-        gSGB = this._gameBoard.getSubGridBounds.bind(this._gameBoard);
-        this._threePanel = threePanel;
+        UIControls.UIControl.call(this);
 
         this.followCursor = false;
 
-        this._n = this._gameBoard.n;
-        this._nSqrd = this._n * this._n;
-        this._cells = new Utils.MultiArray(this._nSqrd, this._nSqrd);
-        this._selectedCell = null;
+        this._gameBoard = gameBoard;
+        this._threePanel = threePanel;
+        this._cells = new Utils.MultiArray(nSqrd, nSqrd);
 
-        this._threePanel._dom.style.background = "#111111";
-        this._threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
+        threePanel._dom.style.background = "#111111";
+        threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
 
-        for (var i = 0; i < this._nSqrd; i++) {
-            for (var j = 0; j < this._nSqrd; j++) {
+        for (var i = 0; i < nSqrd; i++) {
+            for (var j = 0; j < nSqrd; j++) {
 
-                this._cells[i][j] = new Sudoku.GameBoardCell3D(this._gameBoard.cells[i][j], i, j, gb3d.cellSize);
+                this._cells[i][j] = new Sudoku.GameBoardCell3D(gameBoard._cells[i][j], gb3d.cellSize);
 
-                this._cells[i][j].position.x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((this._nSqrd - 1) * (cSize + cSpace) + (this._n - 1) * sgSpace);
-                this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((this._nSqrd - 1) * (cSize + cSpace) + (this._n - 1) * sgSpace);
+                this._cells[i][j].position.x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
+                this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                 this._cells[i][j].position.z = 0
 
-                this._threePanel.addClickable(this._cells[i][j]);
+                threePanel.addClickable(this._cells[i][j]);
 
                 this._cells[i][j].addEventListener("mouseDown", cellSelected.bind(this), false);
             }
@@ -43,7 +43,7 @@
 
         this._gameBoard.addEventListener("gameComplete", gameCompleteAnimation.bind(this));
 
-        window.addEventListener("keydown", keyPress.bind(this), false);
+        this.window.addEventListener("keydown", keyPress.bind(this), false);
 
         centerCamera.call(this);
 
@@ -57,6 +57,9 @@
 
 
     gb3d.subGridSpacing = 40;
+
+
+    gb3d.prototype = Object.create(UIControls.UIControl.prototype);
 
 
     var cap, clashAnimProps = {
@@ -261,7 +264,10 @@
 
     function keyPress(event) {
 
-        var val, i, j;
+        var val
+            , i
+            , j
+            ;
 
         /*left arrow*/
         if (event.keyCode === 37) {
@@ -309,7 +315,9 @@
 
     function centerCamera() {
 
-        var len = 500, cam = this._threePanel.camera;
+        var len = 500
+            , cam = this._threePanel.camera
+            ;
 
         Utils.animate({
             obj:cam.position,
@@ -334,7 +342,9 @@
 
     function deselectCell() {
 
-        var sc = this._selectedCell, len = 200;
+        var sc = this._selectedCell
+            , len = 200
+            ;
 
         if (typeof sc === "object") {
             Utils.animate({
@@ -363,10 +373,14 @@
 
     function gameCompleteAnimation() {
 
-        var c, len = 600;
+        var n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            , c
+            , len = 600
+            ;
 
-        for (var i = 0; i < this._nSqrd; i++) {
-            for (var j = 0; j < this._nSqrd; j++) {
+        for (var i = 0; i < nSqrd; i++) {
+            for (var j = 0; j < nSqrd; j++) {
                 c = this._cells[i][j];
                 Utils.animate({
                     obj:c.rotation,

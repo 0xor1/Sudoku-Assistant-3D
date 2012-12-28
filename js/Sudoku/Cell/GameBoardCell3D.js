@@ -1,7 +1,7 @@
 (function() {
 	
 	
-	var gbc3d = Sudoku.GameBoardCell3D = function(gameBoardCell, i, j, cellSize) {
+	var gbc3d = Sudoku.GameBoardCell3D = function(gameBoardCell, cellSize) {
 
 		var vertexShader = "varying vec2 vUv; void main() {vUv = uv;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );}"
             , fragmentShader = "uniform vec3 color; uniform sampler2D texture; varying vec2 vUv; void main() { vec4 tColor = texture2D( texture, vUv ); gl_FragColor = vec4( mix( color, tColor.rgb, tColor.a ), 1.0 );}";
@@ -38,17 +38,39 @@
 
         this.color = this.uniforms.color.value;
 
-		this.i = i;
-		
-		this.j = j;
-		
+
+        //states
+        this._isSelected = false;
+		this._isSecondaryClasher = false;
+        this._isPrimaryClasher = false;
+        this._isStartingCell = false;
+
+
 		gameBoardCell.addEventListener("valueSet",cellValueChangedAnimation.bind(this));
 		
 	};
 
 	
 	gbc3d.prototype = Object.create(UIControls.ClickableMesh.prototype);
-	
+
+
+    gbc3d.prototype.select = function(){
+
+        if(this._isSelected){
+            return this;
+        }
+
+
+
+
+    };
+
+    gbc3d.prototype.isSelected = function(){
+
+        return this._isSelected;
+
+    };
+
 	
 	function cellValueChangedAnimation(event) {
 		
