@@ -168,7 +168,7 @@
 
         this._isPrimaryClashing = this._isSecondaryClashing = false;
 
-        clashType = "_is" + clashType.substring(0,1).toUpperCase() + clashType.substring(1).toLowerCase() + "Clashing";
+        clashType = "_is" + clashType.substring(0, 1).toUpperCase() + clashType.substring(1).toLowerCase() + "Clashing";
 
         this[clashType] = true;
 
@@ -177,7 +177,7 @@
             this._clashTimer = null;
         }
 
-        this._clashTimer = setTimeout(undoClash.bind(this), len + delay);
+        this._clashTimer = setTimeout(undoClash.bind(this), primaryClashChange.length + 100);
 
         return statusChangedAnimation.call(this);
 
@@ -204,27 +204,27 @@
 
     function statusChangedAnimation() {
 
-        var statusColor;
+        var statusChange;
 
         if (this._isPrimaryClashing) {
-            statusColor = primaryClashColor;
+            statusChange = primaryClashChange;
         } else if (this._isSecondaryClashing) {
-            statusColor = secondaryClashColor;
+            statusChange = secondaryClashChange;
         } else if (this._isStartingCell) {
-            statusColor = startingColor;
+            statusChange = startingChange;
         } else if (this._isSelected) {
-            statusColor = selectedColor;
+            statusChange = selectedChange;
         } else {
-            statusColor = defaultColor;
+            statusChange = defaultChange;
         }
 
-        for (var i in statusColor) {
+        for (var i in statusChange.color) {
 
             Utils.animate({
                 obj:this.color,
                 prop:i,
-                targetValue:statusColor[i],
-                length:len
+                targetValue:statusChange.color[i],
+                length:statusChange.length
             });
 
         }
@@ -315,32 +315,45 @@
     }
 
     // status animation parameters
-    var len = 400
-        , delay = 50
-        , selectedColor = {
-            r:1,
-            g:0.7,
-            b:0.4
+    var selectedChange = {
+            length:200,
+            color:{
+                r:1,
+                g:0.7,
+                b:0.4
+            }
         }
-        , startingColor = {
-            r:0.4,
-            g:0.4,
-            b:1
+        , startingChange = {
+            length:400,
+            color:{
+                r:0.4,
+                g:0.4,
+                b:1
+            }
         }
-        , primaryClashColor = {
-            r:1,
-            g:0,
-            b:0
+        , primaryClashChange = {
+            length:400,
+            color:{
+                r:1,
+                g:0,
+                b:0
+            }
         }
-        , secondaryClashColor = {
-            r:1,
-            g:0.5,
-            b:0.5
+        , secondaryClashChange = {
+            length:400,
+            color:{
+                r:1,
+                g:0.5,
+                b:0.5
+            }
         }
-        , defaultColor = {
-            r:1,
-            g:1,
-            b:1
+        , defaultChange = {
+            length:400,
+            color:{
+                r:1,
+                g:1,
+                b:1
+            }
         }
         ;
 

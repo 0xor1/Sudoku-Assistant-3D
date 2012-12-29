@@ -10,6 +10,8 @@
         threePanel.injectIntoContainer(masterViewport);
         threePanel.start();
 
+        setTimeout(function(){gb3d.assignStartingCells();}, 10000);
+
         //Utils.FrameRateMonitor.enableLogging();
         Utils.FrameRateMonitor.start();
 

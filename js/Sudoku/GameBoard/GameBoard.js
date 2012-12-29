@@ -79,7 +79,13 @@
 				incrementEmptyCellCount.call(this);
 			}	
 			
-		}
+		},
+
+        getCellValue : function(i, j){
+
+            return this._cells[i][j].getValue();
+
+        }
 		
 	
 	};

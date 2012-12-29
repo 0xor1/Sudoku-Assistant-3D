@@ -64,6 +64,24 @@
     gb3d.prototype = Object.create(UIControls.UIControl.prototype);
 
 
+
+    gb3d.prototype.assignStartingCells = function(){
+
+        var n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            ;
+
+        for(var i = 0; i < nSqrd; i++){
+            for(var j = 0; j < nSqrd; j++){
+                if(this._gameBoard.getCellValue(i,j) !== Sudoku.GameBoardCell.empty){
+                    this._cells[i][j].setAsStartingCell();
+                }
+            }
+        }
+
+    }
+
+
     function cellSelected(event) {
 
         if (this._selectedCell !== null) {
@@ -139,6 +157,10 @@
             , i
             , j
             ;
+
+        if(this._selectedCell === null){
+            return;
+        }
 
         /*left arrow*/
         if (event.keyCode === 37) {
