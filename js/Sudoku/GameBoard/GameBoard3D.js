@@ -126,7 +126,6 @@
                     this._cells[k][tempL].clash("Secondary");
                 }
             }
-
         }
 
     }
@@ -134,7 +133,9 @@
 
     function keyPress(event) {
 
-        var val
+        var n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            , val
             , i
             , j
             ;
@@ -143,8 +144,8 @@
         if (event.keyCode === 37) {
             i = this._selectedCell.i;
             j = this._selectedCell.j;
-            j = (j - 1 < 0) ? this._nSqrd - 1 : j - 1;
-            cellSelected.call(this, {obj:this._cells[i][j]});
+            j = (j - 1 < 0) ? nSqrd - 1 : j - 1;
+            this._cells[i][j].select();
             return;
         }
 
@@ -152,8 +153,8 @@
         if (event.keyCode === 38) {
             i = this._selectedCell.i;
             j = this._selectedCell.j;
-            i = (i - 1 < 0) ? this._nSqrd - 1 : i - 1;
-            cellSelected.call(this, {obj:this._cells[i][j]});
+            i = (i - 1 < 0) ? nSqrd - 1 : i - 1;
+            this._cells[i][j].select();
             return;
         }
 
@@ -161,8 +162,8 @@
         if (event.keyCode === 39) {
             i = this._selectedCell.i;
             j = this._selectedCell.j;
-            j = (j + 1 >= this._nSqrd) ? 0 : j + 1;
-            cellSelected.call(this, {obj:this._cells[i][j]});
+            j = (j + 1 >= nSqrd) ? 0 : j + 1;
+            this._cells[i][j].select();
             return;
         }
 
@@ -170,8 +171,8 @@
         if (event.keyCode === 40) {
             i = this._selectedCell.i;
             j = this._selectedCell.j;
-            i = (i + 1 >= this._nSqrd) ? 0 : i + 1;
-            cellSelected.call(this, {obj:this._cells[i][j]});
+            i = (i + 1 >= nSqrd) ? 0 : i + 1;
+            this._cells[i][j].select();
             return;
         }
 

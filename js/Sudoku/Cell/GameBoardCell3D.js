@@ -315,7 +315,7 @@
     }
 
     // status animation parameters
-    var len = 300
+    var len = 400
         , delay = 50
         , selectedColor = {
             r:1,
