@@ -41,8 +41,9 @@
         //states
         this._isSelected = false;
         this._isStartingCell = false;
-		this._isSecondaryClasher = false;
-        this._isPrimaryClasher = false;
+        this._isClashing = false;
+
+        this._clashingTimer = null;
 
 		gameBoardCell.addEventListener("valueSet",cellValueChangedAnimation.bind(this));
 		
@@ -65,7 +66,9 @@
 
         this._isSelected = true;
 
-        cellSelectedAnimation.call(this);
+        if(!this._isClashing){
+            cellSelectedAnimation.call(this);
+        }
 
         return this;
 
@@ -85,7 +88,9 @@
 
         this._isSelected = false;
 
-        cellDeselectedAnimation.call(this);
+        if(!this._isClashing){
+            cellDeselectedAnimation.call(this);
+        }
 
         return this;
 
@@ -116,7 +121,11 @@
 
         this._isStartingCell = true;
 
-        setAsStartingCellAnimation.call(this);
+        if(!this._isClashing){
+            setAsStartingCellAnimation.call(this);
+        }
+
+        return this;
 
     };
 
@@ -134,7 +143,11 @@
 
         this._isStartingCell = false;
 
-        unsetAsStartingCellAnimation.call(this);
+        if(!this._isClashing){
+            unsetAsStartingCellAnimation.call(this);
+        }
+
+        return this;
 
     };
 
@@ -146,20 +159,42 @@
     };
 
 
-    gbc3d.prototype.setAsPrimaryClasher = function(){
+    gbc3d.prototype.clash = function(type){
 
-        //TODO
+        this._isClashing = true;
+
+        if(this._clashTimer !== null){
+            clearTimeout(this._clashTimer);
+            this._clashTimer = null;
+        }
+
+        this._clashTimer = setTimeout(undoClash.bind(this), len);
+
+        ClashAnimation.call(this, type);
+
+        return this;
 
     };
 
 
-    gbc3d.prototype.setAsSecondaryClasher = function(){
+    gbc3d.prototype.isClashing = function(){
 
-        //TODO
+        return this._isClashing;
 
     };
 
+    function undoClash(){
 
+        this._isClashing = false;
+
+        this._clashTimer = null;
+
+        undoClashAnimation.call(this);
+
+        return this;
+
+    }
+    
 	function cellValueChangedAnimation(event) {
 		
 		var len = 500;
@@ -239,6 +274,36 @@
 		});
 		
 	}
+
+    // animation parameters
+    var len = 400
+        , selectedColor = {
+            r : 1,
+            g : 0.7,
+            b : 0.4
+        }
+        , startingColor = {
+            r : 0.4,
+            g : 0.4,
+            b : 1
+        }
+        , primaryClashColor = {
+            r : 1,
+            g : 0,
+            b : 0
+        }
+        , secondaryClashColor = {
+            r : 1,
+            g : 0.5,
+            b : 0.5
+        }
+        , defaultColor = {
+            r : 1,
+            g : 1,
+            b : 1
+        }
+        ;
+
 
 
 })();
