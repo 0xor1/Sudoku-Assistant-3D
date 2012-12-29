@@ -17,9 +17,9 @@
                 type:"t",
                 value:Sudoku.textures[gameBoardCell.getValue()]
             }
-        },
+        };
 
-            this.geometry = new THREE.PlaneGeometry(cellSize, cellSize);
+        this.geometry = new THREE.PlaneGeometry(cellSize, cellSize);
         this.geometry.computeBoundingSphere();
         this.boundRadius = this.geometry.boundingSphere.radius;
 

@@ -73,7 +73,7 @@
 
         for(var i = 0; i < nSqrd; i++){
             for(var j = 0; j < nSqrd; j++){
-                if(this._gameBoard.getCellValue(i,j) !== Sudoku.GameBoardCell.empty){
+                if(this._cells[i][j].uniforms.texture.value !== Sudoku.textures[Sudoku.GameBoardCell.empty]){
                     this._cells[i][j].setAsStartingCell();
                 }
             }
