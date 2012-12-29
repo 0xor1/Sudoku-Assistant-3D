@@ -33,7 +33,8 @@
 
                 threePanel.addClickable(this._cells[i][j]);
 
-                this._cells[i][j].addEventListener("mouseDown", cellSelected.bind(this), false);
+                this._cells[i][j].addEventListener("selected", changeSelectedCell.bind(this));
+                this._cells[i][j].addEventListener("selected", changeSelectedCell.bind(this));
             }
         }
 

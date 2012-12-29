@@ -47,6 +47,7 @@
         this._clashingTimer = null;
 
         gameBoardCell.addEventListener("valueSet", cellValueChangedAnimation.bind(this));
+        this.addEventListener("mouseDown", cellSelected.bind(this), false);
 
     };
 
