@@ -18,6 +18,7 @@
         this._gameBoard = gameBoard;
         this._threePanel = threePanel;
         this._cells = new Utils.MultiArray(nSqrd, nSqrd);
+        this._selectedCell = null;
 
         threePanel._dom.style.background = "#111111";
         threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
@@ -25,7 +26,7 @@
         for (var i = 0; i < nSqrd; i++) {
             for (var j = 0; j < nSqrd; j++) {
 
-                this._cells[i][j] = new Sudoku.GameBoardCell3D(gameBoard._cells[i][j], gb3d.cellSize);
+                this._cells[i][j] = new Sudoku.GameBoardCell3D(gameBoard._cells[i][j], i, j, gb3d.cellSize);
 
                 this._cells[i][j].position.x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                 this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
@@ -33,14 +34,14 @@
 
                 threePanel.addClickable(this._cells[i][j]);
 
-                this._cells[i][j].addEventListener("selected", changeSelectedCell.bind(this));
-                this._cells[i][j].addEventListener("selected", changeSelectedCell.bind(this));
+                this._cells[i][j].addEventListener("selected", cellSelected.bind(this));
+                this._cells[i][j].addEventListener("deselected", cellDeselected.bind(this));
             }
         }
 
-        this._selectedCell = this._cells[0][0].select();
+        this._cells[0][0].select();
 
-        gameBoard.addEventListener("clash", clashAnimation.bind(this));
+        gameBoard.addEventListener("clash", clashRouter.bind(this));
 
         gameBoard.addEventListener("gameComplete", gameCompleteAnimation.bind(this));
 
@@ -63,202 +64,70 @@
     gb3d.prototype = Object.create(UIControls.UIControl.prototype);
 
 
-    var cap, clashAnimProps = {
+    function cellSelected(event) {
 
-        outLength:800,
-        waitLength:800,
-        returnLength:400,
-        colorDipTo:0.55
+        if (this._selectedCell !== null) {
 
-    };
+            this._selectedCell.deselect();
 
-    cap = clashAnimProps;
+        }
+
+        this._selectedCell = event.cell;
+
+    }
 
 
-    function clashAnimation(event) {
+    function cellDeselected(event) {
+
+        this._selectedCell = null;
+
+    }
+
+
+    function clashRouter(event) {
+
+        var k
+            , l
+            , kUpper
+            , lUpper
+            , n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            , sgb = this._gameBoard.getSubGridBounds(event.i, event.j)
+            ;
 
         if (event.subType === "row") {
 
-            rowClashAnimation.call(this, event);
+            k = event.i;
+            l = 0;
+            kUpper = k + 1;
+            lUpper = nSqrd;
 
-        } else if (event.subType === "column") {
+        } else if(event.subType === "column"){
 
-            columnClashAnimation.call(this, event);
+            k = 0;
+            l = event.j;
+            kUpper = nSqrd;
+            lUpper = l + 1;
 
-        } else if (event.subType === "subGrid") {
+        } else if(event.subType === "subGrid"){
 
-            subGridClashAnimation.call(this, event);
+            k = sgb.iLower;
+            l = sgb.jLower;
+            kUpper = sgb.iUpper + 1;
+            lUpper = sgb.jUpper + 1;
 
         }
 
-    }
-
-    function rowClashAnimation(event) {
-
-        var i = event.i;
-        for (var j = 0; j < this._nSqrd; j++) {
-
-            if (j === event.j) {
-
-                primaryClashAnimation(this._cells[i][j], 'color');
-
-            } else {
-
-                secondaryClashAnimation.call(this, this._cells[i][j], 'color');
-
-            }
-        }
-
-    }
-
-
-    function columnClashAnimation(event) {
-
-        var j = event.j;
-        for (var i = 0; i < this._nSqrd; i++) {
-
-            if (i === event.i) {
-
-                primaryClashAnimation(this._cells[i][j], 'color');
-
-            } else {
-
-                secondaryClashAnimation.call(this, this._cells[i][j], 'color');
-
-            }
-        }
-
-    }
-
-
-    function subGridClashAnimation(event) {
-
-        var i = event.i, j = event.j, sgb = this._gameBoard.getSubGridBounds(i, j);
-
-        for (var k = sgb.iLower; k <= sgb.iUpper; k++) {
-            for (var l = sgb.jLower; l <= sgb.jUpper; l++) {
-
-                if (k === i && l === j) {
-
-                    primaryClashAnimation(this._cells[k][l], 'color');
-
+        for( ; k < kUpper; k++){
+            for(var tempL = l; tempL < lUpper; tempL++){
+                if(k === event.i && tempL === event.j){
+                    this._cells[k][tempL].clash("Primary");
                 } else {
-
-                    secondaryClashAnimation.call(this, this._cells[k][l], 'color');
-
+                    this._cells[k][tempL].clash("Secondary");
                 }
             }
-        }
-    }
-
-
-    function primaryClashAnimation(cell, obj) {
-        var prop = ["g", "b"], objStr = obj;
-
-        for (var i = 0; i < prop.length; i++) {
-            Utils.animate({
-                obj:cell[objStr],
-                prop:prop[i],
-                targetValue:0,
-                length:cap.outLength,
-                callback:function (obj, prop) {
-                    Utils.animate({
-                        obj:obj,
-                        prop:prop,
-                        targetValue:0,
-                        length:cap.waitLength,
-                        callback:function (obj, prop) {
-                            Utils.animate({
-                                obj:obj,
-                                prop:prop,
-                                targetValue:1,
-                                length:cap.returnLength
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    function secondaryClashAnimation(cell, obj) {
-        var prop = ["g", "b"], objStr = obj;
-        for (var i = 0; i < prop.length; i++) {
-            if (cell === this._selectedCell) {
-                continue;
-            }
-            Utils.animate({
-                obj:cell[objStr],
-                prop:prop[i],
-                targetValue:0.5,
-                length:cap.outLength,
-                callback:function (obj, prop) {
-                    Utils.animate({
-                        obj:obj,
-                        prop:prop,
-                        targetValue:0.5,
-                        length:cap.waitLength,
-                        callback:function (obj, prop) {
-                            Utils.animate({
-                                obj:obj,
-                                prop:prop,
-                                targetValue:1,
-                                length:cap.returnLength
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-
-    function cellSelected(event) {
-
-        var sc = this._selectedCell, len = 200;
-
-        if (sc !== null) {
-            deselectCell.call(this);
-        }
-
-        sc = this._selectedCell = event.obj;
-
-        if (this.followCursor === false) {
-            centerCamera.call(this);
-        } else {
-            Utils.animate({
-                obj:this._threePanel.camera.position,
-                prop:'x',
-                length:len,
-                targetValue:sc.position.x
-            });
-            Utils.animate({
-                obj:this._threePanel.camera.position,
-                prop:'y',
-                length:len,
-                targetValue:sc.position.y
-            });
 
         }
-
-        Utils.animate({
-            obj:sc.color,
-            prop:"r",
-            targetValue:1,
-            length:len
-        });
-        Utils.animate({
-            obj:sc.color,
-            prop:"g",
-            targetValue:0.7,
-            length:len
-        });
-        Utils.animate({
-            obj:sc.color,
-            prop:"b",
-            targetValue:0.4,
-            length:len
-        });
 
     }
 
@@ -316,7 +185,9 @@
 
     function centerCamera() {
 
-        var len = 500
+        var n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            , len = 500
             , cam = this._threePanel.camera
             ;
 
@@ -335,40 +206,9 @@
         Utils.animate({
             obj:cam.position,
             prop:"z",
-            targetValue:((this._nSqrd - 1) * (gb3d.cellSize + gb3d.cellSpacing) + (this._n - 1) * gb3d.subGridSpacing),
+            targetValue:((nSqrd - 1) * (gb3d.cellSize + gb3d.cellSpacing) + (n - 1) * gb3d.subGridSpacing),
             length:len
         });
-
-    }
-
-    function deselectCell() {
-
-        var sc = this._selectedCell
-            , len = 200
-            ;
-
-        if (typeof sc === "object") {
-            Utils.animate({
-                obj:sc.color,
-                prop:"r",
-                targetValue:1,
-                length:len
-            });
-            Utils.animate({
-                obj:sc.color,
-                prop:"g",
-                targetValue:1,
-                length:len
-            });
-            Utils.animate({
-                obj:sc.color,
-                prop:"b",
-                targetValue:1,
-                length:len
-            });
-
-            this._selectedCell = null;
-        }
 
     }
 
