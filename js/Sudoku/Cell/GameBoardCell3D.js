@@ -332,7 +332,7 @@
             }
         }
         , primaryClashChange = {
-            length:400,
+            length:800,
             color:{
                 r:1,
                 g:0,
@@ -340,7 +340,7 @@
             }
         }
         , secondaryClashChange = {
-            length:400,
+            length:800,
             color:{
                 r:1,
                 g:0.5,
