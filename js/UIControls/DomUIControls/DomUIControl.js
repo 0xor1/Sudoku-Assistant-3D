@@ -25,7 +25,17 @@
     UIControls.DomUIControl.prototype.injectIntoContainer = function (con) {
 
         con._dom.style.background = this._dom.style.background;
-        con._dom.appendChild(this._dom);
+        if(con._dom.hasChildNodes()){
+
+            var el = con._dom.childNodes[con._dom.childNodes.length-1];
+
+            if(el.className && new RegExp("(^|\\s)" + "GitHubForkBanner" + "(\\s|$)").test(el.className)){
+                con._dom.insertBefore(this._dom, el);
+            } else {
+                con._dom.appendChild(this._dom);
+            }
+
+        }
 
         this._dom.style.margin = 0;
         this._dom.style.padding = 0;
@@ -39,6 +49,28 @@
         con.addEventListener('resize', this.resize.bind(this));
 
     };
+
+
+    UIControls.DomUIControl.prototype.insertGitHubForkBanner = function(bannerImgUrl, projectUrl){
+
+        var link = document.createElement('a')
+            , img = document.createElement('img')
+            ;
+
+        link.href = projectUrl;
+        link.className = "GitHubForkBanner";
+
+        img.style.position = "absolute";
+        img.style.top = img.style.right = img.style.border = 0;
+        img.src = bannerImgUrl;
+        img.alt = "Fork me on GitHub";
+
+        link.appendChild(img);
+
+        this._dom.appendChild(link);
+
+        return this;
+    }
 
 
     UIControls.DomUIControl.prototype.resize = function () {

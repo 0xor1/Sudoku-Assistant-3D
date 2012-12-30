@@ -10,6 +10,11 @@
         threePanel.injectIntoContainer(masterViewport);
         threePanel.start();
 
+        masterViewport.insertGitHubForkBanner(
+            "https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png",
+            "https://github.com/0xor1/Sudoku"
+        )
+
         setTimeout(function(){gb3d.assignStartingCells();}, 10000);
 
         //Utils.FrameRateMonitor.enableLogging();
