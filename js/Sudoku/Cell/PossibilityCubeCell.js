@@ -20,7 +20,7 @@
 	pcs.prototype.activate = function() {
 
 		if(this._value === pcs.inactive){
-			this._setValue(pcs.active)
+			this._setValue(pcs.active);
 		}
 			
 		return this;
@@ -31,7 +31,11 @@
 	pcs.prototype.deactivate = function() {
 
 		if(this._value === pcs.active){
-			this._setValue(pcs.inactive)
+			this._setValue(pcs.inactive);
+            this.dispatchEvent({
+                type : "deactivated",
+                obj : this
+            });
 		}
 			
 		return this;

@@ -1,7 +1,7 @@
 (function() {
 
 
-	var pcc3d = Sudoku.PossibilityCubeCell3D = function(possibilityCube) {
+	var pcc3d = Sudoku.PossibilityCubeCell3D = function(possibilityCube, i, j, k) {
 		
 		var size = Sudoku.GameBoard3D.cellSize - pcc3d.CellSpacing * 2;
 

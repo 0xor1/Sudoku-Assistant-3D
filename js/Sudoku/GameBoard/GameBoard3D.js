@@ -26,7 +26,7 @@
         for (var i = 0; i < nSqrd; i++) {
             for (var j = 0; j < nSqrd; j++) {
 
-                this._cells[i][j] = new Sudoku.GameBoardCell3D(gameBoard._cells[i][j], i, j, gb3d.cellSize);
+                this._cells[i][j] = new Sudoku.GameBoardCell3D(gameBoard._cells[i][j], i, j);
 
                 this._cells[i][j].position.x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                 this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
