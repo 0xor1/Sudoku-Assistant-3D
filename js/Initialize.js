@@ -15,8 +15,6 @@
             "https://github.com/0xor1/Sudoku"
         )
 
-        setTimeout(function(){gb3d.assignStartingCells();}, 10000);
-
         //Utils.FrameRateMonitor.enableLogging();
         Utils.FrameRateMonitor.start();
 

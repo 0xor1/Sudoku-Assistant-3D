@@ -43,7 +43,7 @@
 
         gameBoard.addEventListener("clash", clashRouter.bind(this));
 
-        gameBoard.addEventListener("gameComplete", gameCompleteAnimation.bind(this));
+        gameBoard.addEventListener("gameComplete", gameComplete.bind(this));
 
         this.addUIEventListener(window, "keydown", keyPress.bind(this), false);
 
@@ -235,54 +235,15 @@
 
     }
 
-    function gameCompleteAnimation() {
+    function gameComplete() {
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
-            , c
-            , len = 600
             ;
 
         for (var i = 0; i < nSqrd; i++) {
             for (var j = 0; j < nSqrd; j++) {
-                c = this._cells[i][j];
-                Utils.animate({
-                    obj:c.rotation,
-                    prop:"y",
-                    targetValue:Math.PI * 2 * 2,
-                    length:len * 2,
-                    callback:function (obj, prop) {
-                        obj[prop] = 0;
-                    }
-                });
-                Utils.animate({
-                    obj:c.color,
-                    prop:"r",
-                    targetValue:0.4,
-                    length:len * 2,
-                    callback:function (obj, prop) {
-                        Utils.animate({
-                            obj:obj,
-                            prop:prop,
-                            targetValue:1,
-                            length:len * 2
-                        });
-                    }
-                });
-                Utils.animate({
-                    obj:c.color,
-                    prop:"b",
-                    targetValue:0.4,
-                    length:len * 2,
-                    callback:function (obj, prop) {
-                        Utils.animate({
-                            obj:obj,
-                            prop:prop,
-                            targetValue:1,
-                            length:len * 2
-                        });
-                    }
-                });
+                this._cells[i][j].gameComplete();
             }
         }
 

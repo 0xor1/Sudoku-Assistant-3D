@@ -47,7 +47,7 @@
         this._isPrimaryClashing = false;
         this._isSecondaryClashing = false;
 
-        this._clashingTimer = null;
+        this._tempStateTimer = null;
 
         gameBoardCell.addEventListener("valueSet", cellValueChangedAnimation.bind(this));
         this.addEventListener("mouseDown", this.select.bind(this), false);
@@ -172,12 +172,12 @@
 
         this[clashType] = true;
 
-        if (this._clashTimer !== null) {
-            clearTimeout(this._clashTimer);
-            this._clashTimer = null;
+        if (this._tempStateTimer !== null) {
+            clearTimeout(this._tempStateTimer);
+            this._tempStateTimer = null;
         }
 
-        this._clashTimer = setTimeout(undoClash.bind(this), primaryClashChange.length + 100);
+        this._tempStateTimer = setTimeout(undoClash.bind(this), primaryClashChange.length + 100);
 
         return statusChangedAnimation.call(this);
 
@@ -191,11 +191,20 @@
     };
 
 
+
+
+    gbc3d.prototype.gameComplete = function () {
+
+        gameCompleteAnimation.call(this);
+
+    };
+
+
     function undoClash() {
 
         this._isPrimaryClashing = this._isSecondaryClashing = false;
 
-        this._clashTimer = null;
+        this._tempStateTimer = null;
 
         return statusChangedAnimation.call(this);
 
@@ -230,6 +239,66 @@
         }
 
         return this;
+
+    }
+
+
+    function gameCompleteAnimation(){
+
+        var len = 1000
+            , dipTo = Math.random() * 0.7
+            , self = this;
+            ;
+
+
+        Utils.animate({
+            obj:this.color,
+            prop:"r",
+            targetValue:dipTo,
+            length:len
+        });
+        Utils.animate({
+            obj:this.color,
+            prop:"g",
+            targetValue:1,
+            length:len
+        });
+        Utils.animate({
+            obj:this.color,
+            prop:"b",
+            targetValue:dipTo,
+            length:len,
+            callback:function(obj, prop){
+                statusChangedAnimation.call(self);
+            }
+        });
+
+        cellVibrate.call(this, len, Sudoku.GameBoard3D.cellSpacing);
+
+    }
+
+    function cellVibrate(length,maxDisplacement){
+
+        var endTime = Date.now() + length
+            , restX = this.position.x
+            , restY = this.position.y
+            , internal = function(){
+
+                if(endTime < Date.now()){
+                    this.position.x = restX;
+                    this.position.y = restY;
+                    return;
+                }
+
+                this.position.x = restX + Math.random() * maxDisplacement;
+                this.position.y = restY + Math.random() * maxDisplacement;
+
+                requestAnimationFrame(internal);
+
+            }.bind(this)
+            ;
+
+        requestAnimationFrame(internal);
 
     }
 
@@ -314,9 +383,10 @@
 
     }
 
+
     // status animation parameters
     var selectedChange = {
-            length:200,
+            length:100,
             color:{
                 r:1,
                 g:0.7,
@@ -332,7 +402,7 @@
             }
         }
         , primaryClashChange = {
-            length:800,
+            length:400,
             color:{
                 r:1,
                 g:0,
@@ -340,7 +410,7 @@
             }
         }
         , secondaryClashChange = {
-            length:800,
+            length:400,
             color:{
                 r:1,
                 g:0.5,
@@ -348,7 +418,7 @@
             }
         }
         , defaultChange = {
-            length:400,
+            length:200,
             color:{
                 r:1,
                 g:1,
