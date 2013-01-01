@@ -1,38 +1,40 @@
 (function () {
 
 
-    var gb3d = Sudoku.GameBoard3D = function (gameBoard, threePanel) {
+    Sudoku.GameBoard3D = function (gameBoard, threePanel) {
 
         var n, nSqrd, cSpace, sgSpace, cSize, gSGB;
         n = gameBoard.getGameSize();
         nSqrd = n * n;
-        cSpace = gb3d.cellSpacing;
-        sgSpace = gb3d.subGridSpacing;
-        cSize = gb3d.cellSize;
-        gSGB = gameBoard.getSubGridBounds.bind(gameBoard);
+        cSpace = Sudoku.GameBoard3D.cellSpacing;
+        sgSpace = Sudoku.GameBoard3D.subGridSpacing;
+        cSize = Sudoku.GameBoard3D.cellSize;
+        gSGB = gameBoard.getSubGridBoundsContainingCell.bind(gameBoard);
 
         UIControls.UIControl.call(this);
+
+        THREE.Object3D.call(this);
 
         this.followCursor = false;
 
         this._gameBoard = gameBoard;
-        this._threePanel = threePanel;
-        this._cells = new Utils.MultiArray(nSqrd, nSqrd);
-        this._selectedCell = null;
 
-        threePanel._dom.style.background = "#111111";
-        threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
+        this._threePanel = threePanel;
+
+        this._cells = new Utils.MultiArray(nSqrd, nSqrd);
+
+        this._selectedCell = null;
 
         for (var i = 0; i < nSqrd; i++) {
             for (var j = 0; j < nSqrd; j++) {
 
-                this._cells[i][j] = new Sudoku.GameBoardCell3D(gameBoard._cells[i][j], i, j);
+                this._cells[i][j] = new Sudoku.GameBoardCell3D(i, j);
 
                 this._cells[i][j].position.x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                 this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                 this._cells[i][j].position.z = 0
 
-                threePanel.addClickable(this._cells[i][j]);
+                this._threePanel.addClickable(this._cells[i][j]);
 
                 this._cells[i][j].addEventListener("selected", cellSelected.bind(this));
                 this._cells[i][j].addEventListener("deselected", cellDeselected.bind(this));
@@ -41,9 +43,13 @@
 
         this._cells[0][0].select();
 
-        gameBoard.addEventListener("clash", clashRouter.bind(this));
+        threePanel._dom.style.background = "#111111";
 
-        gameBoard.addEventListener("gameComplete", gameComplete.bind(this));
+        threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
+
+        this._gameBoard.addEventListener("clash", clashRouter.bind(this));
+
+        this._gameBoard.addEventListener("gameComplete", gameComplete.bind(this));
 
         this.addUIEventListener(window, "keydown", keyPress.bind(this), false);
 
@@ -52,20 +58,27 @@
     };
 
 
-    gb3d.cellSize = 300;
+    Sudoku.GameBoard3D.cellSize = 300;
 
 
-    gb3d.cellSpacing = 20;
+    Sudoku.GameBoard3D.cellSpacing = 20;
 
 
-    gb3d.subGridSpacing = 40;
+    Sudoku.GameBoard3D.subGridSpacing = 40;
 
 
-    gb3d.prototype = Object.create(UIControls.UIControl.prototype);
+    Sudoku.GameBoard3D.prototype = Object.create(THREE.Object3D.prototype);
+    for(var i in UIControls.UIControl.prototype){
+        if(UIConProto.hasOwnProperty(i)){
+            Sudoku.GameBoard3D.prototype[i] = UIControls.UIControl.prototype[i];
+        }
+    }
 
 
+    
+    
 
-    gb3d.prototype.assignStartingCells = function(){
+    Sudoku.GameBoard3D.prototype.assignStartingCells = function(){
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
@@ -73,8 +86,25 @@
 
         for(var i = 0; i < nSqrd; i++){
             for(var j = 0; j < nSqrd; j++){
-                if(this._cells[i][j].uniforms.texture.value !== Sudoku.textures[Sudoku.GameBoardCell.empty]){
+                if(this._cells[i][j].uniforms.texture.value !== Sudoku.textures[Sudoku.GameBoard.emptyCell]){
                     this._cells[i][j].setAsStartingCell();
+                }
+            }
+        }
+
+    }
+
+
+    Sudoku.GameBoard3D.prototype.unassignStartingCells = function(){
+
+        var n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            ;
+
+        for(var i = 0; i < nSqrd; i++){
+            for(var j = 0; j < nSqrd; j++){
+                if(this._cells[i][j].isStartingCell()){
+                    this._cells[i][j].unsetAsStartingCell();
                 }
             }
         }
@@ -229,7 +259,7 @@
         Utils.animate({
             obj:cam.position,
             prop:"z",
-            targetValue:((nSqrd - 1) * (gb3d.cellSize + gb3d.cellSpacing) + (n - 1) * gb3d.subGridSpacing),
+            targetValue:((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
             length:len
         });
 
