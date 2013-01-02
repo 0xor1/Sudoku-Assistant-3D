@@ -1,7 +1,7 @@
 (function () {
 
 
-    Sudoku.GameBoard3D = function (gameBoard, threePanel) {
+    Sudoku.GameBoard3D = function (gameBoard) {
 
         var n, nSqrd, cSpace, sgSpace, cSize, gSGB;
         n = gameBoard.getGameSize();
@@ -11,15 +11,11 @@
         cSize = Sudoku.GameBoard3D.cellSize;
         gSGB = gameBoard.getSubGridBoundsContainingCell.bind(gameBoard);
 
-        UIControls.UIControl.call(this);
-
         THREE.Object3D.call(this);
 
         this.followCursor = false;
 
         this._gameBoard = gameBoard;
-
-        this._threePanel = threePanel;
 
         this._cells = new Utils.MultiArray(nSqrd, nSqrd);
 
@@ -28,13 +24,12 @@
         for (var i = 0; i < nSqrd; i++) {
             for (var j = 0; j < nSqrd; j++) {
 
-                this._cells[i][j] = new Sudoku.GameBoardCell3D(i, j);
+                this._cells[i][j] = new Sudoku.GameBoardCell3D(i, j, this._gameBoard.getValue(i, j));
+                this.add(this._cells[i][j]);
 
                 this._cells[i][j].position.x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                 this._cells[i][j].position.y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
-                this._cells[i][j].position.z = 0
-
-                this._threePanel.addClickable(this._cells[i][j]);
+                this._cells[i][j].position.z = 0;
 
                 this._cells[i][j].addEventListener("selected", cellSelected.bind(this));
                 this._cells[i][j].addEventListener("deselected", cellDeselected.bind(this));
@@ -43,17 +38,13 @@
 
         this._cells[0][0].select();
 
-        threePanel._dom.style.background = "#111111";
-
-        threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
-
         this._gameBoard.addEventListener("clash", clashRouter.bind(this));
 
         this._gameBoard.addEventListener("gameComplete", gameComplete.bind(this));
 
-        this.addUIEventListener(window, "keydown", keyPress.bind(this), false);
+        this._keyPress = keyPress.bind(this);
 
-        centerCamera.call(this);
+        window.addEventListener("keydown", this._keyPress, false);
 
     };
 
@@ -68,42 +59,67 @@
 
 
     Sudoku.GameBoard3D.prototype = Object.create(THREE.Object3D.prototype);
-    for(var i in UIControls.UIControl.prototype){
-        if(UIConProto.hasOwnProperty(i)){
-            Sudoku.GameBoard3D.prototype[i] = UIControls.UIControl.prototype[i];
-        }
-    }
 
 
-    
-    
-
-    Sudoku.GameBoard3D.prototype.assignStartingCells = function(){
+    Sudoku.GameBoard3D.prototype.enableClickableComponents = function (threePanel) {
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
             ;
 
-        for(var i = 0; i < nSqrd; i++){
-            for(var j = 0; j < nSqrd; j++){
-                if(this._cells[i][j].uniforms.texture.value !== Sudoku.textures[Sudoku.GameBoard.emptyCell]){
-                    this._cells[i][j].setAsStartingCell();
-                }
+        for (var i = 0; i < nSqrd; i++) {
+            for (var j = 0; j < nSqrd; j++) {
+                threePanel.addClickable(this._cells[i][j]);
             }
         }
 
-    }
+        return this;
+
+    };
 
 
-    Sudoku.GameBoard3D.prototype.unassignStartingCells = function(){
+    Sudoku.GameBoard3D.prototype.disableClickableComponents = function (threePanel) {
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
             ;
 
-        for(var i = 0; i < nSqrd; i++){
-            for(var j = 0; j < nSqrd; j++){
-                if(this._cells[i][j].isStartingCell()){
+        for (var i = 0; i < nSqrd; i++) {
+            for (var j = 0; j < nSqrd; j++) {
+                theePanel.removeClickable(this._cells[i][j]);
+            }
+        }
+
+        return this;
+
+    },
+
+        Sudoku.GameBoard3D.prototype.assignStartingCells = function () {
+
+            var n = this._gameBoard.getGameSize()
+                , nSqrd = n * n
+                ;
+
+            for (var i = 0; i < nSqrd; i++) {
+                for (var j = 0; j < nSqrd; j++) {
+                    if (this._cells[i][j].uniforms.texture.value !== Sudoku.textures[Sudoku.GameBoard.emptyCell]) {
+                        this._cells[i][j].setAsStartingCell();
+                    }
+                }
+            }
+
+        }
+
+
+    Sudoku.GameBoard3D.prototype.unassignStartingCells = function () {
+
+        var n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            ;
+
+        for (var i = 0; i < nSqrd; i++) {
+            for (var j = 0; j < nSqrd; j++) {
+                if (this._cells[i][j].isStartingCell()) {
                     this._cells[i][j].unsetAsStartingCell();
                 }
             }
@@ -140,7 +156,7 @@
             , lUpper
             , n = this._gameBoard.getGameSize()
             , nSqrd = n * n
-            , sgb = this._gameBoard.getSubGridBounds(event.i, event.j)
+            , sgb = this._gameBoard.getSubGridBoundsContainingCell(event.i, event.j)
             ;
 
         if (event.subType === "row") {
@@ -150,14 +166,14 @@
             kUpper = k + 1;
             lUpper = nSqrd;
 
-        } else if(event.subType === "column"){
+        } else if (event.subType === "column") {
 
             k = 0;
             l = event.j;
             kUpper = nSqrd;
             lUpper = l + 1;
 
-        } else if(event.subType === "subGrid"){
+        } else if (event.subType === "subGrid") {
 
             k = sgb.iLower;
             l = sgb.jLower;
@@ -166,9 +182,9 @@
 
         }
 
-        for( ; k < kUpper; k++){
-            for(var tempL = l; tempL < lUpper; tempL++){
-                if(k === event.i && tempL === event.j){
+        for (; k < kUpper; k++) {
+            for (var tempL = l; tempL < lUpper; tempL++) {
+                if (k === event.i && tempL === event.j) {
                     this._cells[k][tempL].clash("Primary");
                 } else {
                     this._cells[k][tempL].clash("Secondary");
@@ -188,7 +204,7 @@
             , j
             ;
 
-        if(this._selectedCell === null){
+        if (this._selectedCell === null) {
             return;
         }
 
@@ -236,34 +252,6 @@
         }
     }
 
-    function centerCamera() {
-
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            , len = 500
-            , cam = this._threePanel.camera
-            ;
-
-        Utils.animate({
-            obj:cam.position,
-            prop:"x",
-            targetValue:0,
-            length:len
-        });
-        Utils.animate({
-            obj:cam.position,
-            prop:"y",
-            targetValue:0,
-            length:len
-        });
-        Utils.animate({
-            obj:cam.position,
-            prop:"z",
-            targetValue:((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
-            length:len
-        });
-
-    }
 
     function gameComplete() {
 

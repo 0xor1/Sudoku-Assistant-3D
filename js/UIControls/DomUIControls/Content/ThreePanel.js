@@ -8,18 +8,14 @@
         this._isRendering = false;
         this._stopping = false;
         this._clickables = [];
-        this._threeObjects = [];
         this._resizeTimer = null;
         this._resize = resize.bind(this);
 
         this.renderer = new THREE.WebGLRenderer();
         this._dom = this.renderer.domElement;
-        this.camera = new THREE.PerspectiveCamera(75, this._dom.width / this._dom.height, 1, 100000);
         this.scene = new THREE.Scene();
-        this.controls = {
-            update:function () {
-            }
-        };
+        this.camera = new THREE.PerspectiveCamera(75, this._dom.width / this._dom.height, 1, 100000);
+        this.controls = new THREE.TrackballControls(this.camera, this._dom);
 
         this.scene.add(this.camera);
 
@@ -35,32 +31,18 @@
 
     UIControls.ThreePanel.prototype.add = function (obj) {
 
-        if (obj instanceof THREE.Mesh) {
+        this.scene.add(obj);
 
-            if (this._threeObjects.indexOf(obj) === -1) {
-                this._threeObjects.push(obj);
-                this.scene.add(obj)
-            }
-
-        } else {
-
-            throw new Utils.Error("ThreePanel.add only accepts THREE.Mesh objects or derivatives thereof.");
-
-        }
         return this;
 
-    };
-
+    }
 
     UIControls.ThreePanel.prototype.addClickable = function (obj) {
 
         if (obj instanceof UIControls.ClickableMesh) {
 
-            if (this._threeObjects.indexOf(obj) === -1) {
-                this._threeObjects.push(obj);
-                obj.clickableIndex = this._clickables.length;
+            if (this._clickables.indexOf(obj) === -1) {
                 this._clickables.push(obj);
-                this.scene.add(obj)
             }
 
         } else {
@@ -74,24 +56,14 @@
     };
 
 
-    UIControls.ThreePanel.prototype.remove = function (obj) {
+    UIControls.ThreePanel.prototype.removeClickable = function (obj) {
 
-        var idx = this._threeObjects.indexOf(obj), clickIdx;
+        var idx = this._clickables.indexOf(obj);
 
-        if (idx === -1) {
-            return this;
+        if (idx !== -1) {
+            this._clickables.splice(idx, 1);
         }
-        clickIdx = this._threeObjects[idx].clickableIndex;
-        this._threeObjects.splice(idx, 1);
-        if (typeof clickIdx === "undefined") {
-            return this;
-        }
-        this._clickables.splice(clickIdx, 1);
-        for (var i = idx, l = this._threeObjects.length; i < l; i++) {
-            if (typeof this._threeObjects[i].clickableIndex !== "undefined") {
-                this._threeObjects[i].clickableIndex--;
-            }
-        }
+
         return this;
 
     };
@@ -180,5 +152,6 @@
             intersects[0].object.mouseDown(event);
         }
     };
+
 
 })();

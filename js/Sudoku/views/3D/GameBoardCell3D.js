@@ -1,7 +1,7 @@
 (function () {
 
 
-    var gbc3d = Sudoku.GameBoardCell3D = function (i, j) {
+    var gbc3d = Sudoku.GameBoardCell3D = function (i, j, value) {
 
         var vertexShader = "varying vec2 vUv; void main() {vUv = uv;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );}"
             , fragmentShader = "uniform vec3 color; uniform sampler2D texture; varying vec2 vUv; void main() { vec4 tColor = texture2D( texture, vUv ); gl_FragColor = vec4( mix( color, tColor.rgb, tColor.a ), 1.0 );}";
@@ -15,7 +15,7 @@
             },
             texture:{
                 type:"t",
-                value:Sudoku.textures[gameBoardCell.getValue()]
+                value:Sudoku.textures[value]
             }
         };
 
@@ -306,7 +306,7 @@
 
         var len = 500;
 
-        if (event.value === Sudoku.GameBoardCell.empty) {
+        if (event.value === Sudoku.GameBoard.emptyCell) {
 
             cellValueClearedAnimation.call(this);
 

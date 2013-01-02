@@ -1,7 +1,7 @@
 (function() {
 
 	
-	Sudoku.GameBoard = function(n) {
+	Sudoku.GameBoard = function(n, startingConfiguration) {
 		
 		Utils.EventTarget.call(this);
 
@@ -10,7 +10,9 @@
 		this._nSqrd = n * n;
 
 		this._emptyCellCount = this._nSqrd * this._nSqrd;
-        
+
+        this._startingConfiguration = startingConfiguration || []; // { i, j, value }
+
         this._cells = new Utils.MultiArray(this._nSqrd, this._nSqrd);
 
 		for(var i = 0; i < this._nSqrd; i++) {
@@ -34,6 +36,90 @@
         getGameSize : function(){
 
             return this._n;
+
+        },
+
+
+        getStartingConfiguration : function(){
+
+            var arr = [];
+
+            for(var k = 0, l = this._startingConfiguration.length; k < l; k++){
+                arr[k] = {
+                    i : this._startingConfiguration[k].i,
+                    j : this._startingConfiguration[k].j,
+                    value : this._startingConfiguration[k].value
+                }
+            }
+
+            return arr;
+
+        },
+
+
+        saveStartingConfiguration : function(){
+
+            if(this._startingConfiguration.length !== 0){
+                this.discardStartingConfiguration();
+            }
+
+            for(var i = 0; i < this._nSqrd; i++){
+                for(var j = 0; j < this._nSqrd; j++){
+                    if(this._cells[i][j] !== Sudoku.GameBoard.emptyCell){
+                        this._startingConfiguration.push({
+                            i : i,
+                            j : j,
+                            value : this._cells[i][j]
+                        })
+                    }
+                }
+            }
+
+            this.dispatchEvent({
+                type : 'startingConfigurationSaved',
+                startingConfiguration : this.getStartingConfiguration()
+            });
+
+            return this;
+
+        },
+
+
+        discardStartingConfiguration : function(){
+
+            this._startingConfiguration = [];
+
+            this.dispatchEvent({
+                type : 'startingConfigurationDiscarded'
+            });
+
+            return this;
+
+        },
+
+
+        reset : function(){
+
+            for(var i = 0; i < this._nSqrd; i++){
+                for(var j = 0; j < this._nSqrd; j++){
+                    if(!isStartingCell.call(this, i, j)){
+                        this.clearValue(i,j);
+                    }
+                }
+            }
+
+            return this;
+
+        },
+
+
+        wipeClean : function(){
+
+            this.discardStartingConfiguration();
+
+            this.reset();
+
+            return this;
 
         },
 
@@ -64,7 +150,9 @@
             if(
 				this._cells[i][j] === Sudoku.GameBoard.emptyCell &&
 				!entryClash.call(this, i, j, value) &&
-				val <= this._nSqrd
+				value <= this._nSqrd &&
+                value > 0 &&
+                value % 1 === 0
 			) {
 				this._cells[i][j] = value;
                 this.dispatchEvent({
@@ -75,6 +163,8 @@
                 });
 				decrementEmptyCellCount.call(this);
 			}
+
+            return this;
 
 		},
 		
@@ -89,11 +179,13 @@
                     value : Sudoku.GameBoard.emptyCell
                 });
 				incrementEmptyCellCount.call(this);
-			}	
+			}
+
+            return this;
 			
 		},
 
-        getCellValue : function(i, j){
+        getValue : function(i, j){
 
             return this._cells[i][j];
 
@@ -102,6 +194,21 @@
 	
 	};
 
+
+    function isStartingCell(i, j){
+
+        for(var k = 0, l = this._startingConfiguration.length; k < l; k++){
+            if(
+                this._startingConfiguration[k].i === i &&
+                this._startingConfiguration[k].j !== j
+            ){
+                return true;
+            }
+        }
+
+        return false;
+
+    }
 
 	function entryClash(i, j, value) {
 
