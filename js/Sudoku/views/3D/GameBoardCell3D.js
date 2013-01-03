@@ -108,6 +108,78 @@
     };
 
 
+    gbc3d.prototype.valueEntered = function (value) {
+
+        var len = 200;
+
+        Utils.animate({
+            obj:this.rotation,
+            prop:"y",
+            targetValue:-Math.PI * 2,
+            length:len * 2,
+            callback:function (obj, prop) {
+                obj[prop] = 0;
+            }.bind(this)
+        });
+
+        Utils.animate({
+            obj:this.position,
+            prop:"z",
+            targetValue:Sudoku.GameBoard3D.cellSize * 2,
+            length:len,
+            callback:function (obj, prop) {
+                Utils.animate({
+                    obj:obj,
+                    prop:prop,
+                    targetValue:0,
+                    length:len
+                });
+            }.bind(this)
+        });
+
+        this.uniforms.texture.value = Sudoku.textures[value];
+
+        return this;
+
+    };
+
+
+    gbc3d.prototype.valueCleared = function () {
+
+        var len = 200;
+
+        Utils.animate({
+            obj:this.rotation,
+            prop:"y",
+            targetValue:Math.PI,
+            length:len * 2,
+            callback:function (obj, prop) {
+                obj[prop] = 0;
+            }.bind(this)
+        });
+
+        Utils.animate({
+            obj:this.position,
+            prop:"z",
+            targetValue:Sudoku.GameBoard3D.cellSize * 2,
+            length:len,
+            callback:function (obj, prop) {
+                Utils.animate({
+                    obj:obj,
+                    prop:prop,
+                    targetValue:0,
+                    length:len
+                });
+            }.bind(this)
+        });
+
+        this.uniforms.texture.value = Sudoku.textures[Sudoku.GameBoard.emptyCell];
+
+        return this;
+
+    }
+
+
     gbc3d.prototype.setAsStartingCell = function () {
 
         if (this._isStartingCell) {
@@ -176,7 +248,7 @@
             this._tempStateTimer = null;
         }
 
-        this._tempStateTimer = setTimeout(undoClash.bind(this), primaryClashChange.length + 100);
+        this._tempStateTimer = setTimeout(undoClash.bind(this), primaryClashChange.length + primaryClashChange.delay);
 
         return statusChangedAnimation.call(this);
 
@@ -188,8 +260,6 @@
         return this._isPrimaryClashing || this._isSecondaryClashing;
 
     };
-
-
 
 
     gbc3d.prototype.gameComplete = function () {
@@ -242,12 +312,12 @@
     }
 
 
-    function gameCompleteAnimation(){
+    function gameCompleteAnimation() {
 
         var len = 1000
             , dipTo = Math.random() * 0.7
             , self = this;
-            ;
+        ;
 
 
         Utils.animate({
@@ -267,7 +337,7 @@
             prop:"b",
             targetValue:dipTo,
             length:len,
-            callback:function(obj, prop){
+            callback:function (obj, prop) {
                 statusChangedAnimation.call(self);
             }
         });
@@ -276,14 +346,14 @@
 
     }
 
-    function cellVibrate(length,maxDisplacement){
+    function cellVibrate(length, maxDisplacement) {
 
         var endTime = Date.now() + length
             , restX = this.position.x
             , restY = this.position.y
-            , internal = function(){
+            , internal = function () {
 
-                if(endTime < Date.now()){
+                if (endTime < Date.now()) {
                     this.position.x = restX;
                     this.position.y = restY;
                     return;
@@ -302,87 +372,6 @@
     }
 
 
-    function cellValueChangedAnimation(event) {
-
-        var len = 500;
-
-        if (event.value === Sudoku.GameBoard.emptyCell) {
-
-            cellValueClearedAnimation.call(this);
-
-        } else {
-
-            cellValueEnteredAnimation.call(this);
-
-        }
-
-        this.uniforms.texture.value = Sudoku.textures[event.value];
-
-    }
-
-
-    function cellValueEnteredAnimation(length) {
-
-        var len = length || 200;
-
-        Utils.animate({
-            obj:this.rotation,
-            prop:"y",
-            targetValue:-Math.PI * 2,
-            length:len * 2,
-            callback:function (obj, prop) {
-                obj[prop] = 0;
-            }.bind(this)
-        });
-        Utils.animate({
-            obj:this.position,
-            prop:"z",
-            targetValue:Sudoku.GameBoard3D.cellSize * 2,
-            length:len,
-            callback:function (obj, prop) {
-                Utils.animate({
-                    obj:obj,
-                    prop:prop,
-                    targetValue:0,
-                    length:len
-                });
-            }.bind(this)
-        });
-
-    }
-
-    function cellValueClearedAnimation(length) {
-
-        var len = length || 200;
-
-        Utils.animate({
-            obj:this.rotation,
-            prop:"y",
-            targetValue:Math.PI,
-            length:len * 2,
-            callback:function (obj, prop) {
-                obj[prop] = 0;
-            }.bind(this)
-        });
-
-        Utils.animate({
-            obj:this.position,
-            prop:"z",
-            targetValue:Sudoku.GameBoard3D.cellSize * 2,
-            length:len,
-            callback:function (obj, prop) {
-                Utils.animate({
-                    obj:obj,
-                    prop:prop,
-                    targetValue:0,
-                    length:len
-                });
-            }.bind(this)
-        });
-
-    }
-
-
     // status animation parameters
     var selectedChange = {
             length:100,
@@ -395,13 +384,14 @@
         , startingChange = {
             length:400,
             color:{
-                r:0.4,
-                g:0.4,
+                r:0.6,
+                g:0.6,
                 b:1
             }
         }
         , primaryClashChange = {
             length:400,
+            delay:300,
             color:{
                 r:1,
                 g:0,

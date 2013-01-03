@@ -5,14 +5,193 @@
         var threePanel = new UIControls.ThreePanel()
             , gameBoard = new Sudoku.GameBoard(3)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)
+            , easyStartConf = [
+                {
+                    i:0,
+                    j:1,
+                    value:9
+                },
+                {
+                    i:0,
+                    j:2,
+                    value:6
+                },
+                {
+                    i:0,
+                    j:6,
+                    value:8
+                },
+                {
+                    i:1,
+                    j:0,
+                    value:5
+                },
+                {
+                    i:1,
+                    j:2,
+                    value:1
+                },
+                {
+                    i:1,
+                    j:3,
+                    value:6
+                },
+                {
+                    i:1,
+                    j:4,
+                    value:7
+                },
+                {
+                    i:1,
+                    j:6,
+                    value:9
+                },
+                {
+                    i:1,
+                    j:7,
+                    value:3
+                },
+                {
+                    i:2,
+                    j:3,
+                    value:1
+                },
+                {
+                    i:2,
+                    j:7,
+                    value:5
+                },
+                {
+                    i:2,
+                    j:8,
+                    value:2
+                },
+                {
+                    i:3,
+                    j:2,
+                    value:2
+                },
+                {
+                    i:3,
+                    j:5,
+                    value:4
+                },
+                {
+                    i:3,
+                    j:6,
+                    value:5
+                },
+                {
+                    i:4,
+                    j:0,
+                    value:4
+                },
+                {
+                    i:4,
+                    j:3,
+                    value:8
+                },
+                {
+                    i:4,
+                    j:4,
+                    value:9
+                },
+                {
+                    i:4,
+                    j:5,
+                    value:7
+                },
+                {
+                    i:4,
+                    j:8,
+                    value:3
+                },
+                {
+                    i:5,
+                    j:2,
+                    value:3
+                },
+                {
+                    i:5,
+                    j:3,
+                    value:2
+                },
+                {
+                    i:5,
+                    j:6,
+                    value:4
+                },
+                {
+                    i:6,
+                    j:0,
+                    value:2
+                },
+                {
+                    i:6,
+                    j:1,
+                    value:7
+                },
+                {
+                    i:6,
+                    j:5,
+                    value:1
+                },
+                {
+                    i:7,
+                    j:1,
+                    value:3
+                },
+                {
+                    i:7,
+                    j:2,
+                    value:9
+                },
+                {
+                    i:7,
+                    j:4,
+                    value:2
+                },
+                {
+                    i:7,
+                    j:5,
+                    value:5
+                },
+                {
+                    i:7,
+                    j:6,
+                    value:7
+                },
+                {
+                    i:7,
+                    j:8,
+                    value:6
+                },
+                {
+                    i:8,
+                    j:2,
+                    value:4
+                },
+                {
+                    i:8,
+                    j:6,
+                    value:2
+                },
+                {
+                    i:8,
+                    j:7,
+                    value:1
+                }
+            ]
             ;
 
         threePanel._dom.style.background = "#111111";
-        threePanel._dom.style.backgroundImage = "-webkit-gradient(linear, 0% 60%, 0% 80%, from(#111111), to(#444444), color-stop(0.3,#222222))";
+        threePanel._dom.style.backgroundImage = "-"+getVendorPrefix().toLowerCase()+"-linear-gradient(top, rgb(0,0,0) 50%, rgb(24,24,24) 90%)";
+
         threePanel.add(gameBoard3D);
-        gameBoard3D.enableClickableComponents(threePanel);
         threePanel.injectIntoContainer(masterViewport);
         threePanel.start();
+
+        setTimeout(function(){gameBoard.loadStartingConfiguration(easyStartConf);}, 1000);
 
         centerCamera.call(threePanel, gameBoard);
 
@@ -53,6 +232,27 @@
             length:len
         });
 
+    }
+
+
+    //getVendorPrefix courtesy of Lea Verou. http://lea.verou.me/
+    function getVendorPrefix()
+    {
+        var regex = /^(Moz|Webkit|Khtml|O|ms|Icab)(?=[A-Z])/;
+
+        if('WebkitOpacity' in document.body.style) return 'Webkit';
+        if('KhtmlOpacity' in document.body.style) return 'Khtml';
+
+        for(var prop in document.body.style)
+        {
+            if(regex.test(prop))
+            {
+                return prop.match(regex)[0];
+            }
+
+        }
+
+        return '';
     }
 
     window.addEventListener("load", initialize, false);

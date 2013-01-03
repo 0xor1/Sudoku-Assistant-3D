@@ -13,8 +13,6 @@
 
         THREE.Object3D.call(this);
 
-        this.followCursor = false;
-
         this._gameBoard = gameBoard;
 
         this._cells = new Utils.MultiArray(nSqrd, nSqrd);
@@ -37,6 +35,14 @@
         }
 
         this._cells[0][0].select();
+
+        this._gameBoard.addEventListener('valueEntered', valueEntered.bind(this));
+
+        this._gameBoard.addEventListener('valueCleared', valueCleared.bind(this));
+
+        this._gameBoard.addEventListener('startingConfigurationSaved', startingConfigurationSaved.bind(this));
+
+        this._gameBoard.addEventListener('startingConfigurationDiscarded', startingConfigurationDiscarded.bind(this));
 
         this._gameBoard.addEventListener("clash", clashRouter.bind(this));
 
@@ -61,69 +67,46 @@
     Sudoku.GameBoard3D.prototype = Object.create(THREE.Object3D.prototype);
 
 
-    Sudoku.GameBoard3D.prototype.enableClickableComponents = function (threePanel) {
+    function valueEntered(event){
 
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            ;
+        this._cells[event.i][event.j].valueEntered(event.value);
 
-        for (var i = 0; i < nSqrd; i++) {
-            for (var j = 0; j < nSqrd; j++) {
-                threePanel.addClickable(this._cells[i][j]);
-            }
+        return this;
+
+    }
+
+
+    function valueCleared(event){
+
+        this._cells[event.i][event.j].valueCleared();
+
+        return this;
+
+    }
+
+
+    function startingConfigurationSaved(event){
+
+        var startConf = event.startingConfiguration;
+
+        for(var i = 0, l = startConf.length; i < l; i++){
+            this._cells[startConf[i].i][startConf[i].j].setAsStartingCell();
         }
 
         return this;
 
-    };
+    }
 
 
-    Sudoku.GameBoard3D.prototype.disableClickableComponents = function (threePanel) {
+    function startingConfigurationDiscarded(event){
 
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            ;
+        var startConf = event.startingConfiguration;
 
-        for (var i = 0; i < nSqrd; i++) {
-            for (var j = 0; j < nSqrd; j++) {
-                theePanel.removeClickable(this._cells[i][j]);
-            }
+        for(var k = 0, l = startConf.length; k < l; k++){
+            this._cells[startConf[k].i][startConf[k].j].unsetAsStartingCell();
         }
 
         return this;
-
-    },
-
-        Sudoku.GameBoard3D.prototype.assignStartingCells = function () {
-
-            var n = this._gameBoard.getGameSize()
-                , nSqrd = n * n
-                ;
-
-            for (var i = 0; i < nSqrd; i++) {
-                for (var j = 0; j < nSqrd; j++) {
-                    if (this._cells[i][j].uniforms.texture.value !== Sudoku.textures[Sudoku.GameBoard.emptyCell]) {
-                        this._cells[i][j].setAsStartingCell();
-                    }
-                }
-            }
-
-        }
-
-
-    Sudoku.GameBoard3D.prototype.unassignStartingCells = function () {
-
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            ;
-
-        for (var i = 0; i < nSqrd; i++) {
-            for (var j = 0; j < nSqrd; j++) {
-                if (this._cells[i][j].isStartingCell()) {
-                    this._cells[i][j].unsetAsStartingCell();
-                }
-            }
-        }
 
     }
 

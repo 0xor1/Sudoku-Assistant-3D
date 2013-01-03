@@ -19,7 +19,7 @@
 
         this.scene.add(this.camera);
 
-        this.addEventListener('resize', this.canvasResize.bind(this));
+        this.addEventListener('resize', canvasResized.bind(this));
 
         this.addUIEventListener(this._dom, "mousedown", mouseDown.bind(this), false);
 
@@ -33,36 +33,18 @@
 
         this.scene.add(obj);
 
-        return this;
-
-    }
-
-    UIControls.ThreePanel.prototype.addClickable = function (obj) {
-
-        if (obj instanceof UIControls.ClickableMesh) {
-
-            if (this._clickables.indexOf(obj) === -1) {
-                this._clickables.push(obj);
-            }
-
-        } else {
-
-            throw new Utils.Error("ThreePanel.addClickable only accepts UIControls.ClickableMesh objects.");
-
-        }
+        addClickable.call(this, obj);
 
         return this;
 
     };
 
 
-    UIControls.ThreePanel.prototype.removeClickable = function (obj) {
+    UIControls.ThreePanel.prototype.remove = function (obj) {
 
-        var idx = this._clickables.indexOf(obj);
+        this.scene.remove(obj);
 
-        if (idx !== -1) {
-            this._clickables.splice(idx, 1);
-        }
+        removeClickable.call(this, obj);
 
         return this;
 
@@ -114,7 +96,7 @@
     };
 
 
-    UIControls.ThreePanel.prototype.canvasResize = function () {
+    function canvasResized() {
 
         if (this._resizeTimer !== null) {
             clearTimeout(this._resizeTimer);
@@ -152,6 +134,41 @@
             intersects[0].object.mouseDown(event);
         }
     };
+
+    function addClickable(obj) {
+
+        if (obj instanceof UIControls.ClickableMesh) {
+
+            if (this._clickables.indexOf(obj) === -1) {
+                this._clickables.push(obj);
+            }
+
+        }
+
+        for(var i = 0, l = obj.children.length; i < l; i++){
+            addClickable.call(this,obj.children[i]);
+        }
+
+        return this;
+
+    }
+
+
+    function removeClickable(obj) {
+
+        var idx = this._clickables.indexOf(obj);
+
+        if (idx !== -1) {
+            this._clickables.splice(idx, 1);
+        }
+
+        for(var i = 0, l = obj.children.length; i < l; i++){
+            removeClickable.call(this,obj.children[i]);
+        }
+
+        return this;
+
+    }
 
 
 })();

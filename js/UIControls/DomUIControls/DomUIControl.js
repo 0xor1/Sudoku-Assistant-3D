@@ -58,6 +58,7 @@
             ;
 
         link.href = projectUrl;
+        link.target = "_blank";
         link.className = "GitHubForkBanner";
 
         img.style.position = "absolute";
