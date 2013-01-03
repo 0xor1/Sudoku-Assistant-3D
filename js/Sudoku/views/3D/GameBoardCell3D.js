@@ -314,11 +314,12 @@
 
     function gameCompleteAnimation() {
 
-        var len = 1000
+        var len = 4000
             , dipTo = Math.random() * 0.7
             , self = this;
-        ;
+            ;
 
+        self.gameComplete = function(){};
 
         Utils.animate({
             obj:this.color,
@@ -338,6 +339,7 @@
             targetValue:dipTo,
             length:len,
             callback:function (obj, prop) {
+                delete self.gameComplete;
                 statusChangedAnimation.call(self);
             }
         });
