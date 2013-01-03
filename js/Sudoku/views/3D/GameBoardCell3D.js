@@ -110,7 +110,7 @@
 
     gbc3d.prototype.valueEntered = function (value) {
 
-        var len = 200;
+        var len = 400;
 
         Utils.animate({
             obj:this.rotation,
@@ -146,7 +146,7 @@
 
     gbc3d.prototype.valueCleared = function () {
 
-        var len = 200;
+        var len = 400;
 
         Utils.animate({
             obj:this.rotation,
@@ -391,7 +391,7 @@
         }
         , primaryClashChange = {
             length:400,
-            delay:300,
+            delay:400,
             color:{
                 r:1,
                 g:0,
@@ -407,7 +407,7 @@
             }
         }
         , defaultChange = {
-            length:200,
+            length:300,
             color:{
                 r:1,
                 g:1,
