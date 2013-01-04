@@ -193,25 +193,25 @@
 
         /*left arrow*/
         if (event.keyCode === 37) {
-            selectCellToTheLeft.call(this);
+            selectNextAvailableCellInDirection.call(this, 'left');
             return;
         }
 
         /*up arrow*/
         if (event.keyCode === 38) {
-            selectCellUpwards.call(this);
+            selectNextAvailableCellInDirection.call(this, 'up');
             return;
         }
 
         /*right arrow*/
         if (event.keyCode === 39) {
-            selectCellToTheRight.call(this);
+            selectNextAvailableCellInDirection.call(this, 'right');
             return;
         }
 
         /*down arrow*/
         if (event.keyCode === 40) {
-            selectCellDownwards.call(this);
+            selectNextAvailableCellInDirection.call(this, 'down');
             return;
         }
 
@@ -223,61 +223,28 @@
         }
     }
 
-    function selectCellToTheLeft(){
+
+    function selectNextAvailableCellInDirection(dir){
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
             , i = this._selectedCell.i
             , j = this._selectedCell.j
+            , iterIdx
             ;
 
-        do {
-            j = (j - 1 < 0) ? nSqrd - 1 : j - 1;
-        } while(!this._cells[i][j].select().isSelected())
-
-    }
-
-
-    function selectCellUpwards(){
-
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            , i = this._selectedCell.i
-            , j = this._selectedCell.j
-            ;
+        if(dir === "left" || dir === "up"){
+            iterIdx = function(idx){return (idx - 1 < 0) ? nSqrd - 1 : idx - 1;};
+        } else {
+            iterIdx = function(idx){return (idx + 1 >= nSqrd) ? 0 : idx + 1;};
+        }
 
         do {
-            i = (i - 1 < 0) ? nSqrd - 1 : i - 1;
-        } while(!this._cells[i][j].select().isSelected())
-
-    }
-
-
-    function selectCellToTheRight(){
-
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            , i = this._selectedCell.i
-            , j = this._selectedCell.j
-            ;
-
-        do {
-            j = (j + 1 >= nSqrd) ? 0 : j + 1;
-        } while(!this._cells[i][j].select().isSelected())
-
-    }
-
-
-    function selectCellDownwards(){
-
-        var n = this._gameBoard.getGameSize()
-            , nSqrd = n * n
-            , i = this._selectedCell.i
-            , j = this._selectedCell.j
-            ;
-
-        do {
-            i = (i + 1 >= nSqrd) ? 0 : i + 1;
+            if(dir === "left" || dir === "right"){
+                j = iterIdx(j);
+            } else {
+                i = iterIdx(i);
+            }
         } while(!this._cells[i][j].select().isSelected())
 
     }
