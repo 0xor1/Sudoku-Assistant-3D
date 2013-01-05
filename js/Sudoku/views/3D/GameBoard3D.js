@@ -87,10 +87,27 @@
 
     function startingConfigurationSaved(event){
 
-        var startConf = event.startingConfiguration;
+        var i
+            , j
+            , n = this._gameBoard.getGameSize()
+            , nSqrd = n * n
+            , startConf = event.startingConfiguration
+            ;
 
         for(var i = 0, l = startConf.length; i < l; i++){
             this._cells[startConf[i].i][startConf[i].j].setAsStartingCell();
+        }
+
+        i = j = 0;
+        while(!this._cells[i][j].select().isSelected()){
+            j++;
+            if(j === nSqrd){
+                j = 0;
+                i++;
+                if(i === nSqrd){
+                    return;
+                }
+            }
         }
 
         return this;

@@ -185,7 +185,7 @@
             ;
 
         threePanel._dom.style.background = "#111111";
-        threePanel._dom.style.backgroundImage = "-"+getVendorPrefix().toLowerCase()+"-linear-gradient(top, rgb(0,0,0) 50%, rgb(24,24,24) 90%)";
+        threePanel._dom.style.backgroundImage = "-"+vendorPrefix.toLowerCase()+"-linear-gradient(top, rgb(0,0,0) 60%, rgb(34,34,34) 85%)";
 
         threePanel.add(gameBoard3D);
         threePanel.injectIntoContainer(masterViewport);
@@ -236,8 +236,7 @@
 
 
     //getVendorPrefix courtesy of Lea Verou. http://lea.verou.me/
-    function getVendorPrefix()
-    {
+    function getVendorPrefix() {
         var regex = /^(Moz|Webkit|Khtml|O|ms|Icab)(?=[A-Z])/;
 
         if('WebkitOpacity' in document.body.style) return 'Webkit';
@@ -254,6 +253,12 @@
 
         return '';
     }
+
+    function assignVendorPrefix(){
+        window.vendorPrefix = getVendorPrefix();
+    }
+
+    window.addEventListener("load", assignVendorPrefix, false);
 
     window.addEventListener("load", initialize, false);
 
