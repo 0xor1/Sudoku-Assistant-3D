@@ -1,7 +1,7 @@
 Sudoku Solver Visualisation
 ===========================
 
-A demo webGL application implemented using [mrdoob's](mrdoob.com) [three.js](https://github.com/mrdoob/three.js) library.
+A demo webGL application implemented using [mrdoob's](https://twitter.com/mrdoob) [three.js](https://github.com/mrdoob/three.js) library.
 
 The main purpose is to allow users to enter an initial gameBoard state and then run a solver on the game,
 whilst displaying to the user the logic used to make each value entry in a 3D animation.
