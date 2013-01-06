@@ -146,7 +146,7 @@
 
         loadStartingConfiguration:function (startingConfiguration) {
 
-            this.zeroBoard();
+            this.wipeClean();
 
             for (var i = 0, l = startingConfiguration.length; i < l; i++) {
                 this.enterValue(
@@ -200,7 +200,7 @@
         },
 
 
-        zeroBoard:function () {
+        wipeClean:function () {
 
             this.discardStartingConfiguration();
 
