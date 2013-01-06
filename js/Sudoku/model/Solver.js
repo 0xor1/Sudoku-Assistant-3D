@@ -8,8 +8,6 @@
         this._nSqrd = this._n * this._n;
         this._gameBoard = gameBoard;
 
-        this._certainCells = [] //{i,j,row,column,element,subGrid} -> row column element and subGrid props have boolean values.
-
         if (solver instanceof Sudoku.Solver) {
             this._parent = solver;
         } else {
@@ -76,17 +74,7 @@
 
         getListOfCertainCells:function () {
 
-            var arr = [];
 
-            for (var i = 0, l = this._currentCertainCells.length; i < l; i++) {
-                arr[i] = {
-                    i:this._currentCertainCells[i].i,
-                    j:this._currentCertainCells[i].j,
-                    value:this._currentCertainCells.value
-                }
-            }
-
-            return arr;
 
         }
 
@@ -110,6 +98,8 @@
 
         this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
 
+        this.addEventListener('insolvableBranch',insolvableBranch.bind(this));
+
         return this;
 
     }
@@ -129,20 +119,20 @@
 
         /*killRowPossibilities*/
         for (var jTemp = 0; jTemp < this._nSqrd; jTemp++) {
-            killPossibilityCell.call(this, i, jTemp, k, gbc);
+            killPossibility.call(this, i, jTemp, k, gbc);
         }
         /*killColumnPossibilities*/
         for (var iTemp = 0; iTemp < this._nSqrd; iTemp++) {
-            killPossibilityCell.call(this, iTemp, j, k, gbc);
+            killPossibility.call(this, iTemp, j, k, gbc);
         }
         /*killElementPossibilities*/
         for (var kTemp = 0; kTemp < this._nSqrd; kTemp++) {
-            killPossibilityCell.call(this, i, j, kTemp, gbc);
+            killPossibility.call(this, i, j, kTemp, gbc);
         }
         /*killSubGridPossibilities*/
         for (var iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
             for (var jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
-                killPossibilityCell.call(this, iTemp, jTemp, k, gbc);
+                killPossibility.call(this, iTemp, jTemp, k, gbc);
             }
         }
 
@@ -164,20 +154,20 @@
 
         /*reviveRowPossibilities*/
         for (var jTemp = 0; jTemp < this._nSqrd; jTemp++) {
-            revivePossibilityCell.call(this, i, jTemp, k);
+            revivePossibility.call(this, i, jTemp, k);
         }
         /*reviveColumnPossibilities*/
         for (var iTemp = 0; iTemp < this._nSqrd; iTemp++) {
-            revivePossibilityCell.call(this, iTemp, j, k);
+            revivePossibility.call(this, iTemp, j, k);
         }
         /*reviveElementPossibilities*/
         for (var kTemp = 0; kTemp < this._nSqrd; kTemp++) {
-            revivePossibilityCell.call(this, i, j, kTemp);
+            revivePossibility.call(this, i, j, kTemp);
         }
         /*revivesubGridPossibilities*/
         for (var iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
             for (var jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
-                revivePossibilityCell.call(this, iTemp, jTemp, k)
+                revivePossibility.call(this, iTemp, jTemp, k)
             }
         }
 
@@ -186,13 +176,13 @@
     }
 
 
-    function revivePossibilityCell(i, j, k) {
+    function revivePossibility(i, j, k) {
 
         if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityDead) {
             this._possibilityCube[i][j][k] = Sudoku.Solver.possibilityAlive;
             incrementCounters.call(this, i, j, k);
             this.dispatchEvent({
-                type:"possibilityCellRevived",
+                type:"possibilityRevived",
                 i:i,
                 j:j,
                 k:k
@@ -202,13 +192,13 @@
     }
 
 
-    function killPossibilityCell(i, j, k, gbc) {
+    function killPossibility(i, j, k, gbc) {
 
         if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityAlive) {
             this._possibilityCube[i][j][k] = Sudoku.Solver.possibilityDead;
             decrementCounters.call(this, i, j, k, gbc);
             this.dispatchEvent({
-                type:"possibilityCellRevived",
+                type:"possibilityKilled",
                 i:i,
                 j:j,
                 k:k
@@ -233,7 +223,8 @@
             , sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
             , gbcSgb = this._gameBoard.getSubGridBoundsContainingCell(gbc.i, gbc.j)
             ;
-        /*decrement relevant counters and if the counter
+        /*
+         decrement relevant counters and if the counter
          is zero and the relevant dimension is not the same
          as the originating cell that started the killing process this
          branch has no solution and need not be investigated further
@@ -266,7 +257,6 @@
         this._columnCounters[j][k]++;
         this._elementCounters[i][j]++;
         this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]++;
-
     }
 
 

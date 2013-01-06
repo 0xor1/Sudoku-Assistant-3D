@@ -38,7 +38,11 @@
 
         this._gameBoard.addEventListener('valueEntered', valueEntered.bind(this));
 
+        this._gameBoard.addEventListener('batchValueEntered', batchValueEntered.bind(this));
+
         this._gameBoard.addEventListener('valueCleared', valueCleared.bind(this));
+
+        this._gameBoard.addEventListener('batchValueCleared', batchValueCleared.bind(this));
 
         this._gameBoard.addEventListener('startingConfigurationSaved', startingConfigurationSaved.bind(this));
 
@@ -76,9 +80,37 @@
     }
 
 
+    function batchValueEntered(event){
+
+        event.batch.forEach(
+            function(el, idx, arr){
+                this._cells[el.i][el.j].valueEntered(el.value);
+            },
+            this
+        );
+
+        return this;
+
+    }
+
+
     function valueCleared(event){
 
         this._cells[event.i][event.j].valueCleared();
+
+        return this;
+
+    }
+
+
+    function batchValueCleared(event){
+
+        event.batch.forEach(
+            function(el, idx, arr){
+                this._cells[el.i][el.j].valueCleared();
+            },
+            this
+        );
 
         return this;
 
