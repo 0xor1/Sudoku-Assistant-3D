@@ -16,6 +16,8 @@
 
         this._children = []; //for exploring forks
 
+        this._certainCells = [];
+
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
         for (var i = 0; i < this._nSqrd; i++) {
@@ -74,6 +76,17 @@
 
         getListOfCertainCells:function () {
 
+            var arr = [];
+
+            for (var i = 0, l = this._certainCells.length; i < l; i++) {
+                arr[i] = {
+                    i:this._certainCells[i].i,
+                    j:this._certainCells[i].j,
+                    value:this._certainCells[i].value
+                }
+            }
+
+            return arr;
 
 
         }
