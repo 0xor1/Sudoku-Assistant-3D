@@ -55,5 +55,13 @@
 		}
 		
 	};
+
+    Sudoku.getNewStartingConfig = function(){
+
+        var rand = Math.random() * (Sudoku.startingConfigs.length - 1)
+
+        return Sudoku.startingConfigs[rand];
+
+    };
 	
 })();

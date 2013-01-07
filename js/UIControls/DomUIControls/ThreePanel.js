@@ -1,32 +1,34 @@
 (function () {
 
 
-    UIControls.ThreePanel = function () {
+    UIControls.ThreePanel = function (dom) {
 
-        UIControls.DomUIControl.call(this);
+        UIControls.UIControl.call(this);
 
         this._isRendering = false;
         this._stopping = false;
         this._clickables = [];
         this._resizeTimer = null;
-        this._resize = resize.bind(this);
+        this.resize = resize.bind(this);
 
-        this.renderer = new THREE.WebGLRenderer();
-        this._dom = this.renderer.domElement;
+        this.renderer = new THREE.WebGLRenderer({canvas:dom});
+        this.dom = this.renderer.domElement;
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, this._dom.width / this._dom.height, 1, 100000);
-        this.controls = new THREE.TrackballControls(this.camera, this._dom);
+        this.camera = new THREE.PerspectiveCamera(75, this.dom.width / this.dom.height, 1, 100000);
+        this.controls = new THREE.TrackballControls(this.camera, this.dom);
 
         this.scene.add(this.camera);
 
         this.addEventListener('resize', canvasResized.bind(this));
 
-        this.addUIEventListener(this._dom, "mousedown", mouseDown.bind(this), false);
+        this.addUIEventListener(this.dom, "mousedown", mouseDown.bind(this), false);
+
+        this.addUIEventListener(window, 'resize', canvasResized.bind(this), false);
 
     };
 
 
-    UIControls.ThreePanel.prototype = Object.create(UIControls.DomUIControl.prototype);
+    UIControls.ThreePanel.prototype = Object.create(UIControls.UIControl.prototype);
 
 
     UIControls.ThreePanel.prototype.add = function (obj) {
@@ -114,16 +116,16 @@
     };
 
     function resize() {
-
-        this.renderer.setSize(this._rect.width, this._rect.height);
-        this.camera.aspect = this._rect.width / this._rect.height;
+        var rect = this.dom.getBoundingClientRect();
+        this.renderer.setSize(rect.width, rect.height);
+        this.camera.aspect = rect.width / rect.height;
         this.camera.updateProjectionMatrix();
 
     }
 
     function mouseDown(event) {
 
-        var projector = new THREE.Projector(), rect = this._dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
+        var projector = new THREE.Projector(), rect = this.dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
         projector.unprojectVector(vector, this.camera);
 
         var ray = new THREE.Ray(this.camera.position, vector.subSelf(this.camera.position).normalize());

@@ -49,13 +49,13 @@
                     value % 1 === 0
                 ) {
                 this._cells[i][j] = value;
+                decrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueEntered",
                     i:i,
                     j:j,
                     value:value
                 });
-                decrementEmptyCellCount.call(this);
             }
 
             return this;
@@ -68,48 +68,53 @@
             if (this._cells[i][j] !== Sudoku.GameBoard.emptyCell && !isStartingCell.call(this, i, j)
                 ) {
                 this._cells[i][j] = Sudoku.GameBoard.emptyCell;
+                incrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueCleared",
                     i:i,
                     j:j,
                     value:Sudoku.GameBoard.emptyCell
                 });
-                incrementEmptyCellCount.call(this);
             }
 
             return this;
 
         },
-        
-        
-        batchEnterValue:function(batch){
-            
+
+
+        batchEnterValue:function (batch) {
+
             var entered = [];
-            
+
             batch.forEach(
-                function(el,idx,arr){
-                    if(this._cells[el.i][el.j] === Sudoku.GameBoard.emptyCell){
+                function (el, idx, arr) {
+                    if (
+                        this._cells[el.i][el.j] === Sudoku.GameBoard.emptyCell && !entryClash.call(this, el.i, el.j, el.value) &&
+                            el.value <= this._nSqrd &&
+                            el.value > 0 &&
+                            el.value % 1 === 0
+                        ) {
                         this._cells[el.i][el.j] = el.value;
                         decrementEmptyCellCount.call(this);
-                        entered.push({i:el.i,j:el.j,value:el.value});
-                    }    
+                        entered.push({i:el.i, j:el.j, value:el.value});
+                    }
                 },
                 this
             );
-            
+
             this.dispatchEvent({
                 type:'batchValueEntered',
                 batch:entered
             });
-            
+
         },
-        
-        
-        batchClearValue:function(batch){
-            
+
+
+        batchClearValue:function (batch) {
+
             var cleared = [];
-            
-            if(batch === "all"){
+
+            if (batch === "all") {
                 batch = [];
                 for (var i = 0; i < this._nSqrd; i++) {
                     for (var j = 0; j < this._nSqrd; j++) {
@@ -120,23 +125,24 @@
                     }
                 }
             }
-            
+
             batch.forEach(
-                function(el,idx,arr){
-                    if(this._cells[el.i][el.j] !== Sudoku.GameBoard.emptyCell){
+                function (el, idx, arr) {
+                    if (this._cells[el.i][el.j] !== Sudoku.GameBoard.emptyCell && !isStartingCell.call(this, el.i, el.j)
+                        ) {
                         this._cells[el.i][el.j] = Sudoku.GameBoard.emptyCell;
-                        decrementEmptyCellCount.call(this);
+                        incrementEmptyCellCount.call(this);
                         cleared.push({i:el.i,j:el.j});
-                    }    
+                    }
                 },
                 this
             );
-            
+
             this.dispatchEvent({
                 type:'batchValueCleared',
                 batch:cleared
             });
-            
+
         },
 
 
@@ -152,7 +158,7 @@
             if (this._startingConfiguration.length === 0) {
                 return this;
             }
-            
+
             this.batchClearValue("all");
 
             this.batchEnterValue(this._startingConfiguration);
@@ -193,7 +199,7 @@
 
 
         loadStartingConfiguration:function (startingConfiguration) {
-            
+
             this.wipeClean();
 
             this.batchEnterValue(startingConfiguration);
@@ -245,7 +251,7 @@
         wipeClean:function () {
 
             this.discardStartingConfiguration();
-            
+
             this.batchClearValue("all");
 
             return this;
@@ -338,21 +344,21 @@
 
 
     function isStartingCell(i, j) {
-        
+
         var sc;
-        
+
         for (var k = 0, l = this._startingConfiguration.length; k < l; k++) {
-        
+
             sc = this._startingConfiguration[k];
-            
-            if((sc.i === i && sc.j > j) || sc.i > i){
+
+            if ((sc.i === i && sc.j > j) || sc.i > i) {
                 break;
             }
-            
+
             if (i === sc.i && j === sc.j) {
                 return true;
             }
-        
+
         }
 
         return false;

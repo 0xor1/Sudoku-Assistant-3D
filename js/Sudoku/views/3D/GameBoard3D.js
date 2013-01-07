@@ -84,7 +84,7 @@
 
         event.batch.forEach(
             function(el, idx, arr){
-                this._cells[el.i][el.j].valueEntered(el.value);
+                valueEntered.call(this,el);
             },
             this
         );
@@ -107,7 +107,7 @@
 
         event.batch.forEach(
             function(el, idx, arr){
-                this._cells[el.i][el.j].valueCleared();
+                valueCleared.call(this, el);
             },
             this
         );

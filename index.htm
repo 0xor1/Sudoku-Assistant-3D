@@ -18,13 +18,14 @@
 
     <script src="js/UIControls/UIControl.js"></script>
 
-    <script src="js/UIControls/DomUIControls/DomUIControl.js"></script>
-    <script src="js/UIControls/DomUIControls/Content/ThreePanel.js"></script>
+    <script src="js/UIControls/DomUIControls/ThreePanel.js"></script>
 
     <script src="js/UIControls/ThreeUIControls/ClickableMesh.js"></script>
 
 
     <script src="js/Sudoku/Sudoku.js"></script>
+
+    <script src="js/Sudoku/games/StartingConfigs.js"></script>
 
     <script src="js/Sudoku/model/GameBoard.js"></script>
     <script src="js/Sudoku/model/Solver.js"></script>
@@ -34,12 +35,26 @@
     <script src="js/Sudoku/views/3D/PossibilityCubeCell3D.js"></script>
 
 
-    <script src="js/Initialize.js"></script>
+    <script src="js/app.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
 
 
 </head>
 
 <body>
+
+<div id="masterViewport" class="xor viewport">
+
+    <div id="threeViewport" class="xor viewport">
+
+        <canvas id="threeDView" class="xor threePanel" style="width:100%;height:100%">
+
+        </canvas>
+
+    </div>
+
+</div>
 
 </body>
 
