@@ -339,14 +339,20 @@
 
     function isStartingCell(i, j) {
         
+        var sc;
+        
         for (var k = 0, l = this._startingConfiguration.length; k < l; k++) {
+        
             sc = this._startingConfiguration[k];
+            
             if((sc.i === i && sc.j > j) || sc.i > i){
                 break;
             }
+            
             if (i === sc.i && j === sc.j) {
                 return true;
             }
+        
         }
 
         return false;
