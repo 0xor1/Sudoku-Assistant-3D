@@ -40,7 +40,7 @@
         },
 
 
-        enterValue:function (i, j, value, suppressEvent) {
+        enterValue:function (i, j, value) {
 
             if (
                 this._cells[i][j] === Sudoku.GameBoard.emptyCell && !entryClash.call(this, i, j, value) &&
@@ -49,14 +49,12 @@
                     value % 1 === 0
                 ) {
                 this._cells[i][j] = value;
-                if (!suppressEvent) {
-                    this.dispatchEvent({
-                        type:"valueEntered",
-                        i:i,
-                        j:j,
-                        value:value
-                    });
-                }
+                this.dispatchEvent({
+                    type:"valueEntered",
+                    i:i,
+                    j:j,
+                    value:value
+                });
                 decrementEmptyCellCount.call(this);
             }
 
@@ -65,24 +63,80 @@
         },
 
 
-        clearValue:function (i, j, suppressEvent) {
+        clearValue:function (i, j) {
 
             if (this._cells[i][j] !== Sudoku.GameBoard.emptyCell && !isStartingCell.call(this, i, j)
                 ) {
                 this._cells[i][j] = Sudoku.GameBoard.emptyCell;
-                if (!suppressEvent) {
-                    this.dispatchEvent({
-                        type:"valueCleared",
-                        i:i,
-                        j:j,
-                        value:Sudoku.GameBoard.emptyCell
-                    });
-                }
+                this.dispatchEvent({
+                    type:"valueCleared",
+                    i:i,
+                    j:j,
+                    value:Sudoku.GameBoard.emptyCell
+                });
                 incrementEmptyCellCount.call(this);
             }
 
             return this;
 
+        },
+        
+        
+        batchEnterValue:function(batch){
+            
+            var entered = [];
+            
+            batch.forEach(
+                function(el,idx,arr){
+                    if(this._cells[el.i][el.j] === Sudoku.GameBoard.emptyCell){
+                        this._cells[el.i][el.j] = el.value;
+                        decrementEmptyCellCount.call(this);
+                        entered.push({i:el.i,j:el.j,value:el.value});
+                    }    
+                },
+                this
+            );
+            
+            this.dispatchEvent({
+                type:'batchValueEntered',
+                batch:entered
+            });
+            
+        },
+        
+        
+        batchClearValue:function(batch){
+            
+            var cleared = [];
+            
+            if(batch === "all"){
+                batch = [];
+                for (var i = 0; i < this._nSqrd; i++) {
+                    for (var j = 0; j < this._nSqrd; j++) {
+                        batch.push({
+                            i:i,
+                            j:j
+                        });
+                    }
+                }
+            }
+            
+            batch.forEach(
+                function(el,idx,arr){
+                    if(this._cells[el.i][el.j] !== Sudoku.GameBoard.emptyCell){
+                        this._cells[el.i][el.j] = Sudoku.GameBoard.emptyCell;
+                        decrementEmptyCellCount.call(this);
+                        cleared.push({i:el.i,j:el.j});
+                    }    
+                },
+                this
+            );
+            
+            this.dispatchEvent({
+                type:'batchValueCleared',
+                batch:cleared
+            });
+            
         },
 
 
@@ -95,42 +149,13 @@
 
         setToStartingConfiguration:function () {
 
-            var batch = [];
-
             if (this._startingConfiguration.length === 0) {
                 return this;
             }
+            
+            this.batchClearValue("all");
 
-            for (var i = 0; i < this._nSqrd; i++) {
-                for (var j = 0; j < this._nSqrd; j++) {
-                    if (this._cells[i][j] !== Sudoku.GameBoard.emptyCell) {
-                        this.clearValue(i,j,true);
-                        batch.push({
-                            i:i,
-                            j:j
-                        });
-                    }
-                }
-            }
-
-            this.dispatchEvent({
-                type:'batchValueCleared',
-                batch: batch
-            });
-
-            for (var i = 0, l = this._startingConfiguration.length; i < l; i++) {
-                this.enterValue(
-                    this._startingConfiguration[i].i,
-                    this._startingConfiguration[i].j,
-                    this._startingConfiguration[i].value,
-                    true
-                );
-            }
-
-            this.dispatchEvent({
-                type:'batchValueEntered',
-                batch:this.getStartingConfiguration()
-            });
+            this.batchEnterValue(this._startingConfiguration);
 
             return this;
 
@@ -168,24 +193,12 @@
 
 
         loadStartingConfiguration:function (startingConfiguration) {
-
+            
             this.wipeClean();
 
-            for (var i = 0, l = startingConfiguration.length; i < l; i++) {
-                this.enterValue(
-                    startingConfiguration[i].i,
-                    startingConfiguration[i].j,
-                    startingConfiguration[i].value,
-                    true
-                );
-            }
+            this.batchEnterValue(startingConfiguration);
 
             this.saveStartingConfiguration();
-
-            this.dispatchEvent({
-                type:'batchValueEntered',
-                batch:this.getStartingConfiguration()
-            });
 
             return this;
 
@@ -231,26 +244,9 @@
 
         wipeClean:function () {
 
-            var batch = [];
-
             this.discardStartingConfiguration();
-
-            for (var i = 0; i < this._nSqrd; i++) {
-                for (var j = 0; j < this._nSqrd; j++) {
-                    if (this._cells[i][j] !== Sudoku.GameBoard.emptyCell) {
-                        this.clearValue(i,j,true);
-                        batch.push({
-                            i:i,
-                            j:j
-                        });
-                    }
-                }
-            }
-
-            this.dispatchEvent({
-                type:'batchValueCleared',
-                batch: batch
-            });
+            
+            this.batchClearValue("all");
 
             return this;
 
