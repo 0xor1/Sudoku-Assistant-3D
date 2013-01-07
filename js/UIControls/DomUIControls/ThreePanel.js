@@ -106,7 +106,7 @@
 
         this._resizeTimer = setTimeout(
 
-            this._resize
+            this.resize
 
             , 200
 

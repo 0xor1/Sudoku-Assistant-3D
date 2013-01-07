@@ -10,13 +10,12 @@
         threePanel.add(gameBoard3D);
         threePanel.resize();
         threePanel.start();
+        centerCamera.call(threePanel, gameBoard);
 
         setTimeout(function(){gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());}, 1000);
 
-        setTimeout(function(){gameBoard.setToStartingConfiguration();}, 5000);
-        centerCamera.call(threePanel, gameBoard);
+        Utils.AnimationMaster.turnOnAnimationSmoothing();
 
-        //Utils.FrameRateMonitor.enableLogging();
         Utils.FrameRateMonitor.start();
 
     }
