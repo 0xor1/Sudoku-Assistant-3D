@@ -266,6 +266,13 @@
             return this;
 
         },
+        
+        
+        isStarting:function (i, j) {
+            
+            return this._cells[i][j].isStarting;
+            
+        },
 
 
         getSubGridBoundsContainingCell:function (i, j) {
