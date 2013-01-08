@@ -17,14 +17,11 @@
 
         for (var i = 0; i < this._nSqrd; i++) {
             for (var j = 0; j < this._nSqrd; j++) {
-                this._cells[i][j] = Sudoku.GameBoard.emptyCell;
+                this._cells[i][j] = {value:0,isStarting:false};
             }
         }
 
     };
-
-
-    Sudoku.GameBoard.emptyCell = 0;
 
 
     Sudoku.GameBoard.prototype = {
@@ -43,12 +40,12 @@
         enterValue:function (i, j, value) {
 
             if (
-                this._cells[i][j] === Sudoku.GameBoard.emptyCell && !entryClash.call(this, i, j, value) &&
+                this._cells[i][j].value === 0 && !entryClash.call(this, i, j, value) &&
                     value <= this._nSqrd &&
                     value > 0 &&
                     value % 1 === 0
                 ) {
-                this._cells[i][j] = value;
+                this._cells[i][j].value = value;
                 decrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueEntered",
@@ -65,15 +62,13 @@
 
         clearValue:function (i, j) {
 
-            if (this._cells[i][j] !== Sudoku.GameBoard.emptyCell && !isStartingCell.call(this, i, j)
-                ) {
-                this._cells[i][j] = Sudoku.GameBoard.emptyCell;
+            if (this._cells[i][j].value !== 0 && !this._cells[i][j].isStarting) {
+                this._cells[i][j].value = 0;
                 incrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueCleared",
                     i:i,
                     j:j,
-                    value:Sudoku.GameBoard.emptyCell
                 });
             }
 
@@ -89,12 +84,12 @@
             batch.forEach(
                 function (el, idx, arr) {
                     if (
-                        this._cells[el.i][el.j] === Sudoku.GameBoard.emptyCell && !entryClash.call(this, el.i, el.j, el.value) &&
+                        this._cells[el.i][el.j].value === 0 && !entryClash.call(this, el.i, el.j, el.value) &&
                             el.value <= this._nSqrd &&
                             el.value > 0 &&
                             el.value % 1 === 0
                         ) {
-                        this._cells[el.i][el.j] = el.value;
+                        this._cells[el.i][el.j].value = el.value;
                         decrementEmptyCellCount.call(this);
                         entered.push({i:el.i, j:el.j, value:el.value});
                     }
@@ -128,9 +123,8 @@
 
             batch.forEach(
                 function (el, idx, arr) {
-                    if (this._cells[el.i][el.j] !== Sudoku.GameBoard.emptyCell && !isStartingCell.call(this, el.i, el.j)
-                        ) {
-                        this._cells[el.i][el.j] = Sudoku.GameBoard.emptyCell;
+                    if (this._cells[el.i][el.j].value !== 0 && !this._cells[el.i][el.j].isStarting) {
+                        this._cells[el.i][el.j].value = 0;
                         incrementEmptyCellCount.call(this);
                         cleared.push({i:el.i,j:el.j});
                     }
@@ -148,7 +142,7 @@
 
         getValue:function (i, j) {
 
-            return this._cells[i][j];
+            return this._cells[i][j].value;
 
         },
 
@@ -174,11 +168,12 @@
 
             for (var i = 0; i < this._nSqrd; i++) {
                 for (var j = 0; j < this._nSqrd; j++) {
-                    if (this._cells[i][j] !== Sudoku.GameBoard.emptyCell) {
+                    if (this._cells[i][j].value !== 0) {
+                        this._cells[i][j].isStarting = true;
                         this._startingConfiguration.push({
                             i:i,
                             j:j,
-                            value:this._cells[i][j]
+                            value:this._cells[i][j].value
                         })
                     }
                 }
@@ -200,9 +195,19 @@
 
         loadStartingConfiguration:function (startingConfiguration) {
 
+            var batch = [];
+            
             this.wipeClean();
-
-            this.batchEnterValue(startingConfiguration);
+            
+            for(var i = 0; i < this._nSqrd; i++){
+                for(var j = 0; j < this._nSqrd; j++){
+                    if(startingConfiguration[i][j] !== 0){
+                        batch.push({i:i,j:j,value:startingConfiguration[i][j]})
+                    }    
+                }
+            }
+            
+            this.batchEnterValue(batch);
 
             this.saveStartingConfiguration();
 
@@ -233,7 +238,11 @@
             if (this._startingConfiguration.length > 0) {
 
                 var arr = this.getStartingConfiguration();
-
+                
+                for (var i = 0, l = this._startingConfiguration.length; i < l; i++) {
+                    this._cells[this._startingConfiguration[i].i][this._startingConfiguration[i].j].isStarting = false;
+                }
+                
                 this._startingConfiguration = [];
 
                 this.dispatchEvent({
@@ -294,7 +303,7 @@
             if (k >= subGridBounds.jLower && k <= subGridBounds.jUpper) {
                 continue;
             }
-            if (this._cells[i][k] === value) {
+            if (this._cells[i][k].value === value) {
                 this.dispatchEvent({
                     type:"clash",
                     subType:"row",
@@ -309,7 +318,7 @@
             if (k >= subGridBounds.iLower && k <= subGridBounds.iUpper) {
                 continue;
             }
-            if (this._cells[k][j] === value) {
+            if (this._cells[k][j].value === value) {
                 this.dispatchEvent({
                     type:"clash",
                     subType:"column",
@@ -323,7 +332,7 @@
 
         for (var k = subGridBounds.iLower; k <= subGridBounds.iUpper; k++) {
             for (var l = subGridBounds.jLower; l <= subGridBounds.jUpper; l++) {
-                if (this._cells[k][l] === value) {
+                if (this._cells[k][l].value === value) {
                     this.dispatchEvent({
                         type:"clash",
                         subType:"subGrid",
@@ -340,29 +349,6 @@
             }
         }
         return clashOccurred;
-    }
-
-
-    function isStartingCell(i, j) {
-
-        var sc;
-
-        for (var k = 0, l = this._startingConfiguration.length; k < l; k++) {
-
-            sc = this._startingConfiguration[k];
-
-            if ((sc.i === i && sc.j > j) || sc.i > i) {
-                break;
-            }
-
-            if (i === sc.i && j === sc.j) {
-                return true;
-            }
-
-        }
-
-        return false;
-
     }
 
 
