@@ -8,7 +8,7 @@
     window.Utils = window.Utils || {};
 
 
-    Utils.EventTarget = function () {
+    Utils.EventDispatcher = function () {
 
         var listeners = {};
 
@@ -34,9 +34,11 @@
 
             if (listenerArray !== undefined) {
 
+                event.origin = this;
+
                 for (var i = 0, l = listenerArray.length; i < l; i++) {
 
-                    listenerArray[ i ](event);
+                    listenerArray[ i ].call(this, event);
 
                 }
 
