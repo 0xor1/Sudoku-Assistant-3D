@@ -3,7 +3,7 @@
 
     Sudoku.GameBoard = function (n) {
 
-        Utils.EventTarget.call(this);
+        Utils.EventDispatcher.call(this);
 
         this._n = n || 3;
 
@@ -17,7 +17,7 @@
 
         for (var i = 0; i < this._nSqrd; i++) {
             for (var j = 0; j < this._nSqrd; j++) {
-                this._cells[i][j] = {value:0,isStarting:false};
+                this._cells[i][j] = {value:0, isStarting:false};
             }
         }
 
@@ -39,12 +39,7 @@
 
         enterValue:function (i, j, value) {
 
-            if (
-                this._cells[i][j].value === 0 && !entryClash.call(this, i, j, value) &&
-                    value <= this._nSqrd &&
-                    value > 0 &&
-                    value % 1 === 0
-                ) {
+            if (canEnterValue.call(this, i, j, value)) {
                 this._cells[i][j].value = value;
                 decrementEmptyCellCount.call(this);
                 this.dispatchEvent({
@@ -62,13 +57,13 @@
 
         clearValue:function (i, j) {
 
-            if (this._cells[i][j].value !== 0 && !this._cells[i][j].isStarting) {
+            if (canClearValue.call(this, i, j)) {
                 this._cells[i][j].value = 0;
                 incrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueCleared",
                     i:i,
-                    j:j,
+                    j:j
                 });
             }
 
@@ -83,12 +78,7 @@
 
             batch.forEach(
                 function (el, idx, arr) {
-                    if (
-                        this._cells[el.i][el.j].value === 0 && !entryClash.call(this, el.i, el.j, el.value) &&
-                            el.value <= this._nSqrd &&
-                            el.value > 0 &&
-                            el.value % 1 === 0
-                        ) {
+                    if (canEnterValue.call(this, el.i, el.j, el.value)) {
                         this._cells[el.i][el.j].value = el.value;
                         decrementEmptyCellCount.call(this);
                         entered.push({i:el.i, j:el.j, value:el.value});
@@ -123,10 +113,10 @@
 
             batch.forEach(
                 function (el, idx, arr) {
-                    if (this._cells[el.i][el.j].value !== 0 && !this._cells[el.i][el.j].isStarting) {
+                    if (canClearValue.call(this, el.i, el.j)) {
                         this._cells[el.i][el.j].value = 0;
                         incrementEmptyCellCount.call(this);
-                        cleared.push({i:el.i,j:el.j});
+                        cleared.push({i:el.i, j:el.j});
                     }
                 },
                 this
@@ -196,17 +186,17 @@
         loadStartingConfiguration:function (startingConfiguration) {
 
             var batch = [];
-            
+
             this.wipeClean();
-            
-            for(var i = 0; i < this._nSqrd; i++){
-                for(var j = 0; j < this._nSqrd; j++){
-                    if(startingConfiguration[i][j] !== 0){
-                        batch.push({i:i,j:j,value:startingConfiguration[i][j]})
-                    }    
+
+            for (var i = 0; i < this._nSqrd; i++) {
+                for (var j = 0; j < this._nSqrd; j++) {
+                    if (startingConfiguration[i][j] !== 0) {
+                        batch.push({i:i, j:j, value:startingConfiguration[i][j]})
+                    }
                 }
             }
-            
+
             this.batchEnterValue(batch);
 
             this.saveStartingConfiguration();
@@ -238,11 +228,11 @@
             if (this._startingConfiguration.length > 0) {
 
                 var arr = this.getStartingConfiguration();
-                
+
                 for (var i = 0, l = this._startingConfiguration.length; i < l; i++) {
                     this._cells[this._startingConfiguration[i].i][this._startingConfiguration[i].j].isStarting = false;
                 }
-                
+
                 this._startingConfiguration = [];
 
                 this.dispatchEvent({
@@ -266,12 +256,12 @@
             return this;
 
         },
-        
-        
+
+
         isStarting:function (i, j) {
-            
+
             return this._cells[i][j].isStarting;
-            
+
         },
 
 
@@ -387,6 +377,30 @@
         }
 
         this._emptyCellCount++;
+
+    }
+
+    function canEnterValue(i, j, value) {
+
+        if (this._cells[i][j].value === 0 && !entryClash.call(this, i, j, value) &&
+            value <= this._nSqrd &&
+            value > 0 &&
+            value % 1 === 0) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+
+    function canClearValue(i, j) {
+
+        if (this._cells[i][j].value !== 0 && !this._cells[i][j].isStarting) {
+            return true;
+        } else {
+            return false;
+        }
 
     }
 

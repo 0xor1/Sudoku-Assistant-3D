@@ -180,7 +180,7 @@
 
     Utils.animate.counterSuffix = "_animation_count_";
 
-    Utils.AnimationMaster = new Utils.EventTarget();
+    Utils.AnimationMaster = new Utils.EventDispatcher();
 
     Utils.AnimationMaster.scalingFactor = 1;
 
@@ -241,7 +241,7 @@
             , inCriticalMode
             ;
 
-        Utils.FrameRateMonitor = new Utils.EventTarget();
+        Utils.FrameRateMonitor = new Utils.EventDispatcher();
 
         Utils.FrameRateMonitor.setCriticalFps = function (val) {
 

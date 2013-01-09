@@ -2,7 +2,7 @@
 
     Sudoku.Solver = function (gameBoard, solver) {
 
-        Utils.EventTarget.call(this);
+        Utils.EventDispatcher.call(this);
 
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
