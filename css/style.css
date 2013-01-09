@@ -1,4 +1,4 @@
-html, body, .xor.viewport, .xor.threePanel {
+html, body, .xor.threePanel, .xor.viewport {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -12,11 +12,4 @@ html, body, .xor.viewport, .xor.threePanel {
     background-image: -o-linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
     background-image: -moz-linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
     background-image: -webkit-linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
-}
-
-.xor.gitHubForkBanner {
-    position:absolute;
-    top:0;
-    right:0;
-    border:0;
 }
