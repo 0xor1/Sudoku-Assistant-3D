@@ -58,7 +58,7 @@
 
     Sudoku.getNewStartingConfig = function(){
 
-        var rand = Math.random() * (Sudoku.startingConfigs.length - 1)
+        var rand = Math.floor(Math.random() * (Sudoku.startingConfigs.length));
 
         return Sudoku.startingConfigs[rand];
 
