@@ -173,7 +173,7 @@
             }.bind(this)
         });
 
-        this.uniforms.texture.value = Sudoku.textures[Sudoku.GameBoard.emptyCell];
+        this.uniforms.texture.value = Sudoku.textures[0];
 
         return this;
 
