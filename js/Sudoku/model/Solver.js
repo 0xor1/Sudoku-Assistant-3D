@@ -16,6 +16,8 @@
 
         this._children = []; //for exploring forks
 
+        this._entryList = []; //batch array for values this solver has entered into the gameboard
+
         this._certainCells = [];
 
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
@@ -111,6 +113,10 @@
 
         this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
 
+        this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
+
+        this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
+
         this.addEventListener('insolvableBranch',insolvableBranch.bind(this));
 
         return this;
@@ -189,6 +195,20 @@
     }
 
 
+    function batchKillPossibilities(event){
+
+        event.batch.forEach(
+            function(el, idx, arr){
+                killPossibilities.call(this,el);
+            },
+            this
+        );
+
+        return this;
+
+    }
+
+
     function revivePossibility(i, j, k) {
 
         if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityDead) {
@@ -202,6 +222,20 @@
             });
         }
         return this;
+    }
+
+
+    function batchRevivePossibilities(event){
+
+        event.batch.forEach(
+            function(el, idx, arr){
+                revivePossibilities.call(this,el);
+            },
+            this
+        );
+
+        return this;
+
     }
 
 
