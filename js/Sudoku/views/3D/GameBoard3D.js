@@ -277,10 +277,22 @@
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
-            , i = this._selectedCell.i
-            , j = this._selectedCell.j
+            , idxs = {}
             , iterIdx
+            , getIJ
+            , firstCount = nSqrd
+            , secondCount = nSqrd * nSqrd
             ;
+
+        if(dir === "left" || dir === "right") {
+            idxs.first = this._selectedCell.j;
+            idxs.second = this._selectedCell.i;
+            getIJ = function(){return {i:idxs.second,j:idxs.first};};
+        } else {
+            idxs.first = this._selectedCell.i;
+            idxs.second = this._selectedCell.j;
+            getIJ = function(){return {i:idxs.first,j:idxs.second};};
+        }
 
         if(dir === "left" || dir === "up"){
             iterIdx = function(idx){return (idx - 1 < 0) ? nSqrd - 1 : idx - 1;};
@@ -289,12 +301,16 @@
         }
 
         do {
-            if(dir === "left" || dir === "right"){
-                j = iterIdx(j);
-            } else {
-                i = iterIdx(i);
+            if(!--firstCount){
+                firstCount = nSqrd;
+                idxs.second = iterIdx(idxs.second);
+                if(!--secondCount){
+                    return;
+                }
             }
-        } while(!this._cells[i][j].select().isSelected())
+            idxs.first = iterIdx(idxs.first);
+            console.log("trying cell "+getIJ().i+" "+getIJ().j);
+        } while(!this._cells[getIJ().i][getIJ().j].select().isSelected())
 
     }
 
