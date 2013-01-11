@@ -211,11 +211,11 @@
             var arr = [];
 
             for (var i = 0, l = this._startingConfiguration.length; i < l; i++) {
-                arr[i] = {
+                arr.push({
                     i:this._startingConfiguration[i].i,
                     j:this._startingConfiguration[i].j,
                     value:this._startingConfiguration[i].value
-                }
+                });
             }
 
             return arr;
