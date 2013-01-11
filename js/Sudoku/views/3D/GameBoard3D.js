@@ -71,7 +71,7 @@
     Sudoku.GameBoard3D.prototype = Object.create(THREE.Object3D.prototype);
 
 
-    function valueEntered(event){
+    function valueEntered(event) {
 
         this._cells[event.i][event.j].valueEntered(event.value);
 
@@ -80,11 +80,11 @@
     }
 
 
-    function batchValueEntered(event){
+    function batchValueEntered(event) {
 
         event.batch.forEach(
-            function(el, idx, arr){
-                valueEntered.call(this,el);
+            function (el, idx, arr) {
+                valueEntered.call(this, el);
             },
             this
         );
@@ -94,7 +94,7 @@
     }
 
 
-    function valueCleared(event){
+    function valueCleared(event) {
 
         this._cells[event.i][event.j].valueCleared();
 
@@ -103,10 +103,10 @@
     }
 
 
-    function batchValueCleared(event){
+    function batchValueCleared(event) {
 
         event.batch.forEach(
-            function(el, idx, arr){
+            function (el, idx, arr) {
                 valueCleared.call(this, el);
             },
             this
@@ -117,7 +117,7 @@
     }
 
 
-    function startingConfigurationSaved(event){
+    function startingConfigurationSaved(event) {
 
         var i
             , j
@@ -126,17 +126,17 @@
             , startConf = event.startingConfiguration
             ;
 
-        for(var i = 0, l = startConf.length; i < l; i++){
+        for (var i = 0, l = startConf.length; i < l; i++) {
             this._cells[startConf[i].i][startConf[i].j].setAsStartingCell();
         }
 
         i = j = 0;
-        while(!this._cells[i][j].select().isSelected()){
+        while (!this._cells[i][j].select().isSelected()) {
             j++;
-            if(j === nSqrd){
+            if (j === nSqrd) {
                 j = 0;
                 i++;
-                if(i === nSqrd){
+                if (i === nSqrd) {
                     return;
                 }
             }
@@ -147,11 +147,11 @@
     }
 
 
-    function startingConfigurationDiscarded(event){
+    function startingConfigurationDiscarded(event) {
 
         var startConf = event.startingConfiguration;
 
-        for(var k = 0, l = startConf.length; k < l; k++){
+        for (var k = 0, l = startConf.length; k < l; k++) {
             this._cells[startConf[k].i][startConf[k].j].unsetAsStartingCell();
         }
 
@@ -231,6 +231,7 @@
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
+            , dir
             , val
             , i
             , j
@@ -240,27 +241,20 @@
             return;
         }
 
-        /*left arrow*/
-        if (event.keyCode === 37) {
-            selectNextAvailableCellInDirection.call(this, 'left');
-            return;
-        }
-
-        /*up arrow*/
-        if (event.keyCode === 38) {
-            selectNextAvailableCellInDirection.call(this, 'up');
-            return;
-        }
-
-        /*right arrow*/
-        if (event.keyCode === 39) {
-            selectNextAvailableCellInDirection.call(this, 'right');
-            return;
-        }
-
-        /*down arrow*/
-        if (event.keyCode === 40) {
-            selectNextAvailableCellInDirection.call(this, 'down');
+        if (event.keyCode >= 37 && event.keyCode <= 40) {
+            if (event.keyCode === 37) {
+                dir = 'left';
+            }
+            else if (event.keyCode === 38) {
+                dir = 'up';
+            }
+            else if (event.keyCode === 39) {
+                dir = 'right';
+            }
+            else if (event.keyCode === 40) {
+                dir = 'down';
+            }
+            selectNextAvailableCellInDirection.call(this, dir);
             return;
         }
 
@@ -273,7 +267,7 @@
     }
 
 
-    function selectNextAvailableCellInDirection(dir){
+    function selectNextAvailableCellInDirection(dir) {
 
         var n = this._gameBoard.getGameSize()
             , nSqrd = n * n
@@ -284,33 +278,40 @@
             , secondCount = nSqrd * nSqrd
             ;
 
-        if(dir === "left" || dir === "right") {
+        if (dir === "left" || dir === "right") {
             idxs.first = this._selectedCell.j;
             idxs.second = this._selectedCell.i;
-            getIJ = function(){return {i:idxs.second,j:idxs.first};};
+            getIJ = function () {
+                return {i:idxs.second, j:idxs.first};
+            };
         } else {
             idxs.first = this._selectedCell.i;
             idxs.second = this._selectedCell.j;
-            getIJ = function(){return {i:idxs.first,j:idxs.second};};
+            getIJ = function () {
+                return {i:idxs.first, j:idxs.second};
+            };
         }
 
-        if(dir === "left" || dir === "up"){
-            iterIdx = function(idx){return (idx - 1 < 0) ? nSqrd - 1 : idx - 1;};
+        if (dir === "left" || dir === "up") {
+            iterIdx = function (idx) {
+                return (idx - 1 < 0) ? nSqrd - 1 : idx - 1;
+            };
         } else {
-            iterIdx = function(idx){return (idx + 1 >= nSqrd) ? 0 : idx + 1;};
+            iterIdx = function (idx) {
+                return (idx + 1 >= nSqrd) ? 0 : idx + 1;
+            };
         }
 
         do {
-            if(!--firstCount){
+            if (!--firstCount) {
                 firstCount = nSqrd;
                 idxs.second = iterIdx(idxs.second);
-                if(!--secondCount){
+                if (!--secondCount) {
                     return;
                 }
             }
             idxs.first = iterIdx(idxs.first);
-            console.log("trying cell "+getIJ().i+" "+getIJ().j);
-        } while(!this._cells[getIJ().i][getIJ().j].select().isSelected())
+        } while (!this._cells[getIJ().i][getIJ().j].select().isSelected())
 
     }
 
