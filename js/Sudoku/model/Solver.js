@@ -16,7 +16,7 @@
 
         this._children = []; //for exploring forks
 
-        this._entryList = []; //batch array for values this solver has entered into the gameboard
+        this._entryList = []; //batch array for values this solver has entered into the gameboard in the order they were entered
 
         this._certainCells = [];
 
@@ -69,6 +69,12 @@
         constructor:Sudoku.Solver,
 
 
+        autoSolver:function (delay) {
+
+
+        },
+
+
         possibilityIsAlive:function (i, j, value) {
 
             return this._possibilityCube[i][j][value - 1] === Sudoku.Solver.possibilityAlive;
@@ -78,7 +84,9 @@
 
         getListOfCertainCells:function () {
 
-            var arr = [];
+            var arr = []
+                , tmp = []
+                ;
 
             for (var i = 0, l = this._certainCells.length; i < l; i++) {
                 arr[i] = {
@@ -117,7 +125,7 @@
 
         this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
 
-        this.addEventListener('insolvableBranch',insolvableBranch.bind(this));
+        this.addEventListener('insolvableBranch', insolvableBranch.bind(this));
 
         return this;
 
@@ -195,11 +203,11 @@
     }
 
 
-    function batchKillPossibilities(event){
+    function batchKillPossibilities(event) {
 
         event.batch.forEach(
-            function(el, idx, arr){
-                killPossibilities.call(this,el);
+            function (el, idx, arr) {
+                killPossibilities.call(this, el);
             },
             this
         );
@@ -225,11 +233,11 @@
     }
 
 
-    function batchRevivePossibilities(event){
+    function batchRevivePossibilities(event) {
 
         event.batch.forEach(
-            function(el, idx, arr){
-                revivePossibilities.call(this,el);
+            function (el, idx, arr) {
+                revivePossibilities.call(this, el);
             },
             this
         );
@@ -256,8 +264,75 @@
     }
 
 
-    function getListOfCertainElementsByRowColumnAndSubGridCounter() {
+    function getListOfCertainCells(certainCells) {
 
+        var sgb;
+
+        for (var i = 0; i < this._nSqrd; i++) {
+            for (var k = 0; k < this._nSqrd; k++) {
+                if (this._rowCounters[i][k] === 1) {
+                    for (var jTemp = 0; jTemp < this._nSqrd; jTemp++) {
+                        if (this._possibilityCube[i][jTemp][k] === Sudoku.Solver.possibilityAlive) {
+                            certainCells.push({i:i, j:jTemp, value:k + 1, type:['row']});
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        for (var j = 0; j < this._nSqrd; j++) {
+            for (var k = 0; k < this._nSqrd; k++) {
+                if (this._columnCounters[j][k] === 1) {
+                    for (var iTemp = 0; iTemp < this._nSqrd; iTemp++) {
+                        if (this._possibilityCube[iTemp][j][k] === Sudoku.Solver.possibilityAlive) {
+                            certainCells.push({i:iTemp, j:j, value:k + 1, type:['column']});
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < this._nSqrd; i++) {
+            for (var j = 0; j < this._nSqrd; j++) {
+                if (this._elementCounters[i][j] === 1) {
+                    for (var kTemp = 0; kTemp < this._nSqrd; kTemp++) {
+                        if (this._possibilityCube[i][j][kTemp] === Sudoku.Solver.possibilityAlive) {
+                            certainCells.push({i:i, j:j, value:kTemp + 1, type:['element']});
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        for (var i = 0; i < this._n; i++) {
+            for (var j = 0; j < this._n; j++) {
+                for (var k = 0; k < this._nSqrd; k++) {
+                    if (this._subGridCounters[i][j][k] === 1) {
+                        sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j);
+
+                    }
+                }
+            }
+        }
+    }
+
+
+    function consolidateCertainCells(newEl) {
+
+        var newElAdded = false;
+
+        certainCells.forEach(
+            function (el, idx, arr) {
+                if (el.i === newE) {
+
+                }
+            },
+            this
+        );
+
+        if (!newElAdded) {
+
+        }
 
     }
 
@@ -276,20 +351,49 @@
          as the originating cell that started the killing process this
          branch has no solution and need not be investigated further
          */
-        if (!--this._rowCounters[i][k] && gbc.i !== i) {
-            errorFound = true;
+        this._rowCounters[i][k]--;
+        this._columnCounters[j][k]--;
+        this._elementCounters[i][j]--;
+        this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]--;
+
+        if (this._rowCounters[i][k] === 1) {
+            addCertainCellByRowCounter.call(this, i, k);
         }
-        if (!--this._columnCounters[j][k] && gbc.j !== j) {
-            errorFound = true;
+        if (this._columnCounters[j][k] === 1) {
+            addCertainCellByColumnCounter.call(this, j, k);
         }
-        if (!--this._elementCounters[i][j] && gbc.i !== i && gbc.j !== j) {
-            errorFound = true;
+        if (this._elementCounters[i][j] === 1) {
+            addCertainCellByElementCounter.call(this, i, j);
         }
-        if (!--this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] &&
-            gbcSgb.iSubGrid !== sgb.iSubGrid &&
-            gbcSgb.jSubGrid !== sgb.jSubGrid) {
-            errorFound = true;
+        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
+            addCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
         }
+
+        if (this._rowCounters[i][k] === 0) {
+            removeCertainCellByRowCounter.call(this, i, k);
+            if (gbc.i !== i) {
+                errorFound = true;
+            }
+        }
+        if (this._columnCounters[j][k] === 0) {
+            removeCertainCellByColumnCounter.call(this, j, k);
+            if (gbc.j !== j) {
+                errorFound = true;
+            }
+        }
+        if (this._elementCounters[i][j] === 0) {
+            removeCertainCellByElementCounter.call(this, i, j);
+            if (gbc.i !== i && gbc.j !== j) {
+                errorFound = true;
+            }
+        }
+        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 0) {
+            removeCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
+            if (gbcSgb.iSubGrid !== sgb.iSubGrid && gbcSgb.jSubGrid !== sgb.jSubGrid) {
+                errorFound = true;
+            }
+        }
+
         if (errorFound) {
             this.dispatchEvent({
                 type:"insolvableBranch"
@@ -299,11 +403,45 @@
 
 
     function incrementCounters(i, j, k) {
+
         var sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j);
+
         this._rowCounters[i][k]++;
         this._columnCounters[j][k]++;
         this._elementCounters[i][j]++;
         this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]++;
+
+        if (this._rowCounters[i][k] === 1) {
+            addCertainCellByRowCounter.call(this, i, k);
+        }
+        if (this._columnCounters[j][k] === 1) {
+            addCertainCellByColumnCounter.call(this, j, k);
+        }
+        if (this._elementCounters[i][j] === 1) {
+            addCertainCellByElementCounter.call(this, i, j);
+        }
+        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
+            addCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
+        }
+
+        if (this._rowCounters[i][k] === 2) {
+            removeCertainCellByRowCounter.call(this, i, k);
+        }
+        if (this._columnCounters[j][k] === 2) {
+            removeCertainCellByColumnCounter.call(this, j, k);
+        }
+        if (this._elementCounters[i][j] === 2) {
+            removeCertainCellByElementCounter.call(this, i, j);
+        }
+        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 2) {
+            removeCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
+        }
+    }
+
+
+    function insolvableBranch() {
+
+
     }
 
 
