@@ -37,7 +37,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 // internals
 
-    this.target = new THREE.Vector3();
+    this.target = new THREE.Vector3(0,0,900);
 
     var lastPosition = new THREE.Vector3();
 

@@ -73,6 +73,24 @@
 
         autoSolve:function (delay) {
 
+            var cert = {
+                i:this._certainCells[0].i,
+                j:this._certainCells[0].j,
+                value:this._certainCells[0].value,
+                type:this._certainCells[0].type
+            }
+
+            console.log("i="+cert.i+" j="+cert.j+" value="+cert.value);
+            console.log(this._certainCells.length);
+
+            this._gameBoard.enterValue(cert.i, cert.j, cert.value);
+
+            removeCertainCell.call(this, cert);
+            console.log(this._certainCells.length);
+
+            setTimeout(this.autoSolve.bind(this), delay);
+
+            return this;
 
         },
 
@@ -116,7 +134,7 @@
 
         for (var i = 0; i < this._nSqrd; i++) {
             for (var j = 0; j < this._nSqrd; j++) {
-                if (value = this._gameBoard.getValue(i, j) !== Sudoku.GameBoard.emptyCell) {
+                if (value = this._gameBoard.getValue(i, j) !== 0) {
                     killPossibilities.call(this, {i:i, j:j, value:value});
                 }
             }
@@ -150,20 +168,20 @@
             ;
 
         /*killRowPossibilities*/
-        for (var jTemp = 0; jTemp < this._nSqrd; jTemp++) {
+        for (jTemp = 0; jTemp < this._nSqrd; jTemp++) {
             killPossibility.call(this, i, jTemp, k, gbc);
         }
         /*killColumnPossibilities*/
-        for (var iTemp = 0; iTemp < this._nSqrd; iTemp++) {
+        for (iTemp = 0; iTemp < this._nSqrd; iTemp++) {
             killPossibility.call(this, iTemp, j, k, gbc);
         }
         /*killElementPossibilities*/
-        for (var kTemp = 0; kTemp < this._nSqrd; kTemp++) {
+        for (kTemp = 0; kTemp < this._nSqrd; kTemp++) {
             killPossibility.call(this, i, j, kTemp, gbc);
         }
         /*killSubGridPossibilities*/
-        for (var iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
-            for (var jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
+        for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
+            for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
                 killPossibility.call(this, iTemp, jTemp, k, gbc);
             }
         }
@@ -185,20 +203,20 @@
             ;
 
         /*reviveRowPossibilities*/
-        for (var jTemp = 0; jTemp < this._nSqrd; jTemp++) {
+        for (jTemp = 0; jTemp < this._nSqrd; jTemp++) {
             revivePossibility.call(this, i, jTemp, k);
         }
         /*reviveColumnPossibilities*/
-        for (var iTemp = 0; iTemp < this._nSqrd; iTemp++) {
+        for (iTemp = 0; iTemp < this._nSqrd; iTemp++) {
             revivePossibility.call(this, iTemp, j, k);
         }
         /*reviveElementPossibilities*/
-        for (var kTemp = 0; kTemp < this._nSqrd; kTemp++) {
+        for (kTemp = 0; kTemp < this._nSqrd; kTemp++) {
             revivePossibility.call(this, i, j, kTemp);
         }
         /*revivesubGridPossibilities*/
-        for (var iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
-            for (var jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
+        for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
+            for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
                 revivePossibility.call(this, iTemp, jTemp, k)
             }
         }
@@ -271,23 +289,47 @@
 
     function addCertainCell(cert) {
 
-        var certAdded = false
-            , certDuplicate = false
+        var certCells = this._certainCells
+            , certAlreadyExists = false
             ;
 
-        for (var i = 0, l = this._certainCells.length; i < l; i++) {
-            if (this._certainCells[i].i === cert.i && this._certainCells[i].j === cert.j) {
-                if (this._certainCells[i].type.indexOf(cert.type[0]) === -1) {
-                    this._certainCells[i].type.push(cert.type[0]);
-                    certAdded = true;
-                } else {
-                    certDuplicate = true;
-                }
+        for (var i = 0, l = certCells.length; i < l; i++) {
+
+            if (certCells[i].i === cert.i &&
+                certCells[i].j === cert.j &&
+                certCells[i].value === cert.value) {
+
+                certAlreadyExists = true;
+
+                cert.type.forEach(
+
+                    function (el, idx, arr) {
+
+                        if (certCells[i].type.indexOf(el) === -1) {
+
+                            certCells[i].type.push(el);
+
+                        }
+
+                    }
+
+                );
+
+                break;
+
             }
+
         }
 
-        if (!certAdded && !certDuplicate) {
-            this._certainCells.push(cert)
+        if(cert.j === 9){
+            console.log("BUG");
+            console.log(cert.type[0]);
+        }
+
+        if (!certAlreadyExists) {
+
+            certCells.push(cert);
+
         }
 
         return this;
@@ -297,18 +339,41 @@
 
     function removeCertainCell(cert) {
 
-        var idx;
+        var certCells = this._certainCells
+            ;
 
-        for (var i = 0, l = this._certainCells.length; i < l; i++) {
-            if (this._certainCells[i].i === cert.i && this._certainCells[i].j === cert.j) {
-                idx = this._certainCells[i].type.indexOf(cert.type[0]);
-                if(idx !== -1){
-                    this._certainCells[i].type.splice(idx,1);
-                    if(this._certainCells[i].type.length === 0){
-                        this._certainCells.splice(i,1);
+        for (var i = 0, l = certCells.length; i < l; i++) {
+
+            if (certCells[i].i === cert.i &&
+                certCells[i].j === cert.j &&
+                certCells[i].value === cert.value) {
+
+                cert.type.forEach(
+
+                    function (el, idx, arr) {
+
+                        var idx = certCells[i].type.indexOf(el);
+
+                        if (idx !== -1) {
+
+                            certCells[i].type.splice(idx, 1);
+
+                        }
+
                     }
+
+                );
+
+                if (certCells[i].type.length === 0) {
+
+                    certCells.splice(i, 1);
+
                 }
+
+                break;
+
             }
+
         }
 
         return this;
@@ -384,7 +449,9 @@
 
     function incrementCounters(i, j, k) {
 
-        var sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j);
+        var sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
+            , cert = {i:i, j:j, value:k + 1, type:[]}
+            ;
 
         this._rowCounters[i][k]++;
         this._columnCounters[j][k]++;
@@ -416,6 +483,165 @@
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 2) {
             removeCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
         }
+
+    }
+
+
+    function addCertainCellByRowCounter(i, k) {
+
+        var cert = {i:i,j:0,value:k+1,type:['row']};
+
+        for(; cert.j < this._nSqrd; cert.j++){
+            if(this._possibilityCube[i][cert.j][k] === Sudoku.Solver.possibilityAlive){
+                addCertainCell.call(this, cert);
+                break;
+            }
+        }
+
+    }
+
+
+    function addCertainCellByColumnCounter(j, k) {
+
+        var cert = {i:0,j:j,value:k+1,type:['column']};
+
+        for(; cert.i < this._nSqrd; cert.i++){
+            if(this._possibilityCube[cert.i][j][k] === Sudoku.Solver.possibilityAlive){
+                addCertainCell.call(this, cert);
+                break;
+            }
+        }
+
+    }
+
+
+    function addCertainCellByElementCounter(i, j) {
+
+        var cert = {i:i,j:j,value:0,type:['element']};
+
+        for(var k = 0; k < this._nSqrd; k++){
+            if(this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityAlive){
+                cert.value = k + 1;
+                addCertainCell.call(this, cert);
+                break;
+            }
+        }
+
+    }
+
+
+    function addCertainCellBySubGridCounter(iSubGrid, jSubGrid, k) {
+
+        var iLower = iSubGrid * this._n
+            , iUpper = iLower + this._n
+            , jLower = jSubGrid * this._n
+            , jUpper = jLower + this._n
+            , cert = {i:iLower,j:jLower,value:k+1,type:['subGrid']}
+            ;
+
+        for(; cert.i < iUpper; cert.i++){
+            for(; cert.j < jUpper; cert.j++){
+                if(this._possibilityCube[cert.i][cert.j][k] === Sudoku.Solver.possibilityAlive){
+                    addCertainCell.call(this, cert);
+                    break;
+                }
+            }
+        }
+
+    }
+
+
+    function removeCertainCellByRowCounter(i, k) {
+
+        var idx;
+
+        for (var j = 0, l = this._certainCells.length; j < l; j++) {
+            if (this._certainCells[j].i === i && this._certainCells[j].value === k + 1) {
+                idx = this._certainCells[j].type.indexOf('row');
+                if (idx !== -1) {
+                    this._certainCells[j].type.splice(idx, 1);
+                    if (this._certainCells[j].type.length === 0) {
+                        this._certainCells.splice(j, 1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return this;
+
+    }
+
+
+    function removeCertainCellByColumnCounter(j, k) {
+
+        var idx;
+
+        for (var i = 0, l = this._certainCells.length; i < l; i++) {
+            if (this._certainCells[i].j === j && this._certainCells[i].value === k + 1) {
+                idx = this._certainCells[i].type.indexOf('column');
+                if (idx !== -1) {
+                    this._certainCells[i].type.splice(idx, 1);
+                    if (this._certainCells[i].type.length === 0) {
+                        this._certainCells.splice(i, 1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return this;
+
+    }
+
+
+    function removeCertainCellByElementCounter(i, j) {
+
+        var idx;
+
+        for (var m = 0, l = this._certainCells.length; m < l; m++) {
+            if (this._certainCells[m].i === i && this._certainCells[m].j === j && this._certainCells[m].value) {
+                idx = this._certainCells[m].type.indexOf('element');
+                if (idx !== -1) {
+                    this._certainCells[m].type.splice(idx, 1);
+                    if (this._certainCells[m].type.length === 0) {
+                        this._certainCells.splice(m, 1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return this;
+
+    }
+
+
+    function removeCertainCellBySubGridCounter(iSubGrid, jSubGrid, k) {
+
+        var iLower = iSubGrid * this._n
+            , iUpper = iLower + this._n - 1
+            , jLower = jSubGrid * this._n
+            , jUpper = jLower + this._n - 1
+            , idx
+            ;
+
+        for (var m = 0, l = this._certainCells.length; m < l; m++) {
+            if (this._certainCells[m].i >= iLower && this._certainCells[m].i <= iUpper &&
+                this._certainCells[m].j >= jLower && this._certainCells[m].j <= jUpper &&
+                this._certainCells[m].value === k + 1) {
+                idx = this._certainCells[m].type.indexOf('subGrid');
+                if (idx !== -1) {
+                    this._certainCells[m].type.splice(idx, 1);
+                    if (this._certainCells[m].type.length === 0) {
+                        this._certainCells.splice(m, 1);
+                    }
+                    break;
+                }
+            }
+        }
+
+
     }
 
 
