@@ -13,11 +13,17 @@
         threePanel.start();
         centerCamera.call(threePanel, gameBoard);
 
-        console.log(solver.getListOfCertainCells());
 
-        setTimeout(function(){gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());}, 1000);
+        setTimeout(
+            function () {
+                gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
+            },
+            1000
+        );
 
-        setTimeout(function(){solver.autoSolve(2000);},5000);
+        setTimeout(function () {
+            solver.sequentialAutoSolve(200);
+        }, 5000);
 
         Utils.AnimationMaster.turnOnAnimationSmoothing();
 
