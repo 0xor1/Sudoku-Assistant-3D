@@ -71,24 +71,31 @@
         constructor:Sudoku.Solver,
 
 
-        autoSolve:function (delay) {
+        sequentialAutoSolve:function (delay) {
 
             var cert = {
                 i:this._certainCells[0].i,
                 j:this._certainCells[0].j,
                 value:this._certainCells[0].value,
-                type:this._certainCells[0].type
+                type:this._certainCells[0].type.slice(0)
             }
-
-            console.log("i="+cert.i+" j="+cert.j+" value="+cert.value);
-            console.log(this._certainCells.length);
 
             this._gameBoard.enterValue(cert.i, cert.j, cert.value);
 
-            removeCertainCell.call(this, cert);
-            console.log(this._certainCells.length);
+            //removeCertainCell.call(this, cert);
 
-            setTimeout(this.autoSolve.bind(this), delay);
+            setTimeout(function(){this.sequentialAutoSolve(delay)}.bind(this), delay);
+
+            return this;
+
+        },
+
+
+        batchAutoSolve:function (delay) {
+
+            this._gameBoard.batchEnterValue(this._certainCells);
+
+            setTimeout(function(){this.batchAutoSolve(delay)}.bind(this), delay);
 
             return this;
 
@@ -104,20 +111,12 @@
 
         getListOfCertainCells:function () {
 
-            var arr = []
-                , tempType = []
+            var arr = this._certainCells.slice(0)
                 ;
 
             for (var i = 0, l = this._certainCells.length; i < l; i++) {
-                for (var j = 0, l = this._certainCells[i].type.length; j < l; j++) {
-                    tempType.push(this._certainCells[i].type[j]);
-                }
-                arr.push({
-                    i:this._certainCells[i].i,
-                    j:this._certainCells[i].j,
-                    value:this._certainCells[i].value,
-                    type:tempType
-                });
+
+                    arr[i].type = this._certainCells[i].type.slice(0);
             }
 
             return arr;
@@ -321,11 +320,6 @@
 
         }
 
-        if(cert.j === 9){
-            console.log("BUG");
-            console.log(cert.type[0]);
-        }
-
         if (!certAlreadyExists) {
 
             certCells.push(cert);
@@ -389,6 +383,7 @@
         var errorFound = false
             , sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
             , gbcSgb = this._gameBoard.getSubGridBoundsContainingCell(gbc.i, gbc.j)
+            , cert = {i:i, j:j, value:k + 1, type:[]}
             ;
         /*
          decrement relevant counters and if the counter
@@ -401,6 +396,35 @@
         this._elementCounters[i][j]--;
         this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]--;
 
+        if (this._rowCounters[i][k] === 0) {
+            cert.type.push('row');
+            if (gbc.i !== i) {
+                errorFound = true;
+            }
+        }
+        if (this._columnCounters[j][k] === 0) {
+            cert.type.push('column');
+            if (gbc.j !== j) {
+                errorFound = true;
+            }
+        }
+        if (this._elementCounters[i][j] === 0) {
+            cert.type.push('element');
+            if (gbc.i !== i && gbc.j !== j) {
+                errorFound = true;
+            }
+        }
+        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 0) {
+            cert.type.push('subGrid');
+            if (gbcSgb.iSubGrid !== sgb.iSubGrid && gbcSgb.jSubGrid !== sgb.jSubGrid) {
+                errorFound = true;
+            }
+        }
+
+        if (cert.type.length > 0) {
+            removeCertainCell.call(this, cert);
+        }
+
         if (this._rowCounters[i][k] === 1) {
             addCertainCellByRowCounter.call(this, i, k);
         }
@@ -412,31 +436,6 @@
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
             addCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
-        }
-
-        if (this._rowCounters[i][k] === 0) {
-            removeCertainCellByRowCounter.call(this, i, k);
-            if (gbc.i !== i) {
-                errorFound = true;
-            }
-        }
-        if (this._columnCounters[j][k] === 0) {
-            removeCertainCellByColumnCounter.call(this, j, k);
-            if (gbc.j !== j) {
-                errorFound = true;
-            }
-        }
-        if (this._elementCounters[i][j] === 0) {
-            removeCertainCellByElementCounter.call(this, i, j);
-            if (gbc.i !== i && gbc.j !== j) {
-                errorFound = true;
-            }
-        }
-        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 0) {
-            removeCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
-            if (gbcSgb.iSubGrid !== sgb.iSubGrid && gbcSgb.jSubGrid !== sgb.jSubGrid) {
-                errorFound = true;
-            }
         }
 
         if (errorFound) {
@@ -458,19 +457,6 @@
         this._elementCounters[i][j]++;
         this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]++;
 
-        if (this._rowCounters[i][k] === 1) {
-            addCertainCellByRowCounter.call(this, i, k);
-        }
-        if (this._columnCounters[j][k] === 1) {
-            addCertainCellByColumnCounter.call(this, j, k);
-        }
-        if (this._elementCounters[i][j] === 1) {
-            addCertainCellByElementCounter.call(this, i, j);
-        }
-        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
-            addCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
-        }
-
         if (this._rowCounters[i][k] === 2) {
             removeCertainCellByRowCounter.call(this, i, k);
         }
@@ -484,15 +470,32 @@
             removeCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
         }
 
+        if (this._rowCounters[i][k] === 1) {
+            cert.type.push('row');
+        }
+        if (this._columnCounters[j][k] === 1) {
+            cert.type.push('column');
+        }
+        if (this._elementCounters[i][j] === 1) {
+            cert.type.push('element');
+        }
+        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
+            cert.type.push('subGrid');
+        }
+
+        if(cert.type.length > 0){
+            addCertainCell.call(this, cert);
+        }
+
     }
 
 
     function addCertainCellByRowCounter(i, k) {
 
-        var cert = {i:i,j:0,value:k+1,type:['row']};
+        var cert = {i:i, j:0, value:k + 1, type:['row']};
 
-        for(; cert.j < this._nSqrd; cert.j++){
-            if(this._possibilityCube[i][cert.j][k] === Sudoku.Solver.possibilityAlive){
+        for (; cert.j < this._nSqrd; cert.j++) {
+            if (this._possibilityCube[i][cert.j][k] === Sudoku.Solver.possibilityAlive) {
                 addCertainCell.call(this, cert);
                 break;
             }
@@ -503,10 +506,10 @@
 
     function addCertainCellByColumnCounter(j, k) {
 
-        var cert = {i:0,j:j,value:k+1,type:['column']};
+        var cert = {i:0, j:j, value:k + 1, type:['column']};
 
-        for(; cert.i < this._nSqrd; cert.i++){
-            if(this._possibilityCube[cert.i][j][k] === Sudoku.Solver.possibilityAlive){
+        for (; cert.i < this._nSqrd; cert.i++) {
+            if (this._possibilityCube[cert.i][j][k] === Sudoku.Solver.possibilityAlive) {
                 addCertainCell.call(this, cert);
                 break;
             }
@@ -517,10 +520,10 @@
 
     function addCertainCellByElementCounter(i, j) {
 
-        var cert = {i:i,j:j,value:0,type:['element']};
+        var cert = {i:i, j:j, value:0, type:['element']};
 
-        for(var k = 0; k < this._nSqrd; k++){
-            if(this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityAlive){
+        for (var k = 0; k < this._nSqrd; k++) {
+            if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityAlive) {
                 cert.value = k + 1;
                 addCertainCell.call(this, cert);
                 break;
@@ -536,15 +539,20 @@
             , iUpper = iLower + this._n
             , jLower = jSubGrid * this._n
             , jUpper = jLower + this._n
-            , cert = {i:iLower,j:jLower,value:k+1,type:['subGrid']}
+            , cert = {i:iLower, j:jLower, value:k + 1, type:['subGrid']}
+            , certFound = false
             ;
 
-        for(; cert.i < iUpper; cert.i++){
-            for(; cert.j < jUpper; cert.j++){
-                if(this._possibilityCube[cert.i][cert.j][k] === Sudoku.Solver.possibilityAlive){
+        for (cert.i = iLower; cert.i < iUpper; cert.i++) {
+            for (cert.j = jLower; cert.j < jUpper; cert.j++) {
+                if (this._possibilityCube[cert.i][cert.j][k] === Sudoku.Solver.possibilityAlive) {
                     addCertainCell.call(this, cert);
+                    certFound = true;
                     break;
                 }
+            }
+            if (certFound) {
+                break;
             }
         }
 
@@ -600,7 +608,7 @@
         var idx;
 
         for (var m = 0, l = this._certainCells.length; m < l; m++) {
-            if (this._certainCells[m].i === i && this._certainCells[m].j === j && this._certainCells[m].value) {
+            if (this._certainCells[m].i === i && this._certainCells[m].j === j) {
                 idx = this._certainCells[m].type.indexOf('element');
                 if (idx !== -1) {
                     this._certainCells[m].type.splice(idx, 1);
