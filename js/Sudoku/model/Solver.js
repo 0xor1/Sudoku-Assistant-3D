@@ -128,16 +128,7 @@
 
     function initialize() {
 
-        var value
-            ;
-
-        for (var i = 0; i < this._nSqrd; i++) {
-            for (var j = 0; j < this._nSqrd; j++) {
-                if (value = this._gameBoard.getValue(i, j) !== 0) {
-                    killPossibilities.call(this, {i:i, j:j, value:value});
-                }
-            }
-        }
+        cullPossibilities.call(this);
 
         this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
 
@@ -150,6 +141,22 @@
         this.addEventListener('insolvableBranch', insolvableBranch.bind(this));
 
         return this;
+
+    }
+
+
+    function cullPossibilities(){
+
+        var value
+            ;
+
+        for (var i = 0; i < this._nSqrd; i++) {
+            for (var j = 0; j < this._nSqrd; j++) {
+                if (value = this._gameBoard.getValue(i, j) !== 0) {
+                    killPossibilities.call(this, {i:i, j:j, value:value});
+                }
+            }
+        }
 
     }
 
@@ -219,6 +226,8 @@
                 revivePossibility.call(this, iTemp, jTemp, k)
             }
         }
+
+        cullPossibilities.call(this);
 
         return this;
 
