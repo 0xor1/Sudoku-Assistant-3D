@@ -57,13 +57,16 @@
 
         clearValue:function (i, j) {
 
+            var oldValue = this._cells[i][j].value;
+
             if (canClearValue.call(this, i, j)) {
                 this._cells[i][j].value = 0;
                 incrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueCleared",
                     i:i,
-                    j:j
+                    j:j,
+                    value:oldValue
                 });
             }
 
@@ -97,7 +100,9 @@
 
         batchClearValue:function (batch) {
 
-            var cleared = [];
+            var cleared = []
+                , oldValue
+                ;
 
             if (batch === "all") {
                 batch = [];
@@ -114,9 +119,10 @@
             batch.forEach(
                 function (el, idx, arr) {
                     if (canClearValue.call(this, el.i, el.j)) {
+                        oldValue = this._cells[el.i][el.j].value;
                         this._cells[el.i][el.j].value = 0;
                         incrementEmptyCellCount.call(this);
-                        cleared.push({i:el.i, j:el.j});
+                        cleared.push({i:el.i, j:el.j,value:oldValue});
                     }
                 },
                 this
