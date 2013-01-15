@@ -1,8 +1,16 @@
 (function () {
 
+    var row = 'row'
+        , column = 'column'
+        , element = 'element'
+        , subGrid = 'subGrid'
+        ;
+
     Sudoku.Solver = function (gameBoard, solver, guessedCell) {
 
         Utils.EventDispatcher.call(this);
+
+        this.autoSolveDelay = 300;
 
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
@@ -27,7 +35,7 @@
         for (var i = 0; i < this._nSqrd; i++) {
             for (var j = 0; j < this._nSqrd; j++) {
                 for (var k = 0; k < this._nSqrd; k++) {
-                    this._possibilityCube[i][j][k] = Sudoku.Solver.possibilityAlive;
+                    this._possibilityCube[i][j][k] = [];
                 }
             }
         }
@@ -54,15 +62,11 @@
             }
         }
 
-        initialize.call(this);
+        cullPossibilities.call(this);
+
+        attachEventListeners.call(this);
 
     }
-
-
-    Sudoku.Solver.possibilityAlive = 1;
-
-
-    Sudoku.Solver.possibilityDead = 0;
 
 
     Sudoku.Solver.prototype = {
@@ -71,7 +75,7 @@
         constructor:Sudoku.Solver,
 
 
-        sequentialAutoSolve:function (delay) {
+        sequentialAutoSolve:function () {
 
             var cert = {
                 i:this._certainCells[0].i,
@@ -82,20 +86,22 @@
 
             this._gameBoard.enterValue(cert.i, cert.j, cert.value);
 
-            //removeCertainCell.call(this, cert);
-
-            setTimeout(function(){this.sequentialAutoSolve(delay)}.bind(this), delay);
+            setTimeout(function () {
+                this.sequentialAutoSolve()
+            }.bind(this), this.autoSolveDelay);
 
             return this;
 
         },
 
 
-        batchAutoSolve:function (delay) {
+        batchAutoSolve:function () {
 
             this._gameBoard.batchEnterValue(this._certainCells);
 
-            setTimeout(function(){this.batchAutoSolve(delay)}.bind(this), delay);
+            setTimeout(function () {
+                this.batchAutoSolve()
+            }.bind(this), this.autoSolveDelay);
 
             return this;
 
@@ -104,7 +110,7 @@
 
         possibilityIsAlive:function (i, j, value) {
 
-            return this._possibilityCube[i][j][value - 1] === Sudoku.Solver.possibilityAlive;
+            return this._possibilityCube[i][j][value - 1].length === 0;
 
         },
 
@@ -116,7 +122,7 @@
 
             for (var i = 0, l = this._certainCells.length; i < l; i++) {
 
-                    arr[i].type = this._certainCells[i].type.slice(0);
+                arr[i].type = this._certainCells[i].type.slice(0);
             }
 
             return arr;
@@ -126,9 +132,7 @@
     };
 
 
-    function initialize() {
-
-        cullPossibilities.call(this);
+    function attachEventListeners() {
 
         this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
 
@@ -145,7 +149,7 @@
     }
 
 
-    function cullPossibilities(){
+    function cullPossibilities() {
 
         var value
             ;
@@ -175,20 +179,20 @@
 
         /*killRowPossibilities*/
         for (jTemp = 0; jTemp < this._nSqrd; jTemp++) {
-            killPossibility.call(this, i, jTemp, k, gbc);
+            killPossibility.call(this, i, jTemp, k, row, gbc);
         }
         /*killColumnPossibilities*/
         for (iTemp = 0; iTemp < this._nSqrd; iTemp++) {
-            killPossibility.call(this, iTemp, j, k, gbc);
+            killPossibility.call(this, iTemp, j, k, column, gbc);
         }
         /*killElementPossibilities*/
         for (kTemp = 0; kTemp < this._nSqrd; kTemp++) {
-            killPossibility.call(this, i, j, kTemp, gbc);
+            killPossibility.call(this, i, j, kTemp, element, gbc);
         }
         /*killSubGridPossibilities*/
         for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
             for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
-                killPossibility.call(this, iTemp, jTemp, k, gbc);
+                killPossibility.call(this, iTemp, jTemp, k, subGrid, gbc);
             }
         }
 
@@ -210,24 +214,22 @@
 
         /*reviveRowPossibilities*/
         for (jTemp = 0; jTemp < this._nSqrd; jTemp++) {
-            revivePossibility.call(this, i, jTemp, k);
+            revivePossibility.call(this, i, jTemp, k, row);
         }
         /*reviveColumnPossibilities*/
         for (iTemp = 0; iTemp < this._nSqrd; iTemp++) {
-            revivePossibility.call(this, iTemp, j, k);
+            revivePossibility.call(this, iTemp, j, k, column);
         }
         /*reviveElementPossibilities*/
         for (kTemp = 0; kTemp < this._nSqrd; kTemp++) {
-            revivePossibility.call(this, i, j, kTemp);
+            revivePossibility.call(this, i, j, kTemp, element);
         }
         /*revivesubGridPossibilities*/
         for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
             for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
-                revivePossibility.call(this, iTemp, jTemp, k)
+                revivePossibility.call(this, iTemp, jTemp, k, subGrid);
             }
         }
-
-        cullPossibilities.call(this);
 
         return this;
 
@@ -262,33 +264,41 @@
     }
 
 
-    function revivePossibility(i, j, k) {
+    function revivePossibility(i, j, k, type) {
 
-        if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityDead) {
-            this._possibilityCube[i][j][k] = Sudoku.Solver.possibilityAlive;
-            incrementCounters.call(this, i, j, k);
-            this.dispatchEvent({
-                type:"possibilityRevived",
-                i:i,
-                j:j,
-                k:k
-            });
+        var idx = this._possibilityCube[i][j][k].indexOf(type);
+
+        if (idx !== -1) {
+            this._possibilityCube[i][j][k].splice(idx, 1);
+            if (this._possibilityCube[i][j][k].length === 0) {
+                incrementCounters.call(this, i, j, k);
+                this.dispatchEvent({
+                    type:"possibilityRevived",
+                    i:i,
+                    j:j,
+                    k:k
+                });
+            }
         }
         return this;
     }
 
 
-    function killPossibility(i, j, k, gbc) {
+    function killPossibility(i, j, k, type, gbc) {
 
-        if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityAlive) {
-            this._possibilityCube[i][j][k] = Sudoku.Solver.possibilityDead;
-            decrementCounters.call(this, i, j, k, gbc);
-            this.dispatchEvent({
-                type:"possibilityKilled",
-                i:i,
-                j:j,
-                k:k
-            });
+        var idx = this._possibilityCube[i][j][k].indexOf(type);
+
+        if (idx === -1) {
+            this._possibilityCube[i][j][k].push(type);
+            if (this._possibilityCube[i][j][k].length === 1) {
+                decrementCounters.call(this, i, j, k, gbc);
+                this.dispatchEvent({
+                    type:"possibilityKilled",
+                    i:i,
+                    j:j,
+                    k:k
+                });
+            }
         }
         return this;
 
@@ -476,7 +486,7 @@
             removeCertainCellByElementCounter.call(this, i, j);
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 2) {
-            removeCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
+            removeCertainCellBySubGridCounter.call(this, sgb, k);
         }
 
         if (this._rowCounters[i][k] === 1) {
@@ -492,7 +502,7 @@
             cert.type.push('subGrid');
         }
 
-        if(cert.type.length > 0){
+        if (cert.type.length > 0) {
             addCertainCell.call(this, cert);
         }
 
@@ -504,7 +514,7 @@
         var cert = {i:i, j:0, value:k + 1, type:['row']};
 
         for (; cert.j < this._nSqrd; cert.j++) {
-            if (this._possibilityCube[i][cert.j][k] === Sudoku.Solver.possibilityAlive) {
+            if (this._possibilityCube[i][cert.j][k].length === 0) {
                 addCertainCell.call(this, cert);
                 break;
             }
@@ -518,7 +528,7 @@
         var cert = {i:0, j:j, value:k + 1, type:['column']};
 
         for (; cert.i < this._nSqrd; cert.i++) {
-            if (this._possibilityCube[cert.i][j][k] === Sudoku.Solver.possibilityAlive) {
+            if (this._possibilityCube[cert.i][j][k].length === 0) {
                 addCertainCell.call(this, cert);
                 break;
             }
@@ -532,7 +542,7 @@
         var cert = {i:i, j:j, value:0, type:['element']};
 
         for (var k = 0; k < this._nSqrd; k++) {
-            if (this._possibilityCube[i][j][k] === Sudoku.Solver.possibilityAlive) {
+            if (this._possibilityCube[i][j][k].length === 0) {
                 cert.value = k + 1;
                 addCertainCell.call(this, cert);
                 break;
@@ -542,19 +552,15 @@
     }
 
 
-    function addCertainCellBySubGridCounter(iSubGrid, jSubGrid, k) {
+    function addCertainCellBySubGridCounter(sgb, k) {
 
-        var iLower = iSubGrid * this._n
-            , iUpper = iLower + this._n
-            , jLower = jSubGrid * this._n
-            , jUpper = jLower + this._n
-            , cert = {i:iLower, j:jLower, value:k + 1, type:['subGrid']}
+        var cert = {i:sgb.iLower, j:sgb.jLower, value:k + 1, type:['subGrid']}
             , certFound = false
             ;
 
-        for (cert.i = iLower; cert.i < iUpper; cert.i++) {
-            for (cert.j = jLower; cert.j < jUpper; cert.j++) {
-                if (this._possibilityCube[cert.i][cert.j][k] === Sudoku.Solver.possibilityAlive) {
+        for (cert.i = sgb.iLower; cert.i <= sgb.iUpper; cert.i++) {
+            for (cert.j = sgb.jLower; cert.j <= sgb.jUpper; cert.j++) {
+                if (this._possibilityCube[cert.i][cert.j][k].length === 0) {
                     addCertainCell.call(this, cert);
                     certFound = true;
                     break;
@@ -634,18 +640,14 @@
     }
 
 
-    function removeCertainCellBySubGridCounter(iSubGrid, jSubGrid, k) {
+    function removeCertainCellBySubGridCounter(sgb, k) {
 
-        var iLower = iSubGrid * this._n
-            , iUpper = iLower + this._n - 1
-            , jLower = jSubGrid * this._n
-            , jUpper = jLower + this._n - 1
-            , idx
+        var idx
             ;
 
         for (var m = 0, l = this._certainCells.length; m < l; m++) {
-            if (this._certainCells[m].i >= iLower && this._certainCells[m].i <= iUpper &&
-                this._certainCells[m].j >= jLower && this._certainCells[m].j <= jUpper &&
+            if (this._certainCells[m].i >= sgb.iLower && this._certainCells[m].i <= sgb.iUpper &&
+                this._certainCells[m].j >= sgb.jLower && this._certainCells[m].j <= sgb.jUpper &&
                 this._certainCells[m].value === k + 1) {
                 idx = this._certainCells[m].type.indexOf('subGrid');
                 if (idx !== -1) {
