@@ -22,8 +22,20 @@
         );
 
         setTimeout(function () {
-            solver.sequentialAutoSolve(200);
+            solver.sequentialAutoSolve();
         }, 5000);
+
+        setTimeout(function () {
+            solver.undoMyLastEntry();
+        }, 20000);
+
+        setTimeout(function () {
+            solver.undoAllMyEntries();
+        }, 22000);
+
+        setTimeout(function () {
+            solver.batchAutoSolve();
+        }, 25000);
 
         Utils.AnimationMaster.turnOnAnimationSmoothing();
 

@@ -26,9 +26,11 @@
 
         this._children = []; //for exploring forks
 
-        this._entryList = []; //batch array for values this solver has entered into the gameboard in the order they were entered
+        this._myEntryList = []; //batch array for values this solver has entered into the gameboard in the order they were entered
 
         this._certainCells = [];
+
+        this._autoSolveStopRequested = false;
 
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
@@ -75,21 +77,39 @@
         constructor:Sudoku.Solver,
 
 
-        sequentialAutoSolve:function () {
+        solveOneCell:function () {
 
-            var cert = {
-                i:this._certainCells[0].i,
-                j:this._certainCells[0].j,
-                value:this._certainCells[0].value,
-                type:this._certainCells[0].type.slice(0)
+            var cert;
+
+            if (this._certainCells.length > 0) {
+
+                cert = this._certainCells[0];
+
+                this._myEntryList.push(cert);
+
+                this._gameBoard.enterValue(cert.i, cert.j, cert.value);
+
+                return this;
+
             }
 
-            this._gameBoard.enterValue(cert.i, cert.j, cert.value);
+        },
 
-            setTimeout(function () {
-                this.sequentialAutoSolve()
-            }.bind(this), this.autoSolveDelay);
 
+        sequentialAutoSolve:function () {
+
+            if (this._autoSolveStopRequested) {
+                this._autoSolveStopRequested = false;
+                return;
+            }
+
+            this.solveOneCell();
+
+            if (this._certainCells.length > 0) {
+                setTimeout(function () {
+                    this.sequentialAutoSolve()
+                }.bind(this), this.autoSolveDelay);
+            }
             return this;
 
         },
@@ -97,11 +117,62 @@
 
         batchAutoSolve:function () {
 
-            this._gameBoard.batchEnterValue(this._certainCells);
+            if (this._certainCells.length > 0) {
 
-            setTimeout(function () {
-                this.batchAutoSolve()
-            }.bind(this), this.autoSolveDelay);
+                if (this._autoSolveStopRequested) {
+                    this._autoSolveStopRequested = false;
+                    return;
+                }
+
+                this._myEntryList.push.apply(this._myEntryList, this._certainCells);
+
+                this._gameBoard.batchEnterValue(this._certainCells);
+
+                if (this._certainCells.length > 0) {
+
+                    setTimeout(function () {
+                        this.batchAutoSolve()
+                    }.bind(this), this.autoSolveDelay);
+
+                }
+            }
+
+            return this;
+
+        },
+
+
+        stopAutoSolve:function () {
+
+            this._autoSolveStopRequested = true;
+
+            return this;
+
+        },
+
+
+        undoMyLastEntry:function () {
+
+            var l = this._myEntryList.length
+                , entry
+                ;
+
+            if (l > 0) {
+                entry = this._myEntryList.pop();
+                this._gameBoard.clearValue(entry.i, entry.j);
+            }
+
+            return this;
+
+        },
+
+
+        undoAllMyEntries:function(){
+
+            if( this._myEntryList.length > 0){
+                this._gameBoard.batchClearValue(this._myEntryList);
+                this._myEntryList = [];
+            }
 
             return this;
 
@@ -141,8 +212,6 @@
         this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
 
         this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
-
-        this.addEventListener('insolvableBranch', insolvableBranch.bind(this));
 
         return this;
 
@@ -458,9 +527,9 @@
         }
 
         if (errorFound) {
-            this.dispatchEvent({
-                type:"insolvableBranch"
-            });
+
+            insolvableBranch.call(this);
+
         }
     }
 
@@ -667,7 +736,6 @@
     /*
      Branching functionality
      */
-
 
 
     function insolvableBranch() {
