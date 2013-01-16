@@ -304,12 +304,10 @@
 
     function gameCompleteAnimation() {
 
-        var len = 4000
-            , dipTo = Math.random() * 0.7
+        var len = 2000
+            , dipTo = 0.5
             , self = this;
             ;
-
-        self.gameComplete = function(){};
 
         Utils.animate({
             obj:this.color,
@@ -329,12 +327,9 @@
             targetValue:dipTo,
             length:len,
             callback:function (obj, prop) {
-                delete self.gameComplete;
                 statusChangedAnimation.call(self);
             }
         });
-
-        cellVibrate.call(this, len, Sudoku.GameBoard3D.cellSpacing);
 
     }
 
