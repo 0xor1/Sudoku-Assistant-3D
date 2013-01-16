@@ -2,7 +2,7 @@ Sudoku Solver Visualisation
 ===========================
 
 ##Summary
----
+
 
 A demo webGL application implemented using [mrdoob's](https://twitter.com/mrdoob) [three.js](https://github.com/mrdoob/three.js) library.
 
@@ -12,6 +12,7 @@ whilst displaying to the user the logic used to make each value entry in a 3D an
 Current progress demo available [here](http://0xor1.com/Sudoku).
 
 ##Controls
+
 
 ###GameBoard
 
