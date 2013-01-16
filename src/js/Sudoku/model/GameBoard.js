@@ -37,6 +37,13 @@
         },
 
 
+        gameIsComplete:function(){
+
+            return this._emptyCellCount === 0;
+
+        },
+
+
         enterValue:function (i, j, value) {
 
             if (canEnterValue.call(this, i, j, value)) {
