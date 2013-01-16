@@ -305,7 +305,7 @@
     function gameCompleteAnimation() {
 
         var len = 2000
-            , dipTo = 0.5
+            , dipTo = 0.3
             , self = this;
             ;
 
