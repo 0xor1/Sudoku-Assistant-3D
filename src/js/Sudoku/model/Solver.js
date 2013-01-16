@@ -6,7 +6,7 @@
         , subGrid = 'subGrid'
         ;
 
-    Sudoku.Solver = function (gameBoard, solver, guessedCell) {
+    Sudoku.Solver = function (gameBoard, parent, root, guessedCell) {
 
         Utils.EventDispatcher.call(this);
 
@@ -16,11 +16,13 @@
         this._nSqrd = this._n * this._n;
         this._gameBoard = gameBoard;
 
-        if (solver instanceof Sudoku.Solver) {
-            this._parent = solver;
+        if (parent instanceof Sudoku.Solver) {
+            this._parent = parent;
+            this._root = root;
             this._guessedCell = guessedCell;
         } else {
             this._parent = null;
+            this._root = this;
             this._guessedCell = null;
         }
 
@@ -98,8 +100,8 @@
 
         sequentialAutoSolve:function () {
 
-            if (this._autoSolveStopRequested) {
-                this._autoSolveStopRequested = false;
+            if (this._root._autoSolveStopRequested) {
+                this._root._autoSolveStopRequested = false;
                 return;
             }
 
@@ -119,8 +121,8 @@
 
             if (this._certainCells.length > 0) {
 
-                if (this._autoSolveStopRequested) {
-                    this._autoSolveStopRequested = false;
+                if (this._root._autoSolveStopRequested) {
+                    this._root._autoSolveStopRequested = false;
                     return;
                 }
 
@@ -144,7 +146,7 @@
 
         stopAutoSolve:function () {
 
-            this._autoSolveStopRequested = true;
+            this._root._autoSolveStopRequested = true;
 
             return this;
 
