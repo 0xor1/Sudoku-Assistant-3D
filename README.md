@@ -20,9 +20,7 @@ Click on a cell to select it. The selected cell will turn orange in color. The d
 
 To enter a value in a cell simply select it and then press a relevant key, only empty cells can have values entered into them, to clear a value select the cell and press the _delete_ key. Games accept the following values:
 
-1. **4x4**
-
-   1 &rarr; 4  
+1. **4x4** &rarr; 1 **&rarr;** 4  
 
 2. **9x9**
 
