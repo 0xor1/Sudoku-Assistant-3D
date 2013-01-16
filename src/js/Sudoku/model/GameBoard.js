@@ -37,7 +37,7 @@
         },
 
 
-        gameIsComplete:function(){
+        isComplete:function(){
 
             return this._emptyCellCount === 0;
 
