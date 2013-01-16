@@ -664,6 +664,12 @@
     }
 
 
+    /*
+     Branching functionality
+     */
+
+
+
     function insolvableBranch() {
 
 
