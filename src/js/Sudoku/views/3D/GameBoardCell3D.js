@@ -190,11 +190,6 @@
             this.deselect();
         }
 
-        this.dispatchEvent({
-            type:"setAsStartingCell",
-            obj:this
-        });
-
         this._isStartingCell = true;
 
         if (!this.isClashing()) {
@@ -211,11 +206,6 @@
         if (!this._isStartingCell) {
             return this;
         }
-
-        this.dispatchEvent({
-            type:"unsetAsStartingCell",
-            obj:this
-        });
 
         this._isStartingCell = false;
 
