@@ -34,6 +34,10 @@
 
         this._autoSolveStopRequested = false;
 
+        this._solutionsFound = 0;
+
+        this._deadEndsFound = 0;
+
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
         for (var i = 0; i < this._nSqrd; i++) {
@@ -137,6 +141,11 @@
                     }.bind(this), this.autoSolveDelay);
 
                 }
+
+            } else if (!this._gameBoard.isComplete()){
+
+                forkSolver.call(this);
+
             }
 
             return this;
@@ -740,8 +749,16 @@
      */
 
 
+    function forkSolver(){
+
+        //TODO
+
+    }
+
+
     function insolvableBranch() {
 
+        //TODO
 
     }
 
