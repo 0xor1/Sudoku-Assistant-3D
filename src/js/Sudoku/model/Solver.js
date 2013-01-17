@@ -78,11 +78,15 @@
 
                 this._gameBoard.enterValue(cert.i, cert.j, cert.value);
 
-                if(this._gameBoard.isComplete()){
-                    branchSolved.call(this);
-                }
+            }
 
-            } else if(!this._gameBoard.isComplete()) {
+            if (this._gameBoard.isComplete()) {
+
+                branchSolved.call(this);
+
+            }
+
+            if(!this._gameBoard.isComplete() && this._activeNode._certainCells.length === 0){
 
                 forkSolver.call(this);
 
@@ -102,7 +106,7 @@
 
             this.solveOneCell();
 
-            if(!this._gameBoard.isComplete()){
+            if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
                 setTimeout(function () {
                     this.sequentialAutoSolve()
                 }.bind(this), this.autoSolveDelay);
@@ -120,27 +124,32 @@
                 return;
             }
 
-            if (this._certainCells.length > 0) {
+            if (this._activeNode._certainCells.length > 0) {
 
                 this._activeNode._entryList.push.apply(this._activeNode._entryList, this._activeNode._certainCells);
 
                 this._gameBoard.batchEnterValue(this._activeNode._certainCells);
 
-                if(this._gameBoard.isComplete()){
-                    branchSolved.call(this);
-                }
+            }
 
-                if (this._activeNode._certainCells.length > 0) {
+            if (this._gameBoard.isComplete()) {
 
-                    setTimeout(function () {
-                        this.batchAutoSolve()
-                    }.bind(this), this.autoSolveDelay);
+                branchSolved.call(this);
 
-                }
+            }
 
-            } else if (!this._gameBoard.isComplete()){
+            if(!this._gameBoard.isComplete() && this._activeNode._certainCells.length === 0){
 
                 forkSolver.call(this);
+
+            }
+
+
+            if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
+
+                setTimeout(function () {
+                    this.batchAutoSolve()
+                }.bind(this), this.autoSolveDelay);
 
             }
 
@@ -174,11 +183,17 @@
         },
 
 
-        undoAllEntries:function(){
+        undoAllEntries:function () {
 
-            if( this._activeNode._entryList.length > 0){
-                this._gameBoard.batchClearValue(this._activeNode._entryList);
-                this._activeNode._entryList = [];
+            var activeNode = this._activeNode
+                ;
+
+            while(activeNode._entryList.length > 0) {
+                this._gameBoard.batchClearValue(activeNode._entryList);
+                activeNode._entryList = [];
+                if(activeNode._parent !== null){
+                    activeNode = activeNode._parent;
+                }
             }
 
             return this;
@@ -212,13 +227,13 @@
 
     function attachEventListeners() {
 
-        this._root._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
+        this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
 
-        this._root._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
+        this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
 
-        this._root._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
+        this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
 
-        this._root._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
+        this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
 
         return this;
 
@@ -342,15 +357,14 @@
 
     function revivePossibility(i, j, k, type) {
 
-        var root = this._root
-            ,idx = root._possibilityCube[i][j][k].indexOf(type)
+        var idx = this._possibilityCube[i][j][k].indexOf(type)
             ;
 
         if (idx !== -1) {
-            root._possibilityCube[i][j][k].splice(idx, 1);
-            if (root._possibilityCube[i][j][k].length === 0) {
+            this._possibilityCube[i][j][k].splice(idx, 1);
+            if (this._possibilityCube[i][j][k].length === 0) {
                 incrementCounters.call(this, i, j, k);
-                root.dispatchEvent({
+                this.dispatchEvent({
                     type:"possibilityRevived",
                     i:i,
                     j:j,
@@ -364,15 +378,14 @@
 
     function killPossibility(i, j, k, type, gbc) {
 
-        var root = this._root
-            ,idx = root._possibilityCube[i][j][k].indexOf(type)
+        var idx = this._possibilityCube[i][j][k].indexOf(type)
             ;
 
         if (idx === -1) {
-            root._possibilityCube[i][j][k].push(type);
-            if (root._possibilityCube[i][j][k].length === 1) {
+            this._possibilityCube[i][j][k].push(type);
+            if (this._possibilityCube[i][j][k].length === 1) {
                 decrementCounters.call(this, i, j, k, gbc);
-                root.dispatchEvent({
+                this.dispatchEvent({
                     type:"possibilityKilled",
                     i:i,
                     j:j,
@@ -432,7 +445,7 @@
 
     function removeCertainCell(cert) {
 
-        var certCells = this._certainCells
+        var certCells = this._activeNode._certainCells
             ;
 
         for (var i = 0, l = certCells.length; i < l; i++) {
@@ -595,7 +608,7 @@
 
         for (; cert.j < this._nSqrd; cert.j++) {
             if (this._possibilityCube[i][cert.j][k].length === 0) {
-                addCertainCell.call(this, cert);
+                addCertainCell.call(this._activeNode, cert);
                 break;
             }
         }
@@ -609,7 +622,7 @@
 
         for (; cert.i < this._nSqrd; cert.i++) {
             if (this._possibilityCube[cert.i][j][k].length === 0) {
-                addCertainCell.call(this, cert);
+                addCertainCell.call(this._activeNode, cert);
                 break;
             }
         }
@@ -624,7 +637,7 @@
         for (var k = 0; k < this._nSqrd; k++) {
             if (this._possibilityCube[i][j][k].length === 0) {
                 cert.value = k + 1;
-                addCertainCell.call(this, cert);
+                addCertainCell.call(this._activeNode, cert);
                 break;
             }
         }
@@ -641,7 +654,7 @@
         for (cert.i = sgb.iLower; cert.i <= sgb.iUpper; cert.i++) {
             for (cert.j = sgb.jLower; cert.j <= sgb.jUpper; cert.j++) {
                 if (this._possibilityCube[cert.i][cert.j][k].length === 0) {
-                    addCertainCell.call(this, cert);
+                    addCertainCell.call(this._activeNode, cert);
                     certFound = true;
                     break;
                 }
@@ -656,15 +669,17 @@
 
     function removeCertainCellByRowCounter(i, k) {
 
-        var idx;
+        var certCells = this._activeNode._certainCells
+            , idx
+            ;
 
-        for (var j = 0, l = this._certainCells.length; j < l; j++) {
-            if (this._certainCells[j].i === i && this._certainCells[j].value === k + 1) {
-                idx = this._certainCells[j].type.indexOf('row');
+        for (var j = 0, l = certCells.length; j < l; j++) {
+            if (certCells[j].i === i && certCells[j].value === k + 1) {
+                idx = certCells[j].type.indexOf('row');
                 if (idx !== -1) {
-                    this._certainCells[j].type.splice(idx, 1);
-                    if (this._certainCells[j].type.length === 0) {
-                        this._certainCells.splice(j, 1);
+                    certCells[j].type.splice(idx, 1);
+                    if (certCells[j].type.length === 0) {
+                        certCells.splice(j, 1);
                     }
                     break;
                 }
@@ -678,15 +693,17 @@
 
     function removeCertainCellByColumnCounter(j, k) {
 
-        var idx;
+        var certCells = this._activeNode._certainCells
+            , idx
+            ;
 
-        for (var i = 0, l = this._certainCells.length; i < l; i++) {
-            if (this._certainCells[i].j === j && this._certainCells[i].value === k + 1) {
-                idx = this._certainCells[i].type.indexOf('column');
+        for (var i = 0, l = certCells.length; i < l; i++) {
+            if (certCells[i].j === j && certCells[i].value === k + 1) {
+                idx = certCells[i].type.indexOf('column');
                 if (idx !== -1) {
-                    this._certainCells[i].type.splice(idx, 1);
-                    if (this._certainCells[i].type.length === 0) {
-                        this._certainCells.splice(i, 1);
+                    certCells[i].type.splice(idx, 1);
+                    if (certCells[i].type.length === 0) {
+                        certCells.splice(i, 1);
                     }
                     break;
                 }
@@ -700,15 +717,17 @@
 
     function removeCertainCellByElementCounter(i, j) {
 
-        var idx;
+        var certCells = this._activeNode._certainCells
+            , idx
+            ;
 
-        for (var m = 0, l = this._certainCells.length; m < l; m++) {
-            if (this._certainCells[m].i === i && this._certainCells[m].j === j) {
-                idx = this._certainCells[m].type.indexOf('element');
+        for (var m = 0, l = certCells.length; m < l; m++) {
+            if (certCells[m].i === i && certCells[m].j === j) {
+                idx = certCells[m].type.indexOf('element');
                 if (idx !== -1) {
-                    this._certainCells[m].type.splice(idx, 1);
-                    if (this._certainCells[m].type.length === 0) {
-                        this._certainCells.splice(m, 1);
+                    certCells[m].type.splice(idx, 1);
+                    if (certCells[m].type.length === 0) {
+                        certCells.splice(m, 1);
                     }
                     break;
                 }
@@ -722,18 +741,19 @@
 
     function removeCertainCellBySubGridCounter(sgb, k) {
 
-        var idx
+        var certCells = this._activeNode._certainCells
+            , idx
             ;
 
-        for (var m = 0, l = this._certainCells.length; m < l; m++) {
-            if (this._certainCells[m].i >= sgb.iLower && this._certainCells[m].i <= sgb.iUpper &&
-                this._certainCells[m].j >= sgb.jLower && this._certainCells[m].j <= sgb.jUpper &&
-                this._certainCells[m].value === k + 1) {
-                idx = this._certainCells[m].type.indexOf('subGrid');
+        for (var m = 0, l = certCells.length; m < l; m++) {
+            if (certCells[m].i >= sgb.iLower && certCells[m].i <= sgb.iUpper &&
+                certCells[m].j >= sgb.jLower && certCells[m].j <= sgb.jUpper &&
+                certCells[m].value === k + 1) {
+                idx = certCells[m].type.indexOf('subGrid');
                 if (idx !== -1) {
-                    this._certainCells[m].type.splice(idx, 1);
-                    if (this._certainCells[m].type.length === 0) {
-                        this._certainCells.splice(m, 1);
+                    certCells[m].type.splice(idx, 1);
+                    if (certCells[m].type.length === 0) {
+                        certCells.splice(m, 1);
                     }
                     break;
                 }
@@ -748,17 +768,15 @@
      Branching functionality
      */
 
-        
-    function SolverNode(parent, guessedCell){
 
-        if(typeof parent === 'undefined'){
+    function SolverNode(parent, guessedCell) {
+
+        if (typeof parent === 'undefined') {
             this._parent = null;
             this._guessedCell = null;
-            this._root = this;
         } else {
             this._parent = parent;
             this._guessedCell = guessedCell;
-            this._root = this._parent._root;
         }
 
         this._children = [];
@@ -776,7 +794,7 @@
     }
 
 
-    function forkSolver(){
+    function forkSolver() {
 
         //TODO
 
