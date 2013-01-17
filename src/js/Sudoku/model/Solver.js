@@ -6,37 +6,16 @@
         , subGrid = 'subGrid'
         ;
 
-    Sudoku.Solver = function (gameBoard, parent, root, guessedCell) {
+    Sudoku.Solver = function (gameBoard) {
 
-        Utils.EventDispatcher.call(this);
+        SolverNode.call(this);
 
         this.autoSolveDelay = 300;
 
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
         this._gameBoard = gameBoard;
-
-        if (parent instanceof Sudoku.Solver) {
-            this._parent = parent;
-            this._root = root;
-            this._guessedCell = guessedCell;
-        } else {
-            this._parent = null;
-            this._root = this;
-            this._guessedCell = null;
-        }
-
-        this._children = []; //for exploring forks
-
-        this._myEntryList = []; //batch array for values this solver has entered into the gameboard in the order they were entered
-
-        this._certainCells = [];
-
         this._autoSolveStopRequested = false;
-
-        this._solutionsFound = 0;
-
-        this._deadEndsFound = 0;
 
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
@@ -91,7 +70,7 @@
 
                 cert = this._certainCells[0];
 
-                this._myEntryList.push(cert);
+                this._entryList.push(cert);
 
                 this._gameBoard.enterValue(cert.i, cert.j, cert.value);
 
@@ -130,7 +109,7 @@
                     return;
                 }
 
-                this._myEntryList.push.apply(this._myEntryList, this._certainCells);
+                this._entryList.push.apply(this._entryList, this._certainCells);
 
                 this._gameBoard.batchEnterValue(this._certainCells);
 
@@ -169,7 +148,7 @@
                 ;
 
             if (l > 0) {
-                entry = this._myEntryList.pop();
+                entry = this._entryList.pop();
                 this._gameBoard.clearValue(entry.i, entry.j);
             }
 
@@ -180,9 +159,9 @@
 
         undoAllMyEntries:function(){
 
-            if( this._myEntryList.length > 0){
-                this._gameBoard.batchClearValue(this._myEntryList);
-                this._myEntryList = [];
+            if( this._eEntryList.length > 0){
+                this._gameBoard.batchClearValue(this._entryList);
+                this._entryList = [];
             }
 
             return this;
@@ -747,6 +726,33 @@
     /*
      Branching functionality
      */
+
+        
+    function SolverNode(parent, guessedCell){
+
+        Utils.EventDispatcher.call(this);
+
+        if(typeof parent === 'undefined'){
+            this._parent = null;
+            this._guessedCell = null;
+            this._root = this;
+        } else {
+            this._parent = parent;
+            this._guessedCell = guessedCell;
+            this._root = this._parent._root;
+        }
+
+        this._children = [];
+
+        this._entryList = [];
+
+        this._certainCells = [];
+
+        this._solutionsFound = 0;
+
+        this._deadEndsFound = 0;
+
+    }
 
 
     function forkSolver(){
