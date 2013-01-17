@@ -74,6 +74,10 @@
 
                 this._gameBoard.enterValue(cert.i, cert.j, cert.value);
 
+                if(this._root._gameboard.isComplete()){
+                    branchSolved.call(this);
+                }
+
                 return this;
 
             }
@@ -89,6 +93,10 @@
             }
 
             this.solveOneCell();
+
+            if(this._root._gameboard.isComplete()){
+                branchSolved.call(this);
+            }
 
             if (this._certainCells.length > 0) {
                 setTimeout(function () {
@@ -112,6 +120,10 @@
                 this._entryList.push.apply(this._entryList, this._certainCells);
 
                 this._gameBoard.batchEnterValue(this._certainCells);
+
+                if(this._root._gameboard.isComplete()){
+                    branchSolved.call(this);
+                }
 
                 if (this._certainCells.length > 0) {
 
@@ -518,7 +530,7 @@
 
         if (errorFound) {
 
-            insolvableBranch.call(this);
+            branchFailed.call(this);
 
         }
     }
@@ -762,7 +774,14 @@
     }
 
 
-    function insolvableBranch() {
+    function branchFailed() {
+
+        //TODO
+
+    }
+
+
+    function branchSolved() {
 
         //TODO
 
