@@ -1,4 +1,4 @@
-Sudoku Solver Visualisation
+Sudoku Solver Visualization
 ===========================
 
 ##Summary
