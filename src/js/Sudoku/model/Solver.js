@@ -8,9 +8,13 @@
 
     Sudoku.Solver = function (gameBoard) {
 
+        Utils.EventDispatcher.call(this);
+
         SolverNode.call(this);
 
         this.autoSolveDelay = 300;
+
+        this._activeNode = this;
 
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
@@ -66,43 +70,44 @@
 
             var cert;
 
-            if (this._certainCells.length > 0) {
+            if (this._activeNode._certainCells.length > 0) {
 
-                cert = this._certainCells[0];
+                cert = this._activeNode._certainCells[0];
 
-                this._entryList.push(cert);
+                this._activeNode._entryList.push(cert);
 
                 this._gameBoard.enterValue(cert.i, cert.j, cert.value);
 
-                if(this._root._gameboard.isComplete()){
+                if(this._gameBoard.isComplete()){
                     branchSolved.call(this);
                 }
 
-                return this;
+            } else if(!this._gameBoard.isComplete()) {
+
+                forkSolver.call(this);
 
             }
+
+            return this;
 
         },
 
 
         sequentialAutoSolve:function () {
 
-            if (this._root._autoSolveStopRequested) {
-                this._root._autoSolveStopRequested = false;
-                return;
+            if (this._autoSolveStopRequested) {
+                this._autoSolveStopRequested = false;
+                return this;
             }
 
             this.solveOneCell();
 
-            if(this._root._gameboard.isComplete()){
-                branchSolved.call(this);
-            }
-
-            if (this._certainCells.length > 0) {
+            if(!this._gameBoard.isComplete()){
                 setTimeout(function () {
                     this.sequentialAutoSolve()
                 }.bind(this), this.autoSolveDelay);
             }
+
             return this;
 
         },
@@ -110,22 +115,22 @@
 
         batchAutoSolve:function () {
 
+            if (this._autoSolveStopRequested) {
+                this._autoSolveStopRequested = false;
+                return;
+            }
+
             if (this._certainCells.length > 0) {
 
-                if (this._root._autoSolveStopRequested) {
-                    this._root._autoSolveStopRequested = false;
-                    return;
-                }
+                this._activeNode._entryList.push.apply(this._activeNode._entryList, this._activeNode._certainCells);
 
-                this._entryList.push.apply(this._entryList, this._certainCells);
+                this._gameBoard.batchEnterValue(this._activeNode._certainCells);
 
-                this._gameBoard.batchEnterValue(this._certainCells);
-
-                if(this._root._gameboard.isComplete()){
+                if(this._gameBoard.isComplete()){
                     branchSolved.call(this);
                 }
 
-                if (this._certainCells.length > 0) {
+                if (this._activeNode._certainCells.length > 0) {
 
                     setTimeout(function () {
                         this.batchAutoSolve()
@@ -146,21 +151,21 @@
 
         stopAutoSolve:function () {
 
-            this._root._autoSolveStopRequested = true;
+            this._autoSolveStopRequested = true;
 
             return this;
 
         },
 
 
-        undoMyLastEntry:function () {
+        undoLastEntry:function () {
 
-            var l = this._myEntryList.length
+            var l = this._activeNode._entryList.length
                 , entry
                 ;
 
             if (l > 0) {
-                entry = this._entryList.pop();
+                entry = this._activeNode._entryList.pop();
                 this._gameBoard.clearValue(entry.i, entry.j);
             }
 
@@ -169,11 +174,11 @@
         },
 
 
-        undoAllMyEntries:function(){
+        undoAllEntries:function(){
 
-            if( this._eEntryList.length > 0){
-                this._gameBoard.batchClearValue(this._entryList);
-                this._entryList = [];
+            if( this._activeNode._entryList.length > 0){
+                this._gameBoard.batchClearValue(this._activeNode._entryList);
+                this._activeNode._entryList = [];
             }
 
             return this;
@@ -190,12 +195,12 @@
 
         getListOfCertainCells:function () {
 
-            var arr = this._certainCells.slice(0)
+            var arr = this._activeNode._certainCells.slice(0)
                 ;
 
-            for (var i = 0, l = this._certainCells.length; i < l; i++) {
+            for (var i = 0, l = this._activeNode._certainCells.length; i < l; i++) {
 
-                arr[i].type = this._certainCells[i].type.slice(0);
+                arr[i].type = this._activeNode._certainCells[i].type.slice(0);
             }
 
             return arr;
@@ -207,13 +212,13 @@
 
     function attachEventListeners() {
 
-        this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
+        this._root._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
 
-        this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
+        this._root._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
 
-        this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
+        this._root._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
 
-        this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
+        this._root._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
 
         return this;
 
@@ -337,13 +342,15 @@
 
     function revivePossibility(i, j, k, type) {
 
-        var idx = this._possibilityCube[i][j][k].indexOf(type);
+        var root = this._root
+            ,idx = root._possibilityCube[i][j][k].indexOf(type)
+            ;
 
         if (idx !== -1) {
-            this._possibilityCube[i][j][k].splice(idx, 1);
-            if (this._possibilityCube[i][j][k].length === 0) {
+            root._possibilityCube[i][j][k].splice(idx, 1);
+            if (root._possibilityCube[i][j][k].length === 0) {
                 incrementCounters.call(this, i, j, k);
-                this.dispatchEvent({
+                root.dispatchEvent({
                     type:"possibilityRevived",
                     i:i,
                     j:j,
@@ -357,13 +364,15 @@
 
     function killPossibility(i, j, k, type, gbc) {
 
-        var idx = this._possibilityCube[i][j][k].indexOf(type);
+        var root = this._root
+            ,idx = root._possibilityCube[i][j][k].indexOf(type)
+            ;
 
         if (idx === -1) {
-            this._possibilityCube[i][j][k].push(type);
-            if (this._possibilityCube[i][j][k].length === 1) {
+            root._possibilityCube[i][j][k].push(type);
+            if (root._possibilityCube[i][j][k].length === 1) {
                 decrementCounters.call(this, i, j, k, gbc);
-                this.dispatchEvent({
+                root.dispatchEvent({
                     type:"possibilityKilled",
                     i:i,
                     j:j,
@@ -378,7 +387,7 @@
 
     function addCertainCell(cert) {
 
-        var certCells = this._certainCells
+        var certCells = this._activeNode._certainCells
             , certAlreadyExists = false
             ;
 
@@ -742,8 +751,6 @@
         
     function SolverNode(parent, guessedCell){
 
-        Utils.EventDispatcher.call(this);
-
         if(typeof parent === 'undefined'){
             this._parent = null;
             this._guessedCell = null;
@@ -759,6 +766,8 @@
         this._entryList = [];
 
         this._certainCells = [];
+
+        this._branchesFound = 1;
 
         this._solutionsFound = 0;
 
