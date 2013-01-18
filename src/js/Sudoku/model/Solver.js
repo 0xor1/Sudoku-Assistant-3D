@@ -12,14 +12,14 @@
 
         SolverNode.call(this);
 
-        this.autoSolveDelay = 300;
-
         this._activeNode = this;
 
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
-        this._gameBoard = gameBoard;
-        this._autoSolveStopRequested = false;
+        this._externalGameBoard = gameBoard;
+        this._internalGameBoard = new Sudoku.GameBoard(this._n);
+
+        this._solverStopAndReset = false;
 
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
@@ -53,200 +53,39 @@
             }
         }
 
-        cullPossibilities.call(this);
-
-        attachEventListeners.call(this);
+        attachEventListeners.call(gameBoard);
 
     }
 
 
-    Sudoku.Solver.prototype = {
+    function attachEventListeners(externalGameBoard) {
 
+        this._internalGameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
 
-        constructor:Sudoku.Solver,
+        this._internalGameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
 
+        this._internalGameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
 
-        solveOneCell:function () {
+        this._internalGameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
 
-            var cert;
+        externalGameBoard.addEventListener('startingConfigurationSaved', start.bind(this));
 
-            if (this._activeNode._certainCells.length > 0) {
-
-                cert = this._activeNode._certainCells[0];
-
-                this._activeNode._entryList.push(cert);
-
-                this._gameBoard.enterValue(cert.i, cert.j, cert.value);
-
-            }
-
-            if (this._gameBoard.isComplete()) {
-
-                branchSolved.call(this);
-
-                return this;
-
-            }
-
-            if (!this._gameBoard.isComplete() &&
-                this._activeNode._certainCells.length === 0 &&
-                this._activeNode._children.length === 0) {
-
-                forkSolver.call(this);
-
-                return this;
-
-            }
-
-        },
-
-
-        sequentialAutoSolve:function () {
-
-            if (this._autoSolveStopRequested) {
-                this._autoSolveStopRequested = false;
-                return this;
-            }
-
-            this.solveOneCell();
-
-            if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
-                setTimeout(function () {
-                    this.sequentialAutoSolve();
-                }.bind(this), this.autoSolveDelay);
-
-                return this;
-
-            }
-
-        },
-
-
-        batchAutoSolve:function () {
-
-            if (this._autoSolveStopRequested) {
-                this._autoSolveStopRequested = false;
-                return;
-            }
-
-            if (this._activeNode._certainCells.length > 0) {
-
-                this._activeNode._entryList.push.apply(this._activeNode._entryList, this._activeNode._certainCells);
-
-                this._gameBoard.batchEnterValue(this._activeNode._certainCells);
-
-            }
-
-            if (this._gameBoard.isComplete()) {
-
-                branchSolved.call(this);
-
-                return this;
-
-            }
-
-            if (!this._gameBoard.isComplete() &&
-                this._activeNode._certainCells.length === 0 &&
-                this._activeNode._children.length === 0) {
-
-                forkSolver.call(this);
-
-                return this;
-
-            }
-
-
-            if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
-
-                setTimeout(function () {
-                    this.batchAutoSolve()
-                }.bind(this), this.autoSolveDelay);
-
-                return this;
-
-            }
-
-        },
-
-
-        stopAutoSolve:function () {
-
-            this._autoSolveStopRequested = true;
-
-            return this;
-
-        },
-
-
-        undoLastEntry:function () {
-
-            var l = this._activeNode._entryList.length
-                , entry
-                ;
-
-            if (l > 0) {
-                entry = this._activeNode._entryList.pop();
-                this._gameBoard.clearValue(entry.i, entry.j);
-            }
-
-            return this;
-
-        },
-
-
-        undoAllEntries:function () {
-
-            var activeNode = this._activeNode
-                ;
-
-            while (activeNode._entryList.length > 0) {
-                this._gameBoard.batchClearValue(activeNode._entryList);
-                activeNode._entryList = [];
-                if (activeNode._parent !== null) {
-                    activeNode = activeNode._parent;
-                }
-            }
-
-            return this;
-
-        },
-
-
-        possibilityIsAlive:function (i, j, value) {
-
-            return this._possibilityCube[i][j][value - 1].length === 0;
-
-        },
-
-
-        getListOfCertainCells:function () {
-
-            var arr = this._activeNode._certainCells.slice(0)
-                ;
-
-            for (var i = 0, l = this._activeNode._certainCells.length; i < l; i++) {
-
-                arr[i].type = this._activeNode._certainCells[i].type.slice(0);
-            }
-
-            return arr;
-
-        }
-
-    };
-
-
-    function attachEventListeners() {
-
-        this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
-
-        this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
-
-        this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
-
-        this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
+        externalGameBoard.addEventListener('startingConfigurationDiscarded', stopAndReset.bind(this));
 
         return this;
+
+    }
+
+    function stopAndReset(){
+
+        this._stopAndReset = false;
+        this._internalGameBoard.wipeClean();
+
+    }
+
+    function start(){
+
+        this._internalGameBoard.batchEnterValue(this._externalGameBoard._startingConfiguration);
 
     }
 
@@ -997,7 +836,7 @@
 
     function branchEnded() {
 
-        while (this._activeNode !== null) {
+        while (this._activeNode._parent !== null) {
 
             undoAllActiveNodeEntries.call(this);
 
