@@ -4,7 +4,6 @@
 
         var threePanel = new UIControls.ThreePanel(document.getElementById("threeDView"))
             , gameBoard = new Sudoku.GameBoard(3)
-            , solver = new Sudoku.Solver(gameBoard)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)
             ;
 
