@@ -84,15 +84,19 @@
 
                 branchSolved.call(this);
 
+                return this;
+
             }
 
-            if(!this._gameBoard.isComplete() && this._activeNode._certainCells.length === 0){
+            if (!this._gameBoard.isComplete() &&
+                this._activeNode._certainCells.length === 0 &&
+                this._activeNode._children.length === 0) {
 
                 forkSolver.call(this);
 
-            }
+                return this;
 
-            return this;
+            }
 
         },
 
@@ -108,11 +112,12 @@
 
             if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
                 setTimeout(function () {
-                    this.sequentialAutoSolve()
+                    this.sequentialAutoSolve();
                 }.bind(this), this.autoSolveDelay);
-            }
 
-            return this;
+                return this;
+
+            }
 
         },
 
@@ -136,11 +141,17 @@
 
                 branchSolved.call(this);
 
+                return this;
+
             }
 
-            if(!this._gameBoard.isComplete() && this._activeNode._certainCells.length === 0){
+            if (!this._gameBoard.isComplete() &&
+                this._activeNode._certainCells.length === 0 &&
+                this._activeNode._children.length === 0) {
 
                 forkSolver.call(this);
+
+                return this;
 
             }
 
@@ -151,9 +162,9 @@
                     this.batchAutoSolve()
                 }.bind(this), this.autoSolveDelay);
 
-            }
+                return this;
 
-            return this;
+            }
 
         },
 
@@ -188,10 +199,10 @@
             var activeNode = this._activeNode
                 ;
 
-            while(activeNode._entryList.length > 0) {
+            while (activeNode._entryList.length > 0) {
                 this._gameBoard.batchClearValue(activeNode._entryList);
                 activeNode._entryList = [];
-                if(activeNode._parent !== null){
+                if (activeNode._parent !== null) {
                     activeNode = activeNode._parent;
                 }
             }
@@ -382,17 +393,23 @@
             ;
 
         if (idx === -1) {
+
             this._possibilityCube[i][j][k].push(type);
+
             if (this._possibilityCube[i][j][k].length === 1) {
+
                 decrementCounters.call(this, i, j, k, gbc);
+
                 this.dispatchEvent({
                     type:"possibilityKilled",
                     i:i,
                     j:j,
                     k:k
                 });
+
             }
         }
+
         return this;
 
     }
@@ -608,7 +625,7 @@
 
         for (; cert.j < this._nSqrd; cert.j++) {
             if (this._possibilityCube[i][cert.j][k].length === 0) {
-                addCertainCell.call(this._activeNode, cert);
+                addCertainCell.call(this, cert);
                 break;
             }
         }
@@ -622,7 +639,7 @@
 
         for (; cert.i < this._nSqrd; cert.i++) {
             if (this._possibilityCube[cert.i][j][k].length === 0) {
-                addCertainCell.call(this._activeNode, cert);
+                addCertainCell.call(this, cert);
                 break;
             }
         }
@@ -637,7 +654,7 @@
         for (var k = 0; k < this._nSqrd; k++) {
             if (this._possibilityCube[i][j][k].length === 0) {
                 cert.value = k + 1;
-                addCertainCell.call(this._activeNode, cert);
+                addCertainCell.call(this, cert);
                 break;
             }
         }
@@ -654,7 +671,7 @@
         for (cert.i = sgb.iLower; cert.i <= sgb.iUpper; cert.i++) {
             for (cert.j = sgb.jLower; cert.j <= sgb.jUpper; cert.j++) {
                 if (this._possibilityCube[cert.i][cert.j][k].length === 0) {
-                    addCertainCell.call(this._activeNode, cert);
+                    addCertainCell.call(this, cert);
                     certFound = true;
                     break;
                 }
@@ -771,14 +788,6 @@
 
     function SolverNode(parent, guessedCell) {
 
-        if (typeof parent === 'undefined') {
-            this._parent = null;
-            this._guessedCell = null;
-        } else {
-            this._parent = parent;
-            this._guessedCell = guessedCell;
-        }
-
         this._children = [];
 
         this._entryList = [];
@@ -791,28 +800,228 @@
 
         this._deadEndsFound = 0;
 
+        if (typeof parent === 'undefined') {
+            this._parent = null;
+            this._guessedCell = null;
+        } else {
+            this._parent = parent;
+            this._guessedCell = guessedCell;
+        }
+
     }
 
 
     function forkSolver() {
 
-        //TODO
+        var currentNode = this._activeNode
+            , node = this._activeNode
+            , smallestFork = {branches:this._nSqrd + 1, i:null, j:null, k:null, type:null}
+            , sgb
+            ;
 
+        //find for with least branches
+        //by row
+        for (var i = 0; i < this._nSqrd; i++) {
+            for (var k = 0; k < this._nSqrd; k++) {
+                if (this._rowCounters[i][k] > 0 && this._rowCounters[i][k] < smallestFork.branches) {
+                    smallestFork.branches = this._rowCounters[i][k];
+                    smallestFork.i = i;
+                    smallestFork.j = null;
+                    smallestFork.k = k;
+                    smallestFork.type = row;
+                }
+            }
+        }
+        //by column
+        for (var j = 0; j < this._nSqrd; j++) {
+            for (var k = 0; k < this._nSqrd; k++) {
+                if (this._columnCounters[j][k] > 0 && this._columnCounters[j][k] < smallestFork.branches) {
+                    smallestFork.branches = this._columnCounters[j][k];
+                    smallestFork.i = null;
+                    smallestFork.j = j;
+                    smallestFork.k = k;
+                    smallestFork.type = column;
+                }
+            }
+        }
+        //by element
+        for (var i = 0; i < this._nSqrd; i++) {
+            for (var j = 0; j < this._nSqrd; j++) {
+                if (this._elementCounters[i][j] > 0 && this._elementCounters[i][j] < smallestFork.branches) {
+                    smallestFork.branches = this._elementCounters[i][j];
+                    smallestFork.i = i;
+                    smallestFork.j = j;
+                    smallestFork.k = null;
+                    smallestFork.type = element;
+                }
+            }
+        }
+        //by subGrid
+        for (var i = 0; i < this._n; i++) {
+            for (var j = 0; j < this._n; j++) {
+                for (var k = 0; k < this._nSqrd; k++) {
+                    if (this._subGridCounters[i][j] > 0 && this._subGridCounters[i][j] < smallestFork.branches) {
+                        smallestFork.branches = this._subGridCounters[i][j];
+                        smallestFork.i = i;
+                        smallestFork.j = j;
+                        smallestFork.k = k;
+                        smallestFork.type = subGrid;
+                    }
+                }
+            }
+        }
+
+        //create children with guesses
+        if(smallestFork.type === row){
+            for(var j = 0; j < this._nSqrd; j++){
+                if(this._possibilityCube[smallestFork.i][j][smallestFork.k].length === 0){
+                    this._activeNode._children.push(
+                        new SolverNode(
+                            currentNode,
+                            {
+                                i:smallestFork.i,
+                                j:j,
+                                value:smallestFork.k+1
+                            }
+                        )
+                    );
+                }
+            }
+        }
+        if(smallestFork.type === column){
+            for(var i = 0; i < this._nSqrd; i++){
+                if(this._possibilityCube[i][smallestFork.j][smallestFork.k].length === 0){
+                    this._activeNode._children.push(
+                        new SolverNode(
+                            currentNode,
+                            {
+                                i:i,
+                                j:smallestFork.j,
+                                value:smallestFork.k+1
+                            }
+                        )
+                    );
+                }
+            }
+        }
+        if(smallestFork.type === element){
+            for(var k = 0; k < this._nSqrd; k++){
+                if(this._possibilityCube[smallestFork.i][smallestFork.j][k].length === 0){
+                    this._activeNode._children.push(
+                        new SolverNode(
+                            currentNode,
+                            {
+                                i:smallestFork.i,
+                                j:smallestFork.j,
+                                value:k+1
+                            }
+                        )
+                    );
+                }
+            }
+        }
+        if(smallestFork.type === subGrid){
+            sgb = this._gameBoard.getSubGridBoundsContainingCell(smallestFork.i,smallestFork.j);
+            for(var i = sgb.iLower; i < sgb.iUpper; i++){
+                for(var j = sgb.jLower; j <= sgb.jUpper; j++)
+                    if(this._possibilityCube[i][j][smallestFork.k].length === 0){
+                        this._activeNode._children.push(
+                            new SolverNode(
+                                currentNode,
+                                {
+                                    i:i,
+                                    j:j,
+                                    value:smallestFork.k+1
+                                }
+                            )
+                        );
+                    }
+            }
+
+        }
+
+        var node = this._activeNode._parent;
+        while(node !== null){
+            node._branchesFound += smallestFork.branches - 1;
+            node = node._parent;
+        }
+
+        //activate first child
+        this._activeNode = this._activeNode._children[0];
+        this._gameBoard.enterValue(this._activeNode._guessedCell.i,this._activeNode._guessedCell.j,this._activeNode._guessedCell.value);
+        this._activeNode._entryList.push(this._activeNode._guessedCell);
+
+        return this;
     }
 
 
     function branchFailed() {
 
-        //TODO
+        var currentNode = this._activeNode
+            , node = this._activeNode
+            ;
+
+        while (node !== null) {
+            node._deadEndsFound++;
+            node = node._parent;
+        }
+
+        if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
+            branchEnded.call(this);
+        }
+
+        return this;
 
     }
 
 
     function branchSolved() {
 
-        //TODO
+        var currentNode = this._activeNode
+            , node = this._activeNode
+            ;
+
+        while (node !== null) {
+            node._solutionsFound++;
+            node = node._parent;
+        }
+
+        if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
+            branchEnded.call(this);
+        }
+
+        return this;
 
     }
 
+
+    function branchEnded() {
+
+        while (this._activeNode !== null) {
+
+            undoAllActiveNodeEntries.call(this);
+
+            if (this._activeNode._parent._branchesFound < (this._activeNode._parent._solutionsFound + this._activeNode._parent._deadEndsFound)) {
+                this._activeNode = this._activeNode._parent._children[(this._activeNode._parent._solutionsFound + this._activeNode._parent._deadEndsFound)];
+                break;
+            }
+
+            this._activeNode = this._activeNode._parent;
+        }
+
+        return this;
+
+    }
+
+    function undoAllActiveNodeEntries() {
+
+        var activeNode = this._activeNode
+            ;
+
+        this._gameBoard.batchClearValue(activeNode._entryList);
+
+        return this;
+
+    }
 
 })();
