@@ -13,8 +13,10 @@ Current progress demo available [here](http://0xor1.com/Sudoku).
 
 ##Controls
 
+###3D View
 
-###GameBoard
+
+####GameBoard
 
 Click on a cell to select it. The selected cell will turn orange in color. The directional keys can also be used to change the currently selected cell. Starting cells (blue) can not be selected, the directional keys will skip over them when changing the selected cell.
 
@@ -26,6 +28,6 @@ To enter a value in a cell simply select it and then press a relevant key, only 
 4. **25x25** - 1 &rarr; 9 + A &rarr; P
 5. **36x36** - 1 &rarr; 9 + A &rarr; Z + #
 
-###Menu
+####Menu
 
 (Coming soon!)
