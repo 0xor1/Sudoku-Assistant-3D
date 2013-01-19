@@ -21,8 +21,6 @@
             }
         }
 
-        this._solver = new Sudoku.Solver(this);
-
     };
 
 
