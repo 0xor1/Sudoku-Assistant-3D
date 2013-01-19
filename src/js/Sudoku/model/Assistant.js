@@ -14,7 +14,9 @@
         this._nSqrd = this._n * this._n;
         this._gameBoard = gameBoard;
 
-        this._certainCells = [];
+        this._certainties = [];
+        
+        this._errors = [];
 
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
@@ -68,14 +70,14 @@
         },
 
 
-        getCertainCells:function () {
+        getCertainties:function () {
 
-            var arr = this._certainCells.slice(0)
+            var arr = this._certainties.slice(0)
                 ;
 
-            for (var i = 0, l = this._certainCells.length; i < l; i++) {
+            for (var i = 0, l = this._certainties.length; i < l; i++) {
 
-                arr[i].type = this._certainCells[i].type.slice(0);
+                arr[i].type = this._certainties[i].type.slice(0);
             }
 
             return arr;
@@ -267,7 +269,7 @@
 
     function addCertainCell(cert) {
 
-        var certCells = this._certainCells
+        var certCells = this._certainties
             , certAlreadyExists = false
             ;
 
@@ -312,7 +314,7 @@
 
     function removeCertainCell(cert) {
 
-        var certCells = this._certainCells
+        var certCells = this._certainties
             ;
 
         for (var i = 0, l = certCells.length; i < l; i++) {
@@ -552,7 +554,7 @@
 
     function removeCertainCellByRowCounter(i, k) {
 
-        var certCells = this._certainCells
+        var certCells = this._certainties
             , idx
             ;
 
@@ -576,7 +578,7 @@
 
     function removeCertainCellByColumnCounter(j, k) {
 
-        var certCells = this._certainCells
+        var certCells = this._certainties
             , idx
             ;
 
@@ -600,7 +602,7 @@
 
     function removeCertainCellByElementCounter(i, j) {
 
-        var certCells = this._certainCells
+        var certCells = this._certainties
             , idx
             ;
 
@@ -624,7 +626,7 @@
 
     function removeCertainCellBySubGridCounter(sgb, k) {
 
-        var certCells = this._certainCells
+        var certCells = this._certainties
             , idx
             ;
 
