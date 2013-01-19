@@ -11,7 +11,9 @@
 
         this._emptyCellCount = this._nSqrd * this._nSqrd;
 
-        this._startingConfiguration = []; // { i, j, value }
+        this._startingConfiguration = []; // { i, j, value}
+
+        this._activityList = []; //{i, j, value, type} type = 'enter' || 'clear'
 
         this._cells = new Utils.MultiArray(this._nSqrd, this._nSqrd);
 
@@ -44,10 +46,37 @@
         },
 
 
+        undoLastActivity:function(){
+
+            var l = this._activityList.length
+                , lastActivity
+                ;
+
+            if(l > 0){
+
+                lastActivity = this._activityList[l-1];
+
+                if(lastActivity.type === 'clear'){
+
+                    this.enterValue(lastActivity.i, lastActivity.j, lastActivity.value);
+
+                } else if(lastActivity.type === 'enter'){
+
+                    this.clearValue(lastActivity.i, lastActivity.j);
+
+                }
+
+            }
+
+            return this;
+
+        },
+
         enterValue:function (i, j, value) {
 
             if (this.canEnterValue( i, j, value)) {
                 this._cells[i][j].value = value;
+                this._activityList.push({i:i,j:j,value:value,type:'enter'});
                 decrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueEntered",
@@ -68,6 +97,7 @@
 
             if (this.canClearValue( i, j)) {
                 this._cells[i][j].value = 0;
+                this._activityList.push({i:i,j:j,value:oldValue,type:'clear'});
                 incrementEmptyCellCount.call(this);
                 this.dispatchEvent({
                     type:"valueCleared",
@@ -90,6 +120,7 @@
                 function (el, idx, arr) {
                     if (this.canEnterValue( el.i, el.j, el.value)) {
                         this._cells[el.i][el.j].value = el.value;
+                        this._activityList.push({i:el.i,j:el.j,value:el.value,type:'enter'});
                         decrementEmptyCellCount.call(this);
                         entered.push({i:el.i, j:el.j, value:el.value});
                     }
@@ -128,6 +159,7 @@
                     if (this.canClearValue( el.i, el.j)) {
                         oldValue = this._cells[el.i][el.j].value;
                         this._cells[el.i][el.j].value = 0;
+                        this._activityList.push({i:el.i,j:el.j,value:oldValue,type:'clear'});
                         incrementEmptyCellCount.call(this);
                         cleared.push({i:el.i, j:el.j, value:oldValue});
                     }
