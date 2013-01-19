@@ -37,7 +37,7 @@
         },
 
 
-        isComplete:function(){
+        isComplete:function () {
 
             return this._emptyCellCount === 0;
 
@@ -46,7 +46,7 @@
 
         enterValue:function (i, j, value) {
 
-            if (canEnterValue.call(this, i, j, value)) {
+            if (this.canEnterValue( i, j, value)) {
                 this._cells[i][j].value = value;
                 decrementEmptyCellCount.call(this);
                 this.dispatchEvent({
@@ -66,7 +66,7 @@
 
             var oldValue = this._cells[i][j].value;
 
-            if (canClearValue.call(this, i, j)) {
+            if (this.canClearValue( i, j)) {
                 this._cells[i][j].value = 0;
                 incrementEmptyCellCount.call(this);
                 this.dispatchEvent({
@@ -88,7 +88,7 @@
 
             batch.forEach(
                 function (el, idx, arr) {
-                    if (canEnterValue.call(this, el.i, el.j, el.value)) {
+                    if (this.canEnterValue( el.i, el.j, el.value)) {
                         this._cells[el.i][el.j].value = el.value;
                         decrementEmptyCellCount.call(this);
                         entered.push({i:el.i, j:el.j, value:el.value});
@@ -125,11 +125,11 @@
 
             batch.forEach(
                 function (el, idx, arr) {
-                    if (canClearValue.call(this, el.i, el.j)) {
+                    if (this.canClearValue( el.i, el.j)) {
                         oldValue = this._cells[el.i][el.j].value;
                         this._cells[el.i][el.j].value = 0;
                         incrementEmptyCellCount.call(this);
-                        cleared.push({i:el.i, j:el.j,value:oldValue});
+                        cleared.push({i:el.i, j:el.j, value:oldValue});
                     }
                 },
                 this
@@ -296,6 +296,31 @@
                 jUpper:jUpper,
                 jSubGrid:jSubGrid
             };
+        },
+
+
+        canEnterValue:function (i, j, value) {
+
+            if (this._cells[i][j].value === 0 && !entryClash.call(this, i, j, value) &&
+                value <= this._nSqrd &&
+                value > 0 &&
+                value % 1 === 0) {
+                return true;
+            } else {
+                return false;
+            }
+
+        },
+
+
+        canClearValue:function (i, j) {
+
+            if (this._cells[i][j].value !== 0 && !this._cells[i][j].isStarting) {
+                return true;
+            } else {
+                return false;
+            }
+
         }
 
 
@@ -417,4 +442,5 @@
 
     }
 
-})();
+})
+    ();
