@@ -6,20 +6,15 @@
         , subGrid = 'subGrid'
         ;
 
-    Sudoku.Solver = function (gameBoard) {
+    Sudoku.Assistant = function (gameBoard) {
 
         Utils.EventDispatcher.call(this);
 
-        SolverNode.call(this);
-
-        this._activeNode = this;
-
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
-        this._externalGameBoard = gameBoard;
-        this._internalGameBoard = new Sudoku.GameBoard(this._n);
+        this._gameBoard = gameBoard;
 
-        this._solverStopAndReset = false;
+        this._certainCells = [];
 
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
@@ -53,39 +48,55 @@
             }
         }
 
-        attachEventListeners.call(gameBoard);
+        cullPossibilities.call(this);
+
+        attachEventListeners.call(this);
 
     }
 
 
-    function attachEventListeners(externalGameBoard) {
+    Sudoku.Assistant.prototype = {
 
-        this._internalGameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
 
-        this._internalGameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
+        constructor:Sudoku.Assistant,
 
-        this._internalGameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
 
-        this._internalGameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
+        possibilityIsAlive:function (i, j, value) {
 
-        externalGameBoard.addEventListener('startingConfigurationSaved', start.bind(this));
+            return this._possibilityCube[i][j][value - 1].length === 0;
 
-        externalGameBoard.addEventListener('startingConfigurationDiscarded', stopAndReset.bind(this));
+        },
+
+
+        getCertainCells:function () {
+
+            var arr = this._certainCells.slice(0)
+                ;
+
+            for (var i = 0, l = this._certainCells.length; i < l; i++) {
+
+                arr[i].type = this._certainCells[i].type.slice(0);
+            }
+
+            return arr;
+
+        }
+        
+
+    };
+
+
+    function attachEventListeners() {
+
+        this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
+
+        this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
+
+        this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
+
+        this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
 
         return this;
-
-    }
-
-    function stopAndReset(){
-
-        this._stopAndReset = false;
-        this._internalGameBoard.wipeClean();
-
-    }
-
-    function start(){
-
-        this._internalGameBoard.batchEnterValue(this._externalGameBoard._startingConfiguration);
 
     }
 
@@ -256,7 +267,7 @@
 
     function addCertainCell(cert) {
 
-        var certCells = this._activeNode._certainCells
+        var certCells = this._certainCells
             , certAlreadyExists = false
             ;
 
@@ -301,7 +312,7 @@
 
     function removeCertainCell(cert) {
 
-        var certCells = this._activeNode._certainCells
+        var certCells = this._certainCells
             ;
 
         for (var i = 0, l = certCells.length; i < l; i++) {
@@ -348,11 +359,15 @@
      purposes
      */
     function decrementCounters(i, j, k, gbc) {
-        var errorFound = false
+        var error = {
+                found:false,
+                errors:[]
+            }
             , sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
             , gbcSgb = this._gameBoard.getSubGridBoundsContainingCell(gbc.i, gbc.j)
             , cert = {i:i, j:j, value:k + 1, type:[]}
             ;
+        
         /*
          decrement relevant counters and if the counter
          is zero and the relevant dimension is not the same
@@ -365,27 +380,39 @@
         this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]--;
 
         if (this._rowCounters[i][k] === 0) {
-            cert.type.push('row');
+            cert.type.push(row);
             if (gbc.i !== i) {
-                errorFound = true;
+                error.found = true;
+                error.errors.push({
+                    type:row,
+                    i:i,
+                    j:null,
+                    k:k
+                });
             }
         }
         if (this._columnCounters[j][k] === 0) {
-            cert.type.push('column');
+            cert.type.push(column);
             if (gbc.j !== j) {
-                errorFound = true;
+                error.found = true;
+                error.errors.push({
+                    type:column,
+                    i:i,
+                    j:null,
+                    k:k
+                });
             }
         }
         if (this._elementCounters[i][j] === 0) {
-            cert.type.push('element');
+            cert.type.push(element);
             if (gbc.i !== i && gbc.j !== j) {
-                errorFound = true;
+                error.found = true;
             }
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 0) {
-            cert.type.push('subGrid');
+            cert.type.push(subGrid);
             if (gbcSgb.iSubGrid !== sgb.iSubGrid && gbcSgb.jSubGrid !== sgb.jSubGrid) {
-                errorFound = true;
+                error.found = true;
             }
         }
 
@@ -406,9 +433,9 @@
             addCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
         }
 
-        if (errorFound) {
+        if (error.found) {
 
-            branchFailed.call(this);
+            unsolvableSituationHandler.call(this, error.errors);
 
         }
     }
@@ -439,16 +466,16 @@
         }
 
         if (this._rowCounters[i][k] === 1) {
-            cert.type.push('row');
+            cert.type.push(row);
         }
         if (this._columnCounters[j][k] === 1) {
-            cert.type.push('column');
+            cert.type.push(column);
         }
         if (this._elementCounters[i][j] === 1) {
-            cert.type.push('element');
+            cert.type.push(element);
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
-            cert.type.push('subGrid');
+            cert.type.push(subGrid);
         }
 
         if (cert.type.length > 0) {
@@ -460,7 +487,7 @@
 
     function addCertainCellByRowCounter(i, k) {
 
-        var cert = {i:i, j:0, value:k + 1, type:['row']};
+        var cert = {i:i, j:0, value:k + 1, type:[row]};
 
         for (; cert.j < this._nSqrd; cert.j++) {
             if (this._possibilityCube[i][cert.j][k].length === 0) {
@@ -474,7 +501,7 @@
 
     function addCertainCellByColumnCounter(j, k) {
 
-        var cert = {i:0, j:j, value:k + 1, type:['column']};
+        var cert = {i:0, j:j, value:k + 1, type:[column]};
 
         for (; cert.i < this._nSqrd; cert.i++) {
             if (this._possibilityCube[cert.i][j][k].length === 0) {
@@ -488,7 +515,7 @@
 
     function addCertainCellByElementCounter(i, j) {
 
-        var cert = {i:i, j:j, value:0, type:['element']};
+        var cert = {i:i, j:j, value:0, type:[element]};
 
         for (var k = 0; k < this._nSqrd; k++) {
             if (this._possibilityCube[i][j][k].length === 0) {
@@ -503,7 +530,7 @@
 
     function addCertainCellBySubGridCounter(sgb, k) {
 
-        var cert = {i:sgb.iLower, j:sgb.jLower, value:k + 1, type:['subGrid']}
+        var cert = {i:sgb.iLower, j:sgb.jLower, value:k + 1, type:[subGrid]}
             , certFound = false
             ;
 
@@ -525,13 +552,13 @@
 
     function removeCertainCellByRowCounter(i, k) {
 
-        var certCells = this._activeNode._certainCells
+        var certCells = this._certainCells
             , idx
             ;
 
         for (var j = 0, l = certCells.length; j < l; j++) {
             if (certCells[j].i === i && certCells[j].value === k + 1) {
-                idx = certCells[j].type.indexOf('row');
+                idx = certCells[j].type.indexOf(row);
                 if (idx !== -1) {
                     certCells[j].type.splice(idx, 1);
                     if (certCells[j].type.length === 0) {
@@ -549,13 +576,13 @@
 
     function removeCertainCellByColumnCounter(j, k) {
 
-        var certCells = this._activeNode._certainCells
+        var certCells = this._certainCells
             , idx
             ;
 
         for (var i = 0, l = certCells.length; i < l; i++) {
             if (certCells[i].j === j && certCells[i].value === k + 1) {
-                idx = certCells[i].type.indexOf('column');
+                idx = certCells[i].type.indexOf(column);
                 if (idx !== -1) {
                     certCells[i].type.splice(idx, 1);
                     if (certCells[i].type.length === 0) {
@@ -573,13 +600,13 @@
 
     function removeCertainCellByElementCounter(i, j) {
 
-        var certCells = this._activeNode._certainCells
+        var certCells = this._certainCells
             , idx
             ;
 
         for (var m = 0, l = certCells.length; m < l; m++) {
             if (certCells[m].i === i && certCells[m].j === j) {
-                idx = certCells[m].type.indexOf('element');
+                idx = certCells[m].type.indexOf(element);
                 if (idx !== -1) {
                     certCells[m].type.splice(idx, 1);
                     if (certCells[m].type.length === 0) {
@@ -597,7 +624,7 @@
 
     function removeCertainCellBySubGridCounter(sgb, k) {
 
-        var certCells = this._activeNode._certainCells
+        var certCells = this._certainCells
             , idx
             ;
 
@@ -605,7 +632,7 @@
             if (certCells[m].i >= sgb.iLower && certCells[m].i <= sgb.iUpper &&
                 certCells[m].j >= sgb.jLower && certCells[m].j <= sgb.jUpper &&
                 certCells[m].value === k + 1) {
-                idx = certCells[m].type.indexOf('subGrid');
+                idx = certCells[m].type.indexOf(subGrid);
                 if (idx !== -1) {
                     certCells[m].type.splice(idx, 1);
                     if (certCells[m].type.length === 0) {
@@ -620,45 +647,14 @@
     }
 
 
-    /*
-     Branching functionality
-     */
+    function getBestPossibilitiesBySmallestFork() {
 
-
-    function SolverNode(parent, guessedCell) {
-
-        this._children = [];
-
-        this._entryList = [];
-
-        this._certainCells = [];
-
-        this._branchesFound = 1;
-
-        this._solutionsFound = 0;
-
-        this._deadEndsFound = 0;
-
-        if (typeof parent === 'undefined') {
-            this._parent = null;
-            this._guessedCell = null;
-        } else {
-            this._parent = parent;
-            this._guessedCell = guessedCell;
-        }
-
-    }
-
-
-    function forkSolver() {
-
-        var currentNode = this._activeNode
-            , node = this._activeNode
-            , smallestFork = {branches:this._nSqrd + 1, i:null, j:null, k:null, type:null}
+        var smallestFork = {branches:this._nSqrd + 1, i:null, j:null, k:null, type:null}
+            , bestPos = []
             , sgb
             ;
 
-        //find for with least branches
+        //find fork with least branches
         //by row
         for (var i = 0; i < this._nSqrd; i++) {
             for (var k = 0; k < this._nSqrd; k++) {
@@ -710,157 +706,70 @@
             }
         }
 
-        //create children with guesses
-        if(smallestFork.type === row){
-            for(var j = 0; j < this._nSqrd; j++){
-                if(this._possibilityCube[smallestFork.i][j][smallestFork.k].length === 0){
-                    this._activeNode._children.push(
-                        new SolverNode(
-                            currentNode,
-                            {
-                                i:smallestFork.i,
-                                j:j,
-                                value:smallestFork.k+1
-                            }
-                        )
-                    );
+        //find the actual possibilities relevant to the smallest fork
+        if (smallestFork.type === row) {
+            for (var j = 0; j < this._nSqrd; j++) {
+                if (this.possibilityIsAlive(smallestFork.i, j, smallestFork.k)) {
+                    bestPos.push({
+                        i:smallestFork.i,
+                        j:j,
+                        value:smallestFork.k+1,
+                        type:smallestFork.type
+                    });
                 }
             }
         }
-        if(smallestFork.type === column){
-            for(var i = 0; i < this._nSqrd; i++){
-                if(this._possibilityCube[i][smallestFork.j][smallestFork.k].length === 0){
-                    this._activeNode._children.push(
-                        new SolverNode(
-                            currentNode,
-                            {
-                                i:i,
-                                j:smallestFork.j,
-                                value:smallestFork.k+1
-                            }
-                        )
-                    );
+        if (smallestFork.type === column) {
+            for (var i = 0; i < this._nSqrd; i++) {
+                if (this.possibilityIsAlive(i, smallestFork.j, smallestFork.k)) {
+                    bestPos.push({
+                        i:i,
+                        j:smallestFork.j,
+                        value:smallestFork.k+1,
+                        type:smallestFork.type
+                    });
                 }
             }
         }
-        if(smallestFork.type === element){
-            for(var k = 0; k < this._nSqrd; k++){
-                if(this._possibilityCube[smallestFork.i][smallestFork.j][k].length === 0){
-                    this._activeNode._children.push(
-                        new SolverNode(
-                            currentNode,
-                            {
-                                i:smallestFork.i,
-                                j:smallestFork.j,
-                                value:k+1
-                            }
-                        )
-                    );
+        if (smallestFork.type === element) {
+            for (var k = 0; k < this._nSqrd; k++) {
+                if (this.possibilityIsAlive(smallestFork.i, smallestFork.j, k)) {
+                    bestPos.push({
+                        i:smallestFork.i,
+                        j:smallestFork.j,
+                        value:k+1,
+                        type:smallestFork.type
+                    });
                 }
             }
         }
-        if(smallestFork.type === subGrid){
-            sgb = this._gameBoard.getSubGridBoundsContainingCell(smallestFork.i,smallestFork.j);
-            for(var i = sgb.iLower; i < sgb.iUpper; i++){
-                for(var j = sgb.jLower; j <= sgb.jUpper; j++)
-                    if(this._possibilityCube[i][j][smallestFork.k].length === 0){
-                        this._activeNode._children.push(
-                            new SolverNode(
-                                currentNode,
-                                {
-                                    i:i,
-                                    j:j,
-                                    value:smallestFork.k+1
-                                }
-                            )
-                        );
+        if (smallestFork.type === subGrid) {
+            sgb = this._gameBoard.getSubGridBoundsContainingCell(smallestFork.i, smallestFork.j);
+            for (var i = sgb.iLower; i < sgb.iUpper; i++) {
+                for (var j = sgb.jLower; j <= sgb.jUpper; j++) {
+                    if (this.possibilityIsAlive(i, j, smallestFork.k)) {
+                        bestPos.push({
+                            i:i,
+                            j:j,
+                            value:smallestFork.k+1,
+                            type:smallestFork.type
+                        });
                     }
+                }
             }
 
         }
 
-        var node = this._activeNode._parent;
-        while(node !== null){
-            node._branchesFound += smallestFork.branches - 1;
-            node = node._parent;
-        }
-
-        //activate first child
-        this._activeNode = this._activeNode._children[0];
-        this._gameBoard.enterValue(this._activeNode._guessedCell.i,this._activeNode._guessedCell.j,this._activeNode._guessedCell.value);
-        this._activeNode._entryList.push(this._activeNode._guessedCell);
-
-        return this;
-    }
-
-
-    function branchFailed() {
-
-        var currentNode = this._activeNode
-            , node = this._activeNode
-            ;
-
-        while (node !== null) {
-            node._deadEndsFound++;
-            node = node._parent;
-        }
-
-        if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
-            branchEnded.call(this);
-        }
-
-        return this;
+        return bestPos;
 
     }
 
 
-    function branchSolved() {
+    function unsolvableSituationHandler(errors){
 
-        var currentNode = this._activeNode
-            , node = this._activeNode
-            ;
-
-        while (node !== null) {
-            node._solutionsFound++;
-            node = node._parent;
-        }
-
-        if (this._branchesFound !== (this._solutionsFound + this._deadEndsFound)) {
-            branchEnded.call(this);
-        }
-
-        return this;
+        //TODO
 
     }
 
-
-    function branchEnded() {
-
-        while (this._activeNode._parent !== null) {
-
-            undoAllActiveNodeEntries.call(this);
-
-            if (this._activeNode._parent._branchesFound < (this._activeNode._parent._solutionsFound + this._activeNode._parent._deadEndsFound)) {
-                this._activeNode = this._activeNode._parent._children[(this._activeNode._parent._solutionsFound + this._activeNode._parent._deadEndsFound)];
-                break;
-            }
-
-            this._activeNode = this._activeNode._parent;
-        }
-
-        return this;
-
-    }
-
-    function undoAllActiveNodeEntries() {
-
-        var activeNode = this._activeNode
-            ;
-
-        this._gameBoard.batchClearValue(activeNode._entryList);
-
-        return this;
-
-    }
 
 })();
