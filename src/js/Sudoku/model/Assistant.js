@@ -63,9 +63,9 @@
         constructor:Sudoku.Assistant,
 
 
-        possibilityIsAlive:function (i, j, value) {
+        possibilityIsAlive:function (i, j, k) {
 
-            return this._possibilityCube[i][j][value - 1].length === 0;
+            return this._possibilityCube[i][j][k].length === 0;
 
         },
 
@@ -81,6 +81,14 @@
             }
 
             return arr;
+
+        },
+
+        enterValue:function(i,j,k){
+
+            this._gameBoard.enterValue(i, j, k-1);
+
+            return this;
 
         }
         
@@ -267,17 +275,16 @@
     }
 
 
-    function addCertainCell(cert) {
+    function addCertainty(cert) {
 
-        var certCells = this._certainties
-            , certAlreadyExists = false
+        var certAlreadyExists = false
             ;
 
-        for (var i = 0, l = certCells.length; i < l; i++) {
+        for (var i = 0, l = this._certainties.length; i < l; i++) {
 
-            if (certCells[i].i === cert.i &&
-                certCells[i].j === cert.j &&
-                certCells[i].value === cert.value) {
+            if (this._certainties[i].i === cert.i &&
+                this._certainties[i].j === cert.j &&
+                this._certainties[i].k === cert.k) {
 
                 certAlreadyExists = true;
 
@@ -285,9 +292,9 @@
 
                     function (el, idx, arr) {
 
-                        if (certCells[i].type.indexOf(el) === -1) {
+                        if (this._certainties[i].type.indexOf(el) === -1) {
 
-                            certCells[i].type.push(el);
+                            this._certainties[i].type.push(el);
 
                         }
 
@@ -303,7 +310,7 @@
 
         if (!certAlreadyExists) {
 
-            certCells.push(cert);
+            this._certainties.push(cert);
 
         }
 
@@ -312,26 +319,23 @@
     }
 
 
-    function removeCertainCell(cert) {
+    function removeCertainty(cert) {
 
-        var certCells = this._certainties
-            ;
+        for (var i = 0, l = this._certainties.length; i < l; i++) {
 
-        for (var i = 0, l = certCells.length; i < l; i++) {
-
-            if (certCells[i].i === cert.i &&
-                certCells[i].j === cert.j &&
-                certCells[i].value === cert.value) {
+            if (this._certainties[i].i === cert.i &&
+                this._certainties[i].j === cert.j &&
+                this._certainties[i].k === cert.k) {
 
                 cert.type.forEach(
 
                     function (el, idx, arr) {
 
-                        var idx = certCells[i].type.indexOf(el);
+                        var idx = this._certainties[i].type.indexOf(el);
 
                         if (idx !== -1) {
 
-                            certCells[i].type.splice(idx, 1);
+                            this._certainties[i].type.splice(idx, 1);
 
                         }
 
@@ -339,9 +343,9 @@
 
                 );
 
-                if (certCells[i].type.length === 0) {
+                if (this._certainties[i].type.length === 0) {
 
-                    certCells.splice(i, 1);
+                    this._certainties.splice(i, 1);
 
                 }
 
@@ -363,11 +367,14 @@
     function decrementCounters(i, j, k, gbc) {
         var error = {
                 found:false,
+                i:i,
+                j:j,
+                k:k,
                 errors:[]
             }
             , sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
             , gbcSgb = this._gameBoard.getSubGridBoundsContainingCell(gbc.i, gbc.j)
-            , cert = {i:i, j:j, value:k + 1, type:[]}
+            , cert = {i:i, j:j, k:k, type:[]}
             ;
         
         /*
@@ -383,56 +390,48 @@
 
         if (this._rowCounters[i][k] === 0) {
             cert.type.push(row);
-            if (gbc.i !== i) {
+            if (gbc.i !== i || gbc.value - 1 !== k) {
                 error.found = true;
-                error.errors.push({
-                    type:row,
-                    i:i,
-                    j:null,
-                    k:k
-                });
+                error.errors.type.push(row);
             }
         }
         if (this._columnCounters[j][k] === 0) {
             cert.type.push(column);
-            if (gbc.j !== j) {
+            if (gbc.j !== j || gbc.value - 1 !== k) {
                 error.found = true;
-                error.errors.push({
-                    type:column,
-                    i:i,
-                    j:null,
-                    k:k
-                });
+                error.errors.type.push(column);
             }
         }
         if (this._elementCounters[i][j] === 0) {
             cert.type.push(element);
-            if (gbc.i !== i && gbc.j !== j) {
+            if (gbc.i !== i || gbc.j !== j) {
                 error.found = true;
+                error.errors.type.push(element);
             }
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 0) {
             cert.type.push(subGrid);
-            if (gbcSgb.iSubGrid !== sgb.iSubGrid && gbcSgb.jSubGrid !== sgb.jSubGrid) {
+            if (gbcSgb.iSubGrid !== sgb.iSubGrid || gbcSgb.jSubGrid !== sgb.jSubGrid || gbc.value - 1 !== k) {
                 error.found = true;
+                error.errors.type.push(subGrid);
             }
         }
 
         if (cert.type.length > 0) {
-            removeCertainCell.call(this, cert);
+            removeCertainty.call(this, cert);
         }
 
         if (this._rowCounters[i][k] === 1) {
-            addCertainCellByRowCounter.call(this, i, k);
+            addCertaintyCellByRowCounter.call(this, i, k);
         }
         if (this._columnCounters[j][k] === 1) {
-            addCertainCellByColumnCounter.call(this, j, k);
+            addCertaintyByColumnCounter.call(this, j, k);
         }
         if (this._elementCounters[i][j] === 1) {
-            addCertainCellByElementCounter.call(this, i, j);
+            addCertaintyByElementCounter.call(this, i, j);
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
-            addCertainCellBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
+            addCertaintyBySubGridCounter.call(this, sgb.iSubGrid, sgb.jSubGrid, k);
         }
 
         if (error.found) {
@@ -446,7 +445,7 @@
     function incrementCounters(i, j, k) {
 
         var sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
-            , cert = {i:i, j:j, value:k + 1, type:[]}
+            , cert = {i:i, j:j, k:k, type:[]}
             ;
 
         this._rowCounters[i][k]++;
@@ -455,16 +454,16 @@
         this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]++;
 
         if (this._rowCounters[i][k] === 2) {
-            removeCertainCellByRowCounter.call(this, i, k);
+            removeCertaintyByRowCounter.call(this, i, k);
         }
         if (this._columnCounters[j][k] === 2) {
-            removeCertainCellByColumnCounter.call(this, j, k);
+            removeCertaintyByColumnCounter.call(this, j, k);
         }
         if (this._elementCounters[i][j] === 2) {
-            removeCertainCellByElementCounter.call(this, i, j);
+            removeCertaintyByElementCounter.call(this, i, j);
         }
         if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 2) {
-            removeCertainCellBySubGridCounter.call(this, sgb, k);
+            removeCertaintyBySubGridCounter.call(this, sgb, k);
         }
 
         if (this._rowCounters[i][k] === 1) {
@@ -481,19 +480,19 @@
         }
 
         if (cert.type.length > 0) {
-            addCertainCell.call(this, cert);
+            addCertainty.call(this, cert);
         }
 
     }
 
 
-    function addCertainCellByRowCounter(i, k) {
+    function addCertaintyByRowCounter(i, k) {
 
-        var cert = {i:i, j:0, value:k + 1, type:[row]};
+        var cert = {i:i, j:0, k:k, type:[row]};
 
         for (; cert.j < this._nSqrd; cert.j++) {
             if (this._possibilityCube[i][cert.j][k].length === 0) {
-                addCertainCell.call(this, cert);
+                addCertainty.call(this, cert);
                 break;
             }
         }
@@ -501,13 +500,13 @@
     }
 
 
-    function addCertainCellByColumnCounter(j, k) {
+    function addCertaintyByColumnCounter(j, k) {
 
         var cert = {i:0, j:j, value:k + 1, type:[column]};
 
         for (; cert.i < this._nSqrd; cert.i++) {
             if (this._possibilityCube[cert.i][j][k].length === 0) {
-                addCertainCell.call(this, cert);
+                addCertainty.call(this, cert);
                 break;
             }
         }
@@ -515,14 +514,14 @@
     }
 
 
-    function addCertainCellByElementCounter(i, j) {
+    function addCertaintyByElementCounter(i, j) {
 
         var cert = {i:i, j:j, value:0, type:[element]};
 
         for (var k = 0; k < this._nSqrd; k++) {
             if (this._possibilityCube[i][j][k].length === 0) {
                 cert.value = k + 1;
-                addCertainCell.call(this, cert);
+                addCertainty.call(this, cert);
                 break;
             }
         }
@@ -530,7 +529,7 @@
     }
 
 
-    function addCertainCellBySubGridCounter(sgb, k) {
+    function addCertaintyBySubGridCounter(sgb, k) {
 
         var cert = {i:sgb.iLower, j:sgb.jLower, value:k + 1, type:[subGrid]}
             , certFound = false
@@ -539,7 +538,7 @@
         for (cert.i = sgb.iLower; cert.i <= sgb.iUpper; cert.i++) {
             for (cert.j = sgb.jLower; cert.j <= sgb.jUpper; cert.j++) {
                 if (this._possibilityCube[cert.i][cert.j][k].length === 0) {
-                    addCertainCell.call(this, cert);
+                    addCertainty.call(this, cert);
                     certFound = true;
                     break;
                 }
@@ -552,7 +551,7 @@
     }
 
 
-    function removeCertainCellByRowCounter(i, k) {
+    function removeCertaintyByRowCounter(i, k) {
 
         var certCells = this._certainties
             , idx
@@ -576,7 +575,7 @@
     }
 
 
-    function removeCertainCellByColumnCounter(j, k) {
+    function removeCertaintyByColumnCounter(j, k) {
 
         var certCells = this._certainties
             , idx
@@ -600,7 +599,7 @@
     }
 
 
-    function removeCertainCellByElementCounter(i, j) {
+    function removeCertaintyByElementCounter(i, j) {
 
         var certCells = this._certainties
             , idx
@@ -624,7 +623,7 @@
     }
 
 
-    function removeCertainCellBySubGridCounter(sgb, k) {
+    function removeCertaintyBySubGridCounter(sgb, k) {
 
         var certCells = this._certainties
             , idx
