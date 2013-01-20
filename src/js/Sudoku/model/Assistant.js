@@ -708,17 +708,24 @@
 
     function removeCertaintyByRowCounter(i, k) {
 
-        var certCells = this._certainties
+        var certs = this._certainties
             , idx
+            , cert
             ;
 
-        for (var j = 0, l = certCells.length; j < l; j++) {
-            if (certCells[j].i === i && certCells[j].k === k) {
-                idx = certCells[j].types.indexOf(row);
+        for (var j = 0, l = certs.length; j < l; j++) {
+            if (certs[j].i === i && certs[j].k === k) {
+                idx = certs[j].types.indexOf(row);
                 if (idx !== -1) {
-                    certCells[j].types.splice(idx, 1);
-                    if (certCells[j].types.length === 0) {
-                        certCells.splice(j, 1);
+                    certs[j].types.splice(idx, 1);
+                    if (certs[j].types.length === 0) {
+                        cert = certs.splice(j, 1)[0];
+                        this.dispatchEvent({
+                            type:'certaintyRemoved',
+                            i:cert.i,
+                            j:cert.j,
+                            k:cert.k
+                        });
                     }
                     break;
                 }
@@ -732,17 +739,24 @@
 
     function removeCertaintyByColumnCounter(j, k) {
 
-        var certCells = this._certainties
+        var certs = this._certainties
             , idx
+            , cert
             ;
 
-        for (var i = 0, l = certCells.length; i < l; i++) {
-            if (certCells[i].j === j && certCells[i].k === k) {
-                idx = certCells[i].types.indexOf(column);
+        for (var i = 0, l = certs.length; i < l; i++) {
+            if (certs[i].j === j && certs[i].k === k) {
+                idx = certs[i].types.indexOf(column);
                 if (idx !== -1) {
-                    certCells[i].types.splice(idx, 1);
-                    if (certCells[i].types.length === 0) {
-                        certCells.splice(i, 1);
+                    certs[i].types.splice(idx, 1);
+                    if (certs[i].types.length === 0) {
+                        cert = certs.splice(i, 1)[0];
+                        this.dispatchEvent({
+                            type:'certaintyRemoved',
+                            i:cert.i,
+                            j:cert.j,
+                            k:cert.k
+                        });
                     }
                     break;
                 }
@@ -756,17 +770,24 @@
 
     function removeCertaintyByElementCounter(i, j) {
 
-        var certCells = this._certainties
+        var certs = this._certainties
             , idx
+            ,cert
             ;
 
-        for (var m = 0, l = certCells.length; m < l; m++) {
-            if (certCells[m].i === i && certCells[m].j === j) {
-                idx = certCells[m].types.indexOf(element);
+        for (var m = 0, l = certs.length; m < l; m++) {
+            if (certs[m].i === i && certs[m].j === j) {
+                idx = certs[m].types.indexOf(element);
                 if (idx !== -1) {
-                    certCells[m].types.splice(idx, 1);
-                    if (certCells[m].types.length === 0) {
-                        certCells.splice(m, 1);
+                    certs[m].types.splice(idx, 1);
+                    if (certs[m].types.length === 0) {
+                        cert = certs.splice(m, 1)[0];
+                        this.dispatchEvent({
+                            type:'certaintyRemoved',
+                            i:cert.i,
+                            j:cert.j,
+                            k:cert.k
+                        });
                     }
                     break;
                 }
@@ -780,19 +801,26 @@
 
     function removeCertaintyBySubGridCounter(sgb, k) {
 
-        var certCells = this._certainties
+        var certs = this._certainties
             , idx
+            , cert
             ;
 
-        for (var m = 0, l = certCells.length; m < l; m++) {
-            if (certCells[m].i >= sgb.iLower && certCells[m].i <= sgb.iUpper &&
-                certCells[m].j >= sgb.jLower && certCells[m].j <= sgb.jUpper &&
-                certCells[m].k === k) {
-                idx = certCells[m].types.indexOf(subGrid);
+        for (var m = 0, l = certs.length; m < l; m++) {
+            if (certs[m].i >= sgb.iLower && certs[m].i <= sgb.iUpper &&
+                certs[m].j >= sgb.jLower && certs[m].j <= sgb.jUpper &&
+                certs[m].k === k) {
+                idx = certs[m].types.indexOf(subGrid);
                 if (idx !== -1) {
-                    certCells[m].types.splice(idx, 1);
-                    if (certCells[m].types.length === 0) {
-                        certCells.splice(m, 1);
+                    certs[m].types.splice(idx, 1);
+                    if (certs[m].types.length === 0) {
+                        cert = certs.splice(m, 1)[0];
+                        this.dispatchEvent({
+                            type:'certaintyRemoved',
+                            i:cert.i,
+                            j:cert.j,
+                            k:cert.k
+                        });
                     }
                     break;
                 }
