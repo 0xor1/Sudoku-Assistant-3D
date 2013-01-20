@@ -4,6 +4,7 @@
 
         var threePanel = new UIControls.ThreePanel(document.getElementById("threeDView"))
             , gameBoard = new Sudoku.GameBoard(3)
+            , assistant = new Sudoku.Assistant(gameBoard)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)
             ;
 
@@ -13,16 +14,7 @@
         centerCamera.call(threePanel, gameBoard);
 
 
-        setTimeout(
-            function () {
-                gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
-            },
-            1000
-        );
-
-        setTimeout(function () {
-            solver.sequentialAutoSolve();
-        }, 5000);
+        gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
 
         Utils.AnimationMaster.turnOnAnimationSmoothing();
 
