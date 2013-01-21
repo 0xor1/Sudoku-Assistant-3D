@@ -474,5 +474,26 @@
 
     }
 
-})
-    ();
+
+
+    Sudoku.getSubGridBoundsContainingCell = function (i, j, n) {
+
+        var iLower = Math.floor(i / n) * n
+            , iUpper = iLower + n - 1
+            , iSubGrid = iLower / n
+            , jLower = Math.floor(j / n) * n
+            , jUpper = jLower + n - 1
+            , jSubGrid = jLower / n
+            ;
+
+        return {
+            iLower:iLower,
+            iUpper:iUpper,
+            iSubGrid:iSubGrid,
+            jLower:jLower,
+            jUpper:jUpper,
+            jSubGrid:jSubGrid
+        }
+    };
+
+})();

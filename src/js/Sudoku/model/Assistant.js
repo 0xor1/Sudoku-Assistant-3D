@@ -858,7 +858,7 @@
         },
 
 
-        getKillers:function(){
+        getKillers:function () {
 
             return this._killers.slice(0);
 
@@ -875,10 +875,6 @@
 
                     this.dispatchEvent({
                         type:killed,
-                        i:this._i,
-                        j:this._j,
-                        k:this._k,
-                        killers:this.getKillers(),
                         killerInfo:killerInfo
                     })
 
@@ -903,9 +899,6 @@
 
                     this.dispatchEvent({
                         type:revived,
-                        i:this._i,
-                        j:this._j,
-                        k:this._k,
                         killerInfo:killerInfo
                     });
 
@@ -948,11 +941,7 @@
                 if (this._errors.length === 1) {
 
                     this.dispatchEvent({
-                        type:hasErrors,
-                        i:this._i,
-                        j:this._j,
-                        k:this._k,
-                        errors:this.getErrors()
+                        type:hasErrors
                     })
 
                 }
@@ -975,10 +964,7 @@
                 if (this.hasNoErrors()) {
 
                     this.dispatchEvent({
-                        type:hasNoErrors,
-                        i:this._i,
-                        j:this._j,
-                        k:this._k
+                        type:hasNoErrors
                     });
 
                 }
@@ -997,7 +983,7 @@
         },
 
 
-        notCertainty:function () {
+        isNotCertainty:function () {
 
             return !this.isCertainty();
 
@@ -1011,7 +997,7 @@
         },
 
 
-        addCertainty:function () {
+        addCertainty:function (type) {
 
             if (this._certainties.indexOf(type) === -1) {
 
@@ -1020,11 +1006,7 @@
                 if (this._certainties.length === 1) {
 
                     this.dispatchEvent({
-                        type:isCertainty,
-                        i:this._i,
-                        j:this._j,
-                        k:this._k,
-                        certainties:this.getCertainties()
+                        type:isCertainty
                     });
 
                 }
@@ -1047,10 +1029,7 @@
                 if (this.notCertainty()) {
 
                     this.dispatchEvent({
-                        type:isNotCertainty,
-                        i:this._i,
-                        j:this._j,
-                        k:this._k
+                        type:isNotCertainty
                     });
 
                 }
@@ -1078,8 +1057,12 @@
 
             function (el, idx, arr) {
 
-                el.addEventListener(killed, function(event){this.decrement(event);}.bind(this));
-                el.addEventListener(revived, function(event){this.increment(event);}.bind(this));
+                el.addEventListener(killed, function (event) {
+                    this.decrement(event);
+                }.bind(this));
+                el.addEventListener(revived, function (event) {
+                    this.increment(event);
+                }.bind(this));
 
             },
 
@@ -1094,17 +1077,82 @@
         constructor:Counter,
 
 
-        decrement:function(event){
+        decrement:function (event) {
+            ;
 
             this._value--;
 
-            if(this._value === 0){
+            if (this._value === 0) {
 
-                if(checkForError.call(this, event)){
+                if (thereIsError.call(this, event)) {
 
+                    this._cells.forEach(
 
+                        function (el, idx, arr) {
 
+                            el.addError(this._type);
+
+                        },
+
+                        this
+                    );
                 }
+
+            }
+
+            if (this._value === 1) {
+
+                this._cells.forEach(
+
+                    function (el, idx, arr) {
+
+                        el.addCertainty(this._type);
+
+                    },
+
+                    this
+                );
+
+            }
+
+        },
+
+
+        increment:function (event) {
+            ;
+
+            this._value++;
+
+            if (this._value === 1) {
+
+                if (thereIsError.call(this, event)) {
+
+                    this._cells.forEach(
+
+                        function (el, idx, arr) {
+
+                            el.removeError(this._type);
+
+                        },
+
+                        this
+                    );
+                }
+
+            }
+
+            if (this._value === 2) {
+
+                this._cells.forEach(
+
+                    function (el, idx, arr) {
+
+                        el.removeCertainty(this._type);
+
+                    },
+
+                    this
+                );
 
             }
 
@@ -1113,9 +1161,33 @@
     };
 
 
-    function checkForError (event){
+    function thereIsError(event) {
 
+        var killer = event.killerInfo
+            , poss = event.origin
+            , kSgb = Sudoku.getSubGridBoundsContainingCell(killer.i, killer.j, Math.sqrt(this._cells.length))
+            , pSgb = Sudoku.getSubGridBoundsContainingCell(poss._i, poss._j, Math.sqrt(this._cells.length))
+            ;
 
+        if (this._type === row) {
+            if (killer.j !== poss._j || killer.k !== poss._k) {
+                return true;
+            }
+        } else if (this._type === column) {
+            if (killer.i !== poss._i || killer.k !== poss._k) {
+                return true;
+            }
+        } else if (this._type === element) {
+            if (killer.i !== poss._i || killer.j !== poss._j) {
+                return true;
+            }
+        } else if (this._type === subGrid) {
+            if (kSgb.iSubGrid !== pSgb.iSubGrid || kSgb.jSubGrid !== pSgb.jSubGrid || killer.k !== poss._k) {
+                return true;
+            }
+        } else {
+            return false;
+        }
 
     }
 

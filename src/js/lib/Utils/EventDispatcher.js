@@ -2,61 +2,116 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
-(function () {
+var EventDispatcher = function () {
 
+    var listeners = {};
 
-    window.Utils = window.Utils || {};
+    this.addEventListener = function (type, listener) {
 
+        if (listeners[ type ] === undefined) {
 
-    Utils.EventDispatcher = function () {
+            listeners[ type ] = [];
 
-        var listeners = {};
+        }
 
-        this.addEventListener = function (type, listener) {
+        if (listeners[ type ].indexOf(listener) === -1) {
 
-            if (listeners[type] === undefined) {
+            listeners[ type ].push(listener);
 
-                listeners[type] = [];
+            if (listeners[ type ].isDispatching) {
 
-            }
-
-            if (listeners[type].indexOf(listener) === -1) {
-
-                listeners[type].push(listener);
+                listeners[ type ].numListenersAdded++;
 
             }
 
-        };
+        }
 
-        this.dispatchEvent = function (event) {
+    };
 
-            var listenerArray = listeners[event.type];
+    this.removeEventListener = function (type, listener) {
 
-            if (listenerArray !== undefined) {
+        var index = listeners[ type ].indexOf(listener);
 
-                event.origin = this;
+        if (index !== -1) {
 
-                for (var i = 0, l = listenerArray.length; i < l; i++) {
+            if (listeners[ type ].isDispatching) {
 
-                    listenerArray[ i ].call(this, event);
+                listeners[ type ].dispatchQueueUpdated = true;
+
+                listeners[ type ].removedIndexes.push(index);
+
+            }
+
+            listeners[ type ].splice(index, 1);
+
+        }
+
+    };
+
+    this.dispatchEvent = function (event) {
+
+        var listenerArray = listeners[ event.type ];
+
+        if (listenerArray !== undefined) {
+
+            if (listenerArray.isDispatching) {
+
+                listenerArray.wasReRequested = true;
+
+                return;
+
+            }
+
+            listenerArray.isDispatching = true;
+
+            listenerArray.dispatchQueueUpdated = false;
+
+            listenerArray.removedIndexes = [];
+
+            listenerArray.numListenersAdded = 0;
+
+            event.origin = this;
+
+            for (var i = 0, l = listenerArray.length; i < l; i++) {
+
+                if (listenerArray.dispatchQueueUpdated) {
+
+                    l = listenerArray.length - listenerArray.numListenersAdded;
+
+                    var iOld = i;
+
+                    for (var j = 0, k = listenerArray.removedIndexes.length; j < k; j++) {
+
+                        if (listenerArray.removedIndexes[ j ] < iOld) {
+
+                            i--;
+
+                        }
+
+                    }
+
+                    listenerArray.removedIndexes = [];
+
+                    listenerArray.dispatchQueueUpdated = false;
 
                 }
 
-            }
-
-        };
-
-        this.removeEventListener = function (type, listener) {
-
-            var index = listeners[type].indexOf(listener);
-
-            if (index !== -1) {
-
-                listeners[type].splice(index, 1);
+                listenerArray[ i ].call(this, event);
 
             }
 
-        };
+            listenerArray.isDispatching = false;
+
+            if (listenerArray.wasReRequested) {
+
+                listenerArray.wasReRequested = false;
+
+                setTimeout(function(){this.dispatchEvent(event);}.bind(this),0);
+
+            }
+
+        }
+
     };
 
-})();
+};
