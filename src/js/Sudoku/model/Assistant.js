@@ -26,7 +26,8 @@
             , k
             , iTemp
             , jTemp
-            , sgb
+            , iUpper
+            , jUpper
             , tempArray
             ;
 
@@ -66,17 +67,12 @@
 
         for (j = 0; j < this._nSqrd; j++) {
             for (k = 0; k < this._nSqrd; k++) {
-                this._columnCounters[j][k] = {
-                    counterType:column,
-                    j:j,
-                    k:k,
-                    value:this._nSqrd,
-                    cells:[]
-                };
-                this._masterCounter.push(this._columnCounters[j][k]);
+                tempArray = [];
                 for (i = 0; i < this._nSqrd; i++) {
-                    this._columnCounters[j][k].cells.push(this._possibilityCube[i][j][k]);
+                    tempArray.push(this._possibilityCube[i][j][k]);
                 }
+                this._columnCounters[j][k] = new Counter(column, tempArray);
+                this._masterCounter.push(this._columnCounters[j][k]);
             }
         }
 
@@ -84,17 +80,12 @@
 
         for (i = 0; i < this._nSqrd; i++) {
             for (j = 0; j < this._nSqrd; j++) {
-                this._elementCounters[i][j] = {
-                    counterType:element,
-                    i:i,
-                    j:j,
-                    value:this._nSqrd,
-                    cells:[]
-                };
-                this._masterCounter.push(this._elementCounters[i][j]);
+                tempArray = [];
                 for (k = 0; k < this._nSqrd; k++) {
-                    this._elementCounters[i][j].cells.push(this._possibilityCube[i][j][k]);
+                    tempArray.push(this._possibilityCube[i][j][k]);
                 }
+                this._elementCounters[i][j] = new Counter(element, tempArray);
+                this._masterCounter.push(this._elementCounters[i][j]);
             }
         }
 
@@ -103,21 +94,14 @@
         for (i = 0; i < this._n; i++) {
             for (j = 0; j < this._n; j++) {
                 for (k = 0; k < this._nSqrd; k++) {
-                    sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j);
-                    this._subGridCounters[i][j][k] = {
-                        counterType:subGrid,
-                        i:i,
-                        j:j,
-                        k:k,
-                        value:this._nSqrd,
-                        cells:[]
-                    };
-                    this._masterCounter.push(this._subGridCounters[i][j][k]);
-                    for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
-                        for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp) {
-                            this._subGridCounters[i][j][k].cells.push(this._possibilityCube[iTemp][jTemp][k]);
+                    tempArray = [];
+                    for (iTemp = i * this._n, iUpper = itemp + this._n; iTemp < iUpper; iTemp++) {
+                        for (jTemp = j * this._n, jUpper = jTemp + this._n; jTemp < jUpper; jTemp++) {
+                            tempArray.push(this._possibilityCube[iTemp][jTemp][k]);
                         }
                     }
+                    this._subGridCounters[i][j][k] = new Counter(subGrid, tempArray);
+                    this._masterCounter.push(this._subGridCounters[i][j][k]);
                 }
             }
         }
@@ -137,7 +121,7 @@
 
         possibilityIsAlive:function (i, j, k) {
 
-            return this._possibilityCube[i][j][k].killers.length === 0;
+            return this._possibilityCube[i][j][k].isAlive();
 
         },
 
@@ -345,7 +329,7 @@
             , j = event.j
             , k = event.value - 1
             , sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
-            , gbc = {i:event.i, j:event.j, value:event.value}
+            , killer = {i:i, j:j, k:k}
             , iTemp
             , jTemp
             , kTemp
@@ -353,20 +337,20 @@
 
         /*killRowPossibilities*/
         for (jTemp = 0; jTemp < this._nSqrd; jTemp++) {
-            killPossibility.call(this, i, jTemp, k, row, gbc);
+            this._possibilityCube[i][jTemp][k].addKiller(row, killer);
         }
         /*killColumnPossibilities*/
         for (iTemp = 0; iTemp < this._nSqrd; iTemp++) {
-            killPossibility.call(this, iTemp, j, k, column, gbc);
+            this._possibilityCube[iTemp][j][k].addKiller(column, killer);
         }
         /*killElementPossibilities*/
         for (kTemp = 0; kTemp < this._nSqrd; kTemp++) {
-            killPossibility.call(this, i, j, kTemp, element, gbc);
+            this._possibilityCube[i][j][kTemp].addKiller(element, killer);
         }
         /*killSubGridPossibilities*/
         for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
             for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
-                killPossibility.call(this, iTemp, jTemp, k, subGrid, gbc);
+                this._possibilityCube[iTemp][jTemp][k].addKiller(subGrid, killer);
             }
         }
 
@@ -381,7 +365,7 @@
             , j = event.j
             , k = event.value - 1
             , sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
-            , gbc = {i:event.i, j:event.j, value:event.value}
+            , killer = {i:i, j:j, k:k}
             , iTemp
             , jTemp
             , kTemp
@@ -389,433 +373,24 @@
 
         /*reviveRowPossibilities*/
         for (jTemp = 0; jTemp < this._nSqrd; jTemp++) {
-            revivePossibility.call(this, i, jTemp, k, row, gbc);
+            this._possibilityCube[i][jTemp][k].removeKiller(row, killer);
         }
         /*reviveColumnPossibilities*/
         for (iTemp = 0; iTemp < this._nSqrd; iTemp++) {
-            revivePossibility.call(this, iTemp, j, k, column, gbc);
+            this._possibilityCube[iTemp][j][k].removeKiller(column, killer);
         }
         /*reviveElementPossibilities*/
         for (kTemp = 0; kTemp < this._nSqrd; kTemp++) {
-            revivePossibility.call(this, i, j, kTemp, element, gbc);
+            this._possibilityCube[i][j][kTemp].removeKiller(element, killer);
         }
         /*reviveSubGridPossibilities*/
         for (iTemp = sgb.iLower; iTemp <= sgb.iUpper; iTemp++) {
             for (jTemp = sgb.jLower; jTemp <= sgb.jUpper; jTemp++) {
-                revivePossibility.call(this, iTemp, jTemp, k, subGrid, gbc);
+                this._possibilityCube[iTemp][jTemp][k].removeKiller(subGrid, killer);
             }
         }
 
         return this;
-
-    }
-
-
-    function revivePossibility(i, j, k, type, gbc) {
-
-        var idx = this._possibilityCube[i][j][k].killers.indexOf(type)
-            ;
-
-        if (idx !== -1) {
-
-            this._possibilityCube[i][j][k].killers.splice(idx, 1);
-
-            if (this._possibilityCube[i][j][k].killers.length === 0) {
-
-                incrementCounters.call(this, i, j, k, gbc);
-
-                this.dispatchEvent({
-                    type:"possibilityRevived",
-                    i:i,
-                    j:j,
-                    k:k
-                });
-
-            }
-
-        }
-
-        return this;
-
-    }
-
-
-    function killPossibility(i, j, k, type, gbc) {
-
-        var idx = this._possibilityCube[i][j][k].killers.indexOf(type)
-            ;
-
-        if (idx === -1) {
-
-            this._possibilityCube[i][j][k].killers.push(type);
-
-            if (this._possibilityCube[i][j][k].killers.length === 1) {
-
-                decrementCounters.call(this, i, j, k, gbc);
-
-                this.dispatchEvent({
-                    type:"possibilityKilled",
-                    i:i,
-                    j:j,
-                    k:k
-                });
-
-            }
-        }
-
-        return this;
-
-    }
-
-
-    /* gbc -> gameBoardCell coordinates and value for the
-     cell that started the killing process for error checking
-     purposes
-     */
-    function decrementCounters(i, j, k, gbc) {
-        var sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
-            , gbcSgb = this._gameBoard.getSubGridBoundsContainingCell(gbc.i, gbc.j)
-            , cert = {i:i, j:j, k:k, types:[]}
-            , counters = [
-                this._rowCounters[i][k],
-                this._columnCounters[j][k],
-                this._elementCounters[i][j],
-                this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]
-            ]
-            ;
-
-        counters.forEach(
-            function (el, idx, arr) {
-
-                var i
-                    , typeIdx
-                    ;
-
-                if (el.value-- === 1) {
-
-                    for (i = 0; i < this._nSqrd; i++) {
-
-                        if (el.cells[i].killers.length === 0) {
-
-
-                            break;
-
-                        }
-
-                    }
-
-                    if (typeIdx = el.cells[i].certainties.indexOf(el.counterType) === -1) {
-
-                        el.cells
-
-                    }
-
-                }
-
-            },
-
-            this
-
-        );
-
-        /*
-         decrement relevant counters and if the counter
-         is zero and the relevant dimension is not the same
-         as the originating cell that started the killing process this
-         branch has no solution and need not be investigated further
-         */
-        this._rowCounters[i][k].value--;
-        this._columnCounters[j][k].value--;
-        this._elementCounters[i][j].value--;
-        this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k].value--;
-
-        if (this._rowCounters[i][k].value === 0) {
-            cert.types.push(row);
-            if (gbc.i !== i || gbc.value - 1 !== k) {
-                addErrorByRow.call(this, i, k);
-            }
-        }
-        if (this._columnCounters[j][k] === 0) {
-            cert.types.push(column);
-            if (gbc.j !== j || gbc.value - 1 !== k) {
-                addErrorByColumn.call(this, j, k);
-            }
-        }
-        if (this._elementCounters[i][j] === 0) {
-            cert.types.push(element);
-            if (gbc.i !== i || gbc.j !== j) {
-                addErrorByElement.call(this, i, j);
-            }
-        }
-        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 0) {
-            cert.types.push(subGrid);
-            if (gbcSgb.iSubGrid !== sgb.iSubGrid || gbcSgb.jSubGrid !== sgb.jSubGrid || gbc.value - 1 !== k) {
-                addErrorBySubGrid.call(this, sgb, k);
-            }
-        }
-
-        if (cert.types.length > 0) {
-            removeCertainty.call(this, cert);
-        }
-
-        if (this._rowCounters[i][k] === 1) {
-            addCertaintyByRow.call(this, i, k);
-        }
-        if (this._columnCounters[j][k] === 1) {
-            addCertaintyByColumn.call(this, j, k);
-        }
-        if (this._elementCounters[i][j] === 1) {
-            addCertaintyByElement.call(this, i, j);
-        }
-        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
-            addCertaintyBySubGrid.call(this, sgb, k);
-        }
-
-    }
-
-
-    function incrementCounters(i, j, k, gbc) {
-
-        var sgb = this._gameBoard.getSubGridBoundsContainingCell(i, j)
-            , cert = {i:i, j:j, k:k, types:[]}
-            ;
-
-        this._rowCounters[i][k]++;
-        this._columnCounters[j][k]++;
-        this._elementCounters[i][j]++;
-        this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k]++;
-
-        if (this._rowCounters[i][k] === 2) {
-            removeCertaintyByRow.call(this, i, k);
-        }
-        if (this._columnCounters[j][k] === 2) {
-            removeCertaintyByColumn.call(this, j, k);
-        }
-        if (this._elementCounters[i][j] === 2) {
-            removeCertaintyByElement.call(this, i, j);
-        }
-        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 2) {
-            removeCertaintyBySubGrid.call(this, sgb, k);
-        }
-
-        if (this._rowCounters[i][k] === 1) {
-            cert.types.push(row);
-            if (gbc.i !== i || gbc.value - 1 !== k) {
-                removeErrorByRow.call(this, i, k);
-            }
-        }
-        if (this._columnCounters[j][k] === 1) {
-            cert.types.push(column);
-            if (gbc.j !== j || gbc.value - 1 !== k) {
-                removeErrorByColumn.call(this, j, k);
-            }
-        }
-        if (this._elementCounters[i][j] === 1) {
-            cert.types.push(element);
-            if (gbc.i !== i || gbc.j !== j) {
-                removeErrorByElement.call(this, i, j);
-            }
-        }
-        if (this._subGridCounters[sgb.iSubGrid][sgb.jSubGrid][k] === 1) {
-            cert.types.push(subGrid);
-            if (gbcSgb.iSubGrid !== sgb.iSubGrid || gbcSgb.jSubGrid !== sgb.jSubGrid || gbc.value - 1 !== k) {
-                removeErrorBySubGrid.call(this, sgb, k);
-            }
-        }
-
-        if (cert.types.length > 0) {
-            addCertainty.call(this, cert);
-        }
-
-    }
-
-
-    function addCertaintyByRow(i, k) {
-
-        var cert = {i:i, j:0, k:k, types:[row]};
-
-        for (; cert.j < this._nSqrd; cert.j++) {
-            if (this._possibilityCube[i][cert.j][k].length === 0) {
-                addCertainty.call(this, cert);
-                break;
-            }
-        }
-
-    }
-
-
-    function addCertaintyByColumn(j, k) {
-
-        var cert = {i:0, j:j, k:k, types:[column]};
-
-        for (; cert.i < this._nSqrd; cert.i++) {
-            if (this._possibilityCube[cert.i][j][k].length === 0) {
-                addCertainty.call(this, cert);
-                break;
-            }
-        }
-
-    }
-
-
-    function addCertaintyByElement(i, j) {
-
-        var cert = {i:i, j:j, k:0, types:[element]};
-
-        for (var k = 0; k < this._nSqrd; k++) {
-            if (this._possibilityCube[i][j][k].length === 0) {
-                cert.k = k;
-                addCertainty.call(this, cert);
-                break;
-            }
-        }
-
-    }
-
-
-    function addCertaintyBySubGrid(sgb, k) {
-
-        var cert = {i:sgb.iLower, j:sgb.jLower, k:k, types:[subGrid]}
-            , certFound = false
-            ;
-
-        for (cert.i = sgb.iLower; cert.i <= sgb.iUpper; cert.i++) {
-            for (cert.j = sgb.jLower; cert.j <= sgb.jUpper; cert.j++) {
-                if (this._possibilityCube[cert.i][cert.j][k].length === 0) {
-                    addCertainty.call(this, cert);
-                    certFound = true;
-                    break;
-                }
-            }
-            if (certFound) {
-                break;
-            }
-        }
-
-    }
-
-
-    function removeCertaintyByRow(i, k) {
-
-        var certs = this._certainties
-            , idx
-            , cert
-            ;
-
-        for (var j = 0, l = certs.length; j < l; j++) {
-            if (certs[j].i === i && certs[j].k === k) {
-                idx = certs[j].types.indexOf(row);
-                if (idx !== -1) {
-                    certs[j].types.splice(idx, 1);
-                    if (certs[j].types.length === 0) {
-                        cert = certs.splice(j, 1)[0];
-                        this.dispatchEvent({
-                            type:'certaintyRemoved',
-                            i:cert.i,
-                            j:cert.j,
-                            k:cert.k
-                        });
-                    }
-                    break;
-                }
-            }
-        }
-
-        return this;
-
-    }
-
-
-    function removeCertaintyByColumn(j, k) {
-
-        var certs = this._certainties
-            , idx
-            , cert
-            ;
-
-        for (var i = 0, l = certs.length; i < l; i++) {
-            if (certs[i].j === j && certs[i].k === k) {
-                idx = certs[i].types.indexOf(column);
-                if (idx !== -1) {
-                    certs[i].types.splice(idx, 1);
-                    if (certs[i].types.length === 0) {
-                        cert = certs.splice(i, 1)[0];
-                        this.dispatchEvent({
-                            type:'certaintyRemoved',
-                            i:cert.i,
-                            j:cert.j,
-                            k:cert.k
-                        });
-                    }
-                    break;
-                }
-            }
-        }
-
-        return this;
-
-    }
-
-
-    function removeCertaintyByElement(i, j) {
-
-        var certs = this._certainties
-            , idx
-            , cert
-            ;
-
-        for (var m = 0, l = certs.length; m < l; m++) {
-            if (certs[m].i === i && certs[m].j === j) {
-                idx = certs[m].types.indexOf(element);
-                if (idx !== -1) {
-                    certs[m].types.splice(idx, 1);
-                    if (certs[m].types.length === 0) {
-                        cert = certs.splice(m, 1)[0];
-                        this.dispatchEvent({
-                            type:'certaintyRemoved',
-                            i:cert.i,
-                            j:cert.j,
-                            k:cert.k
-                        });
-                    }
-                    break;
-                }
-            }
-        }
-
-        return this;
-
-    }
-
-
-    function removeCertaintyBySubGrid(sgb, k) {
-
-        var certs = this._certainties
-            , idx
-            , cert
-            ;
-
-        for (var m = 0, l = certs.length; m < l; m++) {
-            if (certs[m].i >= sgb.iLower && certs[m].i <= sgb.iUpper &&
-                certs[m].j >= sgb.jLower && certs[m].j <= sgb.jUpper &&
-                certs[m].k === k) {
-                idx = certs[m].types.indexOf(subGrid);
-                if (idx !== -1) {
-                    certs[m].types.splice(idx, 1);
-                    if (certs[m].types.length === 0) {
-                        cert = certs.splice(m, 1)[0];
-                        this.dispatchEvent({
-                            type:'certaintyRemoved',
-                            i:cert.i,
-                            j:cert.j,
-                            k:cert.k
-                        });
-                    }
-                    break;
-                }
-            }
-        }
-
 
     }
 
@@ -1078,40 +653,46 @@
 
 
         decrement:function (event) {
-            ;
+
+            var i
+                , l
+                ;
 
             this._value--;
 
             if (this._value === 0) {
 
+                for (i = 0, l = this._cells.length; i < l; i++) {
+
+                    this._cells[i].removeCertainty(this._type);
+
+                }
+
                 if (thereIsError.call(this, event)) {
 
-                    this._cells.forEach(
+                    for (i = 0, l = this._cells.length; i < l; i++) {
 
-                        function (el, idx, arr) {
+                        this._cells[i].addError(this._type);
 
-                            el.addError(this._type);
+                    }
 
-                        },
-
-                        this
-                    );
                 }
 
             }
 
             if (this._value === 1) {
 
-                this._cells.forEach(
+                for (i = 0, l = this._cells.length; i < l; i++) {
 
-                    function (el, idx, arr) {
+                    if (this._cells[i].isAlive()) {
 
-                        el.addCertainty(this._type);
+                        this._cells[i].addCertainty(this._type);
 
-                    },
+                        break;
 
-                    this
-                );
+                    }
+
+                }
 
             }
 
@@ -1119,40 +700,46 @@
 
 
         increment:function (event) {
-            ;
+
+            var i
+                , l
+                ;
 
             this._value++;
 
             if (this._value === 1) {
 
+                for (i = 0, l = this._cells.length; i < l; i++) {
+
+                    if (this._cells[i].isAlive()) {
+
+                        this._cells[i].addCertainty(this._type);
+
+                        break;
+
+                    }
+
+                }
+
                 if (thereIsError.call(this, event)) {
 
-                    this._cells.forEach(
+                    for (i = 0, l = this._cells.length; i < l; i++) {
 
-                        function (el, idx, arr) {
+                        this._cells[i].removeError(this._type);
 
-                            el.removeError(this._type);
+                    }
 
-                        },
-
-                        this
-                    );
                 }
 
             }
 
             if (this._value === 2) {
 
-                this._cells.forEach(
+                for (i = 0, l = this._cells.length; i < l; i++) {
 
-                    function (el, idx, arr) {
+                    this._cells[i].removeCertainty(this._type);
 
-                        el.removeCertainty(this._type);
-
-                    },
-
-                    this
-                );
+                }
 
             }
 
