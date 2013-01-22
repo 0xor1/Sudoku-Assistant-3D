@@ -13,6 +13,10 @@
         , hasNoErrors = 'hasNoErrors'
         , isCertainty = 'isCertainty'
         , isNotCertainty = 'isNotCertainty'
+        , valueEntered = 'valueEntered'
+        , valueCleared = 'valueCleared'
+        , batchValueEntered = 'batchValueEntered'
+        , batchValueCleared = 'batchValueCleared'
         ;
 
 
@@ -43,6 +47,18 @@
             for (j = 0; j < this._nSqrd; j++) {
                 for (k = 0; k < this._nSqrd; k++) {
                     this._possibilityCube[i][j][k] = new Possibility(i, j, k);
+                    this._possibilityCube[i][j][k].addEventListener(isCertainty, function (event) {
+                        newCertaintyHandler.call(this, event)
+                    }.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(isNotCertainty, function (event) {
+                        oldCertaintyHandler.call(this, event)
+                    }.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(hasErrors, function (event) {
+                        newErrorHandler.call(this, event)
+                    }.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(hasNoErrors, function (event) {
+                        oldErrorHandler.call(this, event)
+                    }.bind(this));
                 }
             }
         }
@@ -95,7 +111,7 @@
             for (j = 0; j < this._n; j++) {
                 for (k = 0; k < this._nSqrd; k++) {
                     tempArray = [];
-                    for (iTemp = i * this._n, iUpper = itemp + this._n; iTemp < iUpper; iTemp++) {
+                    for (iTemp = i * this._n, iUpper = iTemp + this._n; iTemp < iUpper; iTemp++) {
                         for (jTemp = j * this._n, jUpper = jTemp + this._n; jTemp < jUpper; jTemp++) {
                             tempArray.push(this._possibilityCube[iTemp][jTemp][k]);
                         }
@@ -128,134 +144,56 @@
 
         enterValue:function (i, j, k) {
 
-            this._gameBoard.enterValue(i, j, k - 1);
+            this._gameBoard.enterValue(i, j, k + 1);
 
             return this;
 
         },
 
 
+        getCertainties:function () {
+
+            var arr = this._certainties.slice(0);
+
+            for (var i = 0, l = arr.length; i < l; i++) {
+
+                arr[i].types = this._certainties[i].types.slice(0);
+
+            }
+
+            return arr;
+
+        },
+
+
         getBestPossibilities:function () {
 
-            var smallestFork = {branches:this._nSqrd + 1, i:null, j:null, k:null, type:null}
+            var smallestFork = {branches:this._nSqrd + 1, cells:[], type:null}
                 , bestPos = []
                 , sgb
                 ;
 
             if (this._certainties.length > 0) {
                 bestPos = this.getCertainties();
-                bestPos.type = 'certain';
+                bestPos.type = isCertainty;
                 return bestPos;
             }
 
-            bestPos.type = 'guess';
-
             //find fork with least branches
-            //by row
-            for (var i = 0; i < this._nSqrd; i++) {
-                for (var k = 0; k < this._nSqrd; k++) {
-                    if (this._rowCounters[i][k] > 0 && this._rowCounters[i][k] < smallestFork.branches) {
-                        smallestFork.branches = this._rowCounters[i][k];
-                        smallestFork.i = i;
-                        smallestFork.j = null;
-                        smallestFork.k = k;
-                        smallestFork.type = row;
-                    }
+            for (var i = 0, l = this._masterCounter.length; i < l; i++) {
+                if (this._masterCounter[i]._value > 0 && this._masterCounter[i]._value < smallestFork.branches) {
+                    smallestFork.branches = this._masterCounter[i]._value;
+                    smallestFork.cells = [];
                 }
-            }
-            //by column
-            for (var j = 0; j < this._nSqrd; j++) {
-                for (var k = 0; k < this._nSqrd; k++) {
-                    if (this._columnCounters[j][k] > 0 && this._columnCounters[j][k] < smallestFork.branches) {
-                        smallestFork.branches = this._columnCounters[j][k];
-                        smallestFork.i = null;
-                        smallestFork.j = j;
-                        smallestFork.k = k;
-                        smallestFork.type = column;
-                    }
-                }
-            }
-            //by element
-            for (var i = 0; i < this._nSqrd; i++) {
-                for (var j = 0; j < this._nSqrd; j++) {
-                    if (this._elementCounters[i][j] > 0 && this._elementCounters[i][j] < smallestFork.branches) {
-                        smallestFork.branches = this._elementCounters[i][j];
-                        smallestFork.i = i;
-                        smallestFork.j = j;
-                        smallestFork.k = null;
-                        smallestFork.type = element;
-                    }
-                }
-            }
-            //by subGrid
-            for (var i = 0; i < this._n; i++) {
-                for (var j = 0; j < this._n; j++) {
-                    for (var k = 0; k < this._nSqrd; k++) {
-                        if (this._subGridCounters[i][j] > 0 && this._subGridCounters[i][j] < smallestFork.branches) {
-                            smallestFork.branches = this._subGridCounters[i][j];
-                            smallestFork.i = i;
-                            smallestFork.j = j;
-                            smallestFork.k = k;
-                            smallestFork.type = subGrid;
-                        }
+                for(var j = 0; j < this._nSqrd; j++){
+                    if(this._masterCounter[i]._cells[j].isAlive()){
+                        smallestFork.cells.push(this._masterCounter[i]._cells[j].getIndices())
                     }
                 }
             }
 
-            //find the actual possibilities relevant to the smallest fork
-            if (smallestFork.type === row) {
-                for (var j = 0; j < this._nSqrd; j++) {
-                    if (this.possibilityIsAlive(smallestFork.i, j, smallestFork.k)) {
-                        bestPos.push({
-                            i:smallestFork.i,
-                            j:j,
-                            k:smallestFork.k,
-                            type:smallestFork.type
-                        });
-                    }
-                }
-            }
-            if (smallestFork.type === column) {
-                for (var i = 0; i < this._nSqrd; i++) {
-                    if (this.possibilityIsAlive(i, smallestFork.j, smallestFork.k)) {
-                        bestPos.push({
-                            i:i,
-                            j:smallestFork.j,
-                            k:smallestFork.k,
-                            type:smallestFork.type
-                        });
-                    }
-                }
-            }
-            if (smallestFork.type === element) {
-                for (var k = 0; k < this._nSqrd; k++) {
-                    if (this.possibilityIsAlive(smallestFork.i, smallestFork.j, k)) {
-                        bestPos.push({
-                            i:smallestFork.i,
-                            j:smallestFork.j,
-                            k:k,
-                            type:smallestFork.type
-                        });
-                    }
-                }
-            }
-            if (smallestFork.type === subGrid) {
-                sgb = this._gameBoard.getSubGridBoundsContainingCell(smallestFork.i, smallestFork.j);
-                for (var i = sgb.iLower; i < sgb.iUpper; i++) {
-                    for (var j = sgb.jLower; j <= sgb.jUpper; j++) {
-                        if (this.possibilityIsAlive(i, j, smallestFork.k)) {
-                            bestPos.push({
-                                i:i,
-                                j:j,
-                                k:smallestFork.k,
-                                type:smallestFork.type
-                            });
-                        }
-                    }
-                }
-
-            }
-
+            bestPos = smallestFork.cells;
+            bestPos.type = isNotCertainty;
             return bestPos;
 
         }
@@ -264,15 +202,35 @@
     };
 
 
+    function newCertaintyHandler(event){
+
+        this.dispatchEvent({
+            type:isCertainty,
+            cell:event.origin.getIndices()
+        });
+
+    }
+
+
+    function oldCertaintyHandler(event){
+
+        this.dispatchEvent({
+            type:isNotCertainty,
+            cell:event.origin.getIndices()
+        });
+
+    }
+
+
     function attachEventListeners() {
 
-        this._gameBoard.addEventListener('valueEntered', killPossibilities.bind(this));
+        this._gameBoard.addEventListener(valueEntered, killPossibilities.bind(this));
 
-        this._gameBoard.addEventListener('valueCleared', revivePossibilities.bind(this));
+        this._gameBoard.addEventListener(valueCleared, revivePossibilities.bind(this));
 
-        this._gameBoard.addEventListener('batchValueEntered', batchKillPossibilities.bind(this));
+        this._gameBoard.addEventListener(batchValueEntered, batchKillPossibilities.bind(this));
 
-        this._gameBoard.addEventListener('batchValueCleared', batchRevivePossibilities.bind(this));
+        this._gameBoard.addEventListener(batchValueCleared, batchRevivePossibilities.bind(this));
 
         return this;
 
@@ -417,6 +375,17 @@
 
 
         constructor:Possibility,
+
+
+        getIndices:function(){
+
+            return {
+                i:this._i,
+                j:this._j,
+                k:this._k
+            };
+
+        },
 
 
         isAlive:function () {
@@ -601,7 +570,7 @@
 
                 this._certainties.splice(idx, 1);
 
-                if (this.notCertainty()) {
+                if (this.isNotCertainty()) {
 
                     this.dispatchEvent({
                         type:isNotCertainty
@@ -757,11 +726,11 @@
             ;
 
         if (this._type === row) {
-            if (killer.j !== poss._j || killer.k !== poss._k) {
+            if (killer.i !== poss._i || killer.k !== poss._k) {
                 return true;
             }
         } else if (this._type === column) {
-            if (killer.i !== poss._i || killer.k !== poss._k) {
+            if (killer.j !== poss._j || killer.k !== poss._k) {
                 return true;
             }
         } else if (this._type === element) {
