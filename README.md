@@ -30,4 +30,4 @@ To enter a value in a cell simply select it and then press a relevant key, only 
 
 ####Menu
 
-(Coming soon!)
+(Coming soon!!)
