@@ -128,9 +128,9 @@
         var projector = new THREE.Projector(), rect = this.dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
         projector.unprojectVector(vector, this.camera);
 
-        var ray = new THREE.Ray(this.camera.position, vector.subSelf(this.camera.position).normalize());
+        var raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
 
-        var intersects = ray.intersectObjects(this._clickables);
+        var intersects = raycaster.intersectObjects(this._clickables);
 
         if (intersects.length > 0) {
             intersects[0].object.mouseDown(event);
