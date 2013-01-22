@@ -222,6 +222,26 @@
     }
 
 
+    function newErrorHandler(event){
+
+        this.dispatchEvent({
+            type:hasErrors,
+            cell:event.origin.getIndices()
+        })
+
+    }
+
+
+    function oldErrorHandler(event){
+
+        this.dispatchEvent({
+            type:hasNoErrors,
+            cell:event.origin.getIndices()
+        })
+
+    }
+
+
     function attachEventListeners() {
 
         this._gameBoard.addEventListener(valueEntered, killPossibilities.bind(this));
