@@ -6,6 +6,7 @@
             , gameBoard = new Sudoku.GameBoard(3)
             , assistant = new Sudoku.Assistant(gameBoard)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)
+            , possibilityCube3D
             ;
 
         threePanel.add(gameBoard3D);
@@ -16,8 +17,14 @@
 
         gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
 
-        Utils.AnimationMaster.turnOnAnimationSmoothing();
 
+        possibilityCube3D = new Sudoku.PossibilityCube3D(gameBoard, assistant);
+        threePanel.add(possibilityCube3D);
+
+        threePanel.controls.target.z = Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * gameBoard.getGameSize() * gameBoard.getGameSize();
+
+        Utils.AnimationMaster.turnOnAnimationSmoothing();
+        Utils.FrameRateMonitor.enableLogging();
         Utils.FrameRateMonitor.start();
 
     }
@@ -45,7 +52,7 @@
         Utils.animate({
             obj:cam.position,
             prop:"z",
-            targetValue:((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
+            targetValue:2*((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
             length:len
         });
 
