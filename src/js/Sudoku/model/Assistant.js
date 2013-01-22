@@ -227,7 +227,7 @@
         this.dispatchEvent({
             type:hasErrors,
             cell:event.origin.getIndices()
-        })
+        });
 
     }
 
@@ -237,7 +237,7 @@
         this.dispatchEvent({
             type:hasNoErrors,
             cell:event.origin.getIndices()
-        })
+        });
 
     }
 
