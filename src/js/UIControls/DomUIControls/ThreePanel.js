@@ -1,6 +1,5 @@
 (function () {
 
-
     UIControls.ThreePanel = function (dom) {
 
         UIControls.UIControl.call(this);
@@ -14,14 +13,22 @@
         this.renderer = new THREE.WebGLRenderer({canvas:dom});
         this.dom = this.renderer.domElement;
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, this.dom.width / this.dom.height, 1, 100000);
+        this.camera = new THREE.PerspectiveCamera(75, this.dom.width / this.dom.height, 1, 10000);
         this.controls = new THREE.TrackballControls(this.camera, this.dom);
 
         this.scene.add(this.camera);
 
         this.addEventListener('resize', canvasResized.bind(this));
 
-        this.addUIEventListener(this.dom, "mousedown", mouseDown.bind(this), false);
+        this.addUIEventListener(this.dom, 'mousedown', mouseDown.bind(this), false);
+
+        this.addUIEventListener(this.dom, 'mouseup', mouseUp.bind(this), false);
+
+        this.addUIEventListener(this.dom, 'click', click.bind(this), false);
+
+        this.addUIEventListener(this.dom, 'dblclick', dblClick.bind(this), false);
+
+        this.addUIEventListener(this.dom, 'mousemove', mouseMove.bind(this), false);
 
         this.addUIEventListener(window, 'resize', canvasResized.bind(this), false);
 
@@ -119,11 +126,38 @@
         var rect = this.dom.getBoundingClientRect();
         this.renderer.setSize(rect.width, rect.height);
         this.camera.aspect = rect.width / rect.height;
+        this.controls.handleResize();
         this.camera.updateProjectionMatrix();
 
     }
 
+
     function mouseDown(event) {
+        mouse.call(this, 'mouseDown', event);
+    }
+
+
+    function mouseUp(event) {
+        mouse.call(this, 'mouseUp', event);
+    }
+
+
+    function click(event) {
+        mouse.call(this, 'click', event);
+    }
+
+
+    function dblClick(event) {
+        mouse.call(this, 'dblClick', event);
+    }
+
+
+    function mouseMove(event) {
+        mouse.call(this, 'mouseMove', event);
+    }
+
+
+    function mouse(type, event) {
 
         var projector = new THREE.Projector(), rect = this.dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
         projector.unprojectVector(vector, this.camera);
@@ -133,7 +167,9 @@
         var intersects = raycaster.intersectObjects(this._clickables);
 
         if (intersects.length > 0) {
-            intersects[0].object.mouseDown(event);
+            if (typeof intersects[0].object[type] === 'function') {
+                intersects[0].object[type](event);
+            }
         }
     };
 
@@ -147,8 +183,8 @@
 
         }
 
-        for(var i = 0, l = obj.children.length; i < l; i++){
-            addClickable.call(this,obj.children[i]);
+        for (var i = 0, l = obj.children.length; i < l; i++) {
+            addClickable.call(this, obj.children[i]);
         }
 
         return this;
@@ -164,8 +200,8 @@
             this._clickables.splice(idx, 1);
         }
 
-        for(var i = 0, l = obj.children.length; i < l; i++){
-            removeClickable.call(this,obj.children[i]);
+        for (var i = 0, l = obj.children.length; i < l; i++) {
+            removeClickable.call(this, obj.children[i]);
         }
 
         return this;

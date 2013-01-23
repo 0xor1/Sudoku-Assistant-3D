@@ -17842,8 +17842,8 @@ THREE.WebGLRenderer = function ( parameters ) {
         _canvas.width = width * this.devicePixelRatio;
         _canvas.height = height * this.devicePixelRatio;
 
-        _canvas.style.width = width + 'px';
-        _canvas.style.height = height + 'px';
+        //_canvas.style.width = width + 'px';
+        //_canvas.style.height = height + 'px';
 
         this.setViewport( 0, 0, _canvas.width, _canvas.height );
 

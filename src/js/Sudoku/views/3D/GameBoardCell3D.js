@@ -49,7 +49,7 @@
 
         this._tempStateTimer = null;
 
-        this.addEventListener("mouseDown", this.select.bind(this));
+        this.addEventListener('click', this.select.bind(this));
 
     };
 
@@ -364,14 +364,14 @@
             length:100,
             color:{
                 r:1,
-                g:0.7,
-                b:0.4
+                g:0.6,
+                b:0.2
             }
         }
         , startingChange = {
             length:400,
             color:{
-                r:0.6,
+                r:0.2,
                 g:0.6,
                 b:1
             }
