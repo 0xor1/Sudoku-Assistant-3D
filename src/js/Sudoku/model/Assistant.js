@@ -41,6 +41,8 @@
         this._nSqrd = this._n * this._n;
         this._gameBoard = gameBoard;
 
+        this._certainties = [];
+
         this._possibilityCube = Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
         for (i = 0; i < this._nSqrd; i++) {
@@ -141,6 +143,12 @@
 
         },
 
+        possibilityHasError:function (i, j, k){
+
+            return this._possibilityCube[i][j][k].hasErrors();
+
+        },
+
 
         enterValue:function (i, j, k) {
 
@@ -204,9 +212,15 @@
 
     function newCertaintyHandler(event){
 
+        var idx = this._certainties.indexOf(event.dispatcher);
+
+        if(idx !== -1){
+            this._certainties.push(event.dispatcher);
+        }
+
         this.dispatchEvent({
             type:isCertainty,
-            cell:event.origin.getIndices()
+            cell:event.dispatcher.getIndices()
         });
 
     }
@@ -214,9 +228,15 @@
 
     function oldCertaintyHandler(event){
 
+        var idx = this._certainties.indexOf(event.dispatcher);
+
+        if(idx !== -1){
+            this._certainties.splice(idx, 1);
+        }
+
         this.dispatchEvent({
             type:isNotCertainty,
-            cell:event.origin.getIndices()
+            cell:event.dispatcher.getIndices()
         });
 
     }
@@ -226,7 +246,7 @@
 
         this.dispatchEvent({
             type:hasErrors,
-            cell:event.origin.getIndices()
+            cell:event.dispatcher.getIndices()
         });
 
     }
@@ -236,7 +256,7 @@
 
         this.dispatchEvent({
             type:hasNoErrors,
-            cell:event.origin.getIndices()
+            cell:event.dispatcher.getIndices()
         });
 
     }
@@ -740,7 +760,7 @@
     function thereIsError(event) {
 
         var killer = event.killerInfo
-            , poss = event.origin
+            , poss = event.dispatcher
             , kSgb = Sudoku.getSubGridBoundsContainingCell(killer.i, killer.j, Math.sqrt(this._cells.length))
             , pSgb = Sudoku.getSubGridBoundsContainingCell(poss._i, poss._j, Math.sqrt(this._cells.length))
             ;

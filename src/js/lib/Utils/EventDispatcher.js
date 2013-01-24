@@ -74,7 +74,7 @@
 
                 listenerArray.numListenersAdded = 0;
 
-                event.origin = this;
+                event.dispatcher = this;
 
                 for (var i = 0, l = listenerArray.length; i < l; i++) {
 
