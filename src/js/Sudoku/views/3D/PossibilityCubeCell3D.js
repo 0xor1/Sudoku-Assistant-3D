@@ -1,12 +1,9 @@
-(function() {
+(function(){
 
-
-	Sudoku.LivePossibilityCubeCell3D = function( i, j, k) {
+    Sudoku.PossibilityCubeCell3D = function(i, j, k) {
 
         var vertexShader = "varying vec2 vUv; void main() {vUv = uv;gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );}"
             , fragmentShader = "uniform vec3 color; uniform sampler2D texture; varying vec2 vUv; void main() { vec4 tColor = texture2D( texture, vUv ); gl_FragColor = vec4( mix( color, tColor.rgb, tColor.a ), 1.0 );}";
-
-        UIControls.ClickableMesh.call(this);
 
         this.uniforms = {
             color:{
@@ -54,19 +51,7 @@
         this._isEntering = false;
         this._isHidden = false;
 
-        this._tempStateTimer = null;
+        this._tempStateTimer = null;};
 
-        this.addEventListener("mouseDown", this.select.bind(this));
-	
-	};
-
-
-
-    Sudoku.LivePossibilityCubeCell3D.prototype = Object.create(UIControls.ClickableMesh.prototype);
-
-
-    Sudoku.LivePossibilityCubeCell3D.prototype.select = function(){
-
-    }
 
 })();
