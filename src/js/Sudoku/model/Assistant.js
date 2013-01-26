@@ -49,6 +49,12 @@
             for (j = 0; j < this._nSqrd; j++) {
                 for (k = 0; k < this._nSqrd; k++) {
                     this._possibilityCube[i][j][k] = new Possibility(i, j, k);
+                    this._possibilityCube[i][j][k].addEventListener(killed, function (event) {
+                        killedHandler.call(this, event)
+                    }.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(revived, function (event) {
+                        revivedHandler.call(this, event)
+                    }.bind(this));
                     this._possibilityCube[i][j][k].addEventListener(isCertainty, function (event) {
                         newCertaintyHandler.call(this, event)
                     }.bind(this));
@@ -210,9 +216,39 @@
     };
 
 
+    function killedHandler(event){
+
+        var cell = event.dispatcher.getIndices();
+
+        this.dispatchEvent({
+            type:killed,
+            i:cell.i,
+            j:cell.j,
+            k:cell.k
+        });
+
+    }
+
+
+    function revivedHandler(event){
+
+        var cell = event.dispatcher.getIndices();
+
+        this.dispatchEvent({
+            type:revived,
+            i:cell.i,
+            j:cell.j,
+            k:cell.k
+        });
+
+    }
+
+
     function newCertaintyHandler(event){
 
-        var idx = this._certainties.indexOf(event.dispatcher);
+        var idx = this._certainties.indexOf(event.dispatcher)
+            , cell = event.dispatcher.getIndices()
+            ;
 
         if(idx !== -1){
             this._certainties.push(event.dispatcher);
@@ -220,7 +256,9 @@
 
         this.dispatchEvent({
             type:isCertainty,
-            cell:event.dispatcher.getIndices()
+            i:cell.i,
+            j:cell.j,
+            k:cell.k
         });
 
     }
@@ -228,7 +266,9 @@
 
     function oldCertaintyHandler(event){
 
-        var idx = this._certainties.indexOf(event.dispatcher);
+        var idx = this._certainties.indexOf(event.dispatcher)
+            , cell = event.dispatcher.getIndices()
+            ;
 
         if(idx !== -1){
             this._certainties.splice(idx, 1);
@@ -236,7 +276,9 @@
 
         this.dispatchEvent({
             type:isNotCertainty,
-            cell:event.dispatcher.getIndices()
+            i:cell.i,
+            j:cell.j,
+            k:cell.k
         });
 
     }
@@ -244,9 +286,13 @@
 
     function newErrorHandler(event){
 
+        var cell = event.dispatcher.getIndices();
+
         this.dispatchEvent({
             type:hasErrors,
-            cell:event.dispatcher.getIndices()
+            i:cell.i,
+            j:cell.j,
+            k:cell.k
         });
 
     }
@@ -254,9 +300,13 @@
 
     function oldErrorHandler(event){
 
+        var cell = event.dispatcher.getIndices();
+
         this.dispatchEvent({
             type:hasNoErrors,
-            cell:event.dispatcher.getIndices()
+            i:cell.i,
+            j:cell.j,
+            k:cell.k
         });
 
     }
