@@ -8,61 +8,24 @@
 
         UIControls.ClickableMesh.call(this);
 
-        this.uniforms = {
-            color:{
-                type:"c",
-                value:new THREE.Color(0xffffff)
-            },
-            texture:{
-                type:"t",
-                value:Sudoku.textures[k+1]
-            }
-        };
-
-        this.geometry = new THREE.CubeGeometry(
-            Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing,
-            Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing,
-            Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing
-        );
-
-        this.geometry.computeBoundingSphere();
-        this.boundRadius = this.geometry.boundingSphere.radius;
-
-        this.material = new THREE.ShaderMaterial({
-            uniforms:this.uniforms,
-            vertexShader:vertexShader,
-            fragmentShader:fragmentShader,
-            opacity : 0.5,
-            transparent:true
-        });
-
-        this.texture = this.uniforms.texture.value;
-
-        this.texture.needsUpdate = true;
-
-        //this.material.side = THREE.DoubleSide;
-
-        this.color = this.uniforms.color.value;
-
-        this.i = i;
-        this.j = j;
-        this.k = k;
-
-        //states
-        this._isHidding = false;
-        this._isShowing = false;
-        this._isEntering = false;
-        this._isHidden = false;
-
-        this._tempStateTimer = null;
+        Sudoku.PossibilityCubeCell3D.call(this, i, j, k);
 
         this.addEventListener("mouseDown", this.select.bind(this));
 	
 	};
 
 
-
     Sudoku.LivePossibilityCubeCell3D.prototype = Object.create(UIControls.ClickableMesh.prototype);
+
+    for(var i in Sudoku.PossibilityCubeCell3D.prototype){
+        if(Sudoku.PossibilityCubeCell3D.prototype.hasOwnProperty(i) && i !== 'constructor'){
+            if(typeof UIControls.ClickableMesh.prototype[i] === 'undefined'){
+                Sudoku.LivePossibilityCubeCell3D.prototype[i] = Sudoku.PossibilityCubeCell3D.prototype[i];
+            } else {
+                throw new Error('Sudoku.LivePossibilityCubeCell3D.prototype already contains property ' + i);
+            }
+        }
+    }
 
 
     Sudoku.LivePossibilityCubeCell3D.prototype.select = function(){

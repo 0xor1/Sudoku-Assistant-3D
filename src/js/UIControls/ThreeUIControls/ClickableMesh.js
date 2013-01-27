@@ -10,12 +10,14 @@
 	
 	
 	UIControls.ClickableMesh.prototype = Object.create(THREE.Mesh.prototype);
-	
-	var UIConProto = Object.create(UIControls.UIControl.prototype);
 
-	for(var i in UIConProto){
-		if(UIConProto.hasOwnProperty(i)){
-			UIControls.ClickableMesh.prototype[i] = UIConProto[i];
+	for(var i in UIControls.UIControl.prototype){
+		if(UIControls.UIControl.prototype.hasOwnProperty(i)){
+            if(typeof UIControls.ClickableMesh.prototype[i] === 'undefined'){
+			UIControls.ClickableMesh.prototype[i] = UIControls.UIControl.prototype[i];
+            } else {
+                throw new Error('UIControls.ClickableMesh.prototype already contains property ' + i);
+            }
 		}
 	}
 	

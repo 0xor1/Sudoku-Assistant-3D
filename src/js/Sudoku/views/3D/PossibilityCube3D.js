@@ -26,9 +26,9 @@
                 for (var k = 0; k < this._nSqrd; k++) {
                     cell = this._cells[i][j][k] = {
                         active:null,
-                        //dead:new Sudoku.DeadPossibilityCubeCell3D(i, j, k),
+                        dead:new Sudoku.LivePossibilityCubeCell3D(i, j, k),
                         live:new Sudoku.LivePossibilityCubeCell3D(i, j, k),
-                        //error:new Sudoku.ErrorPossibilityCubeCell3D(i, j, k)
+                        error:new Sudoku.LivePossibilityCubeCell3D(i, j, k)
                     };
 
                     x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
@@ -48,7 +48,7 @@
             }
         }
 
-        this.showAll();
+        this.showAll(10000);
 
     };
 
@@ -103,10 +103,11 @@
     function showCell(i, j, k, length) {
 
         var self = this
-            , len = length || 300
             , oldCell = this._cells[i][j][k].active
             , newCell
             ;
+
+        length = length || 300;
 
         if (this._assistant.possibilityHasError(i, j, k)) {
             newCell = this._cells[i][j][k].error;
@@ -119,7 +120,7 @@
         if (typeof oldCell === 'undefined' || oldCell === null) {
             this._cells[i][j][k].active = newCell;
             this.add(newCell);
-            //cell.show();
+            newCell.show(length);
         } else if(oldCell !== newCell) {
             switchCellType.call(this, i, j, k, length);
         }
