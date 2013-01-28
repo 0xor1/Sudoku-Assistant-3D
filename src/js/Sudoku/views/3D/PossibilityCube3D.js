@@ -26,18 +26,17 @@
                 for (var k = 0; k < this._nSqrd; k++) {
                     cell = this._cells[i][j][k] = {
                         active:null,
-                        dead:new Sudoku.LivePossibilityCubeCell3D(i, j, k),
-                        live:new Sudoku.LivePossibilityCubeCell3D(i, j, k),
-                        error:new Sudoku.LivePossibilityCubeCell3D(i, j, k)
+                        dead:new Sudoku.DeadPossibilityCubeCell3D(i, j, k),
+                        live:new Sudoku.LivePossibilityCubeCell3D(i, j, k)
                     };
 
                     x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                     y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                     z = (k * (cSize + cSpace));
 
-                    cell.live.position.x = /*cell.dead.position.x = cell.error.positionon.x =*/ x;
-                    cell.live.position.y = /*cell.dead.position.y = cell.error.positionon.y =*/ y;
-                    cell.live.position.z = /*cell.dead.position.z = cell.error.positionon.z =*/ z;
+                    cell.live.position.x = cell.dead.position.x = x;
+                    cell.live.position.y = cell.dead.position.y = y;
+                    cell.live.position.z = cell.dead.position.z = z;
 
                     this._cells[i][j][k].live.addEventListener("selected", function () {
                     });
@@ -48,7 +47,9 @@
             }
         }
 
-        this.showAll(10000);
+        assistant.addEventListener('')
+
+        this.showAll(3000);
 
     };
 
@@ -64,13 +65,13 @@
 
     Sudoku.PossibilityCube3D.prototype.showAll = function (length) {
 
-        var len = length || 300;
+        length = length || 300;
 
         for (var i = 0; i < this._nSqrd; i++) {
             for (var j = 0; j < this._nSqrd; j++) {
                 for (var k = 0; k < this._nSqrd; k++) {
 
-                    showCell.call(this, i, j, k, len);
+                    showCell.call(this, i, j, k, length);
 
                 }
             }
@@ -83,7 +84,7 @@
 
     Sudoku.PossibilityCube3D.prototype.hideAll = function (length) {
 
-        var len = length || 300;
+        length = length || 300;
 
         for (var i = 0; i < this._nSqrd; i++) {
             for (var j = 0; j < this._nSqrd; j++) {
@@ -107,11 +108,9 @@
             , newCell
             ;
 
-        length = length || 300;
+        length = length || 300
 
-        if (this._assistant.possibilityHasError(i, j, k)) {
-            newCell = this._cells[i][j][k].error;
-        } else if (this._assistant.possibilityIsAlive(i, j, k)) {
+        if (this._assistant.possibilityIsAlive(i, j, k)) {
             newCell = this._cells[i][j][k].live;
         } else {
             newCell = this._cells[i][j][k].dead;
@@ -120,9 +119,11 @@
         if (typeof oldCell === 'undefined' || oldCell === null) {
             this._cells[i][j][k].active = newCell;
             this.add(newCell);
-            newCell.show(length);
-        } else if(oldCell !== newCell) {
-            switchCellType.call(this, i, j, k, length);
+            if (newCell === this._cells[i][j][k].live) {
+                newCell.show(length);
+            }
+        } else if (oldCell !== newCell) {
+            //switchCellType.call(this, i, j, k, length);
         }
 
         return this;
@@ -136,13 +137,14 @@
             ;
 
         length = length || 300;
-        callback = callback || function () {};
+        callback = callback || function () {
+        };
 
         cell = this._cells[i][j][k].active;
 
         cell.hide(
             length,
-            function(){
+            function () {
                 self.remove(cell);
                 self._cells[i][j][k].active = null;
                 callback();
