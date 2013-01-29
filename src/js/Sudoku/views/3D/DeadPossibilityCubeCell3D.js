@@ -8,6 +8,10 @@
 
         this.material.wireframe = true;
 
+        this.material.color.g = this.material.color.b = 0;
+
+        this.defaultOpacity = 0.1;
+
     };
 
 

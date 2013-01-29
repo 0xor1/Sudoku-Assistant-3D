@@ -8,6 +8,8 @@
         Sudoku.PossibilityCubeCell3D.call(this, i, j, k);
 
         this.addEventListener("dblClick", this.dblClick.bind(this));
+
+        this.material.texture
 	
 	};
 
@@ -29,7 +31,12 @@
 
 
     Sudoku.LivePossibilityCubeCell3D.prototype.dblClick = function(){
-
+        this.dispatchEvent({
+            type:'dblClicked',
+            i:this.i,
+            j:this.j,
+            k:this.k
+        });
     }
 
 })();

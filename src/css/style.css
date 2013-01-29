@@ -8,10 +8,10 @@ html, body, .xor.threePanel, .xor.viewport {
 }
 
 .xor.threePanel {
-    background-image: linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
-    background-image: -o-linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
-    background-image: -moz-linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
-    background-image: -webkit-linear-gradient(top, rgb(0, 0, 0) 60%, rgb(34, 34, 34) 85%);
+    background-image: linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
+    background-image: -o-linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
+    background-image: -moz-linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
+    background-image: -webkit-linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
 }
 
 .xor.sliderTab {
@@ -19,8 +19,8 @@ html, body, .xor.threePanel, .xor.viewport {
     -moz-transition:right 0.5s,left 0.5s,top 0.5s,bottom 0.5s;
     -o-transition:right 0.5s,left 0.5s,top 0.5s,bottom 0.5s;
     transition:right 0.5s,left 0.5s,top 0.5s,bottom 0.5s;
+    position: absolute;
     top:30px;
-    position:absolute;
     font-family: sans-serif;
     border-radius:5px;
     font-size: 0.8em;
@@ -34,13 +34,39 @@ html, body, .xor.threePanel, .xor.viewport {
     border:#000 1px solid;
 }
 
-#menuTab {
-    left:-63px;
-    background:#28F;
+.menu {
+    background: #28F;
 }
 
-#menuTab:hover {
+#newGameTab:hover,
+#toggleAssistantTab:hover,
+#clearBoardTab:hover,
+#saveStartingConfigTab:hover{
+    cursor: pointer;
     left:-10px;
+}
+
+#toggleAssistantTab {
+    left:-130px;
+}
+
+#newGameTab {
+    top:90px;
+    left: -93px;
+}
+
+#clearBoardTab {
+    top:150px;
+    left: -100px;
+}
+
+#saveStartingConfigTab {
+    top:210px;
+    left:-145px;
+}
+
+#saveStartingConfigTab.disabled {
+    left:-170px;
 }
 
 #gitHubTab {

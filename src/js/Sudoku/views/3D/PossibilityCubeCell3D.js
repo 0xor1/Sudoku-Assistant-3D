@@ -33,6 +33,8 @@
 
         this._tempStateTimer = null;
 
+        this.defaultOpacity = 0.65;
+
     };
 
 
@@ -53,13 +55,41 @@
             Utils.animate({
                 obj:this.material,
                 prop:'opacity',
-                targetValue:0.6,
+                targetValue:this.defaultOpacity,
                 length:length
             });
 
         }
 
     }
+
+
+    Sudoku.PossibilityCubeCell3D.prototype.hide = function (length, callback) {
+
+        var self = this;
+
+        length = length || 300;
+
+        if (!this._isHidden) {
+
+            this._isHidden = true;
+
+            Utils.animate({
+                obj:this.material,
+                prop:'opacity',
+                targetValue:0,
+                length:length,
+                callback:function(obj,prop){
+                    callback();
+                    self._isHidden = true;
+                }
+            });
+
+        }
+
+    }
+
+
 
 
 })();

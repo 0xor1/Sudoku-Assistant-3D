@@ -28,7 +28,8 @@
 
         this.addUIEventListener(this.dom, 'dblclick', dblClick.bind(this), false);
 
-        this.addUIEventListener(this.dom, 'mousemove', mouseMove.bind(this), false);
+        //commented out for performance
+        //this.addUIEventListener(this.dom, 'mousemove', mouseMove.bind(this), false);
 
         this.addUIEventListener(window, 'resize', canvasResized.bind(this), false);
 
@@ -179,6 +180,7 @@
 
             if (this._clickables.indexOf(obj) === -1) {
                 this._clickables.push(obj);
+                obj.clickableIdx = this._clickables.length - 1;
             }
 
         }
@@ -194,10 +196,13 @@
 
     function removeClickable(obj) {
 
-        var idx = this._clickables.indexOf(obj);
+        var idx = obj.clickableIdx;
 
-        if (idx !== -1) {
+        if (typeof idx !== 'undefined') {
             this._clickables.splice(idx, 1);
+            for(var i = idx, l = this._clickables.length; i < l; i++ ){
+                this._clickables[i].clickableIdx--;
+            }
         }
 
         for (var i = 0, l = obj.children.length; i < l; i++) {

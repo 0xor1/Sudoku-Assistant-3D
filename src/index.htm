@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
     <title>Sudoku Assistant 3D</title>
 
+    <meta charset="utf-8">
 
     <script src="js/lib/Three/three-r55-mini.js"></script>
     <script src="js/lib/Three/TrackBallControls.js"></script>
@@ -49,12 +50,6 @@
 
 <div id="masterViewport" class="xor viewport">
 
-    <div id="cmdViewport" class="xor viewport">
-
-
-    </div>
-
-
     <div id="threeViewport" class="xor viewport">
 
         <canvas id="threeDView" class="xor threePanel">
@@ -63,18 +58,48 @@
 
     </div>
 
-    <div id="menuTab" class="xor sliderTab">
+    <div id="toggleAssistantTab" class="xor sliderTab menu">
         <p>
             <em>
                 <strong>
-                    Menu
+                    Toggle Assistant
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="newGameTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    New Game
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="clearBoardTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    Clear Board
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="saveStartingConfigTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    Save Starting Cells
                 </strong>
             </em>
         </p>
     </div>
 
     <div id="gitHubTab" class="xor sliderTab">
-        <a href="https://github.com/0xor1/Sudoku-Assistant-3D" target="_blank">
+        <a href="https://github.com/0xor1/Sudoku-Assistant-3D#sudoku-assistant-3d" target="_blank">
             <p>
                 <em>
                     <strong>
