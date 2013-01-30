@@ -29,7 +29,6 @@
 
         //states
         this._isHidden = true;
-        this._isEntering = false;
 
         this._tempStateTimer = null;
 
@@ -44,9 +43,11 @@
     Sudoku.PossibilityCubeCell3D.prototype.constructor = Sudoku.PossibilityCubeCell3D;
 
 
-    Sudoku.PossibilityCubeCell3D.prototype.show = function (length) {
+    Sudoku.PossibilityCubeCell3D.prototype.show = function (length, callback) {
 
-        length = length || 300;
+        length = length || 500;
+
+        callback = callback || function(){};
 
         if (this._isHidden) {
 
@@ -56,7 +57,8 @@
                 obj:this.material,
                 prop:'opacity',
                 targetValue:this.defaultOpacity,
-                length:length
+                length:length,
+                callback:callback
             });
 
         }
@@ -68,11 +70,11 @@
 
         var self = this;
 
-        length = length || 300;
+        length = length || 500;
+
+        callback = callback || function(){};
 
         if (!this._isHidden) {
-
-            this._isHidden = true;
 
             Utils.animate({
                 obj:this.material,
@@ -80,8 +82,8 @@
                 targetValue:0,
                 length:length,
                 callback:function(obj,prop){
+                    this._isHidden = true;
                     callback();
-                    self._isHidden = true;
                 }
             });
 
@@ -90,6 +92,11 @@
     }
 
 
+    Sudoku.PossibilityCubeCell3D.prototype.spin = function(length, callback) {
+
+        length = length || 500;
+
+    }
 
 
 })();

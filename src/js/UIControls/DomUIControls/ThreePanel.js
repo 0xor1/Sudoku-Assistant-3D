@@ -13,7 +13,7 @@
         this.renderer = new THREE.WebGLRenderer({canvas:dom});
         this.dom = this.renderer.domElement;
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, this.dom.width / this.dom.height, 1, 10000);
+        this.camera = new THREE.PerspectiveCamera(75, this.dom.width / this.dom.height, 1, 100000);
         this.controls = new THREE.TrackballControls(this.camera, this.dom);
 
         this.scene.add(this.camera);
@@ -129,7 +129,6 @@
         this.camera.aspect = rect.width / rect.height;
         this.controls.handleResize();
         this.camera.updateProjectionMatrix();
-
     }
 
 

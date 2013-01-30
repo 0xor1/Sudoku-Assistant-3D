@@ -20,8 +20,6 @@
 
         this._isHidden = false;
 
-        this.position.z = Sudoku.PossibilityCube3D.zOffset;
-
         this._cells = new Utils.MultiArray(this._nSqrd, this._nSqrd, this._nSqrd);
 
         for (var i = 0; i < this._nSqrd; i++) {
@@ -35,7 +33,7 @@
 
                     x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                     y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
-                    z = (k * (cSize + cSpace));
+                    z = (k * (cSize + cSpace)) + Sudoku.PossibilityCube3D.zOffset;
 
                     cell.live.position.x = cell.dead.position.x = x;
                     cell.live.position.y = cell.dead.position.y = y;

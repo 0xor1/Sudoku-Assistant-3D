@@ -1,33 +1,29 @@
 (function () {
 
+
     function app() {
 
         var threePanel = new UIControls.ThreePanel(document.getElementById("threeDView"))
             , gameBoard = new Sudoku.GameBoard(3)
             , assistant = new Sudoku.Assistant(gameBoard)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)
-            , possibilityCube3D
+            , possibilityCube3D = new Sudoku.PossibilityCube3D(gameBoard, assistant, threePanel)
             ;
 
         initialiseDomControls();
-
         threePanel.add(gameBoard3D);
+        threePanel.add(possibilityCube3D);
         threePanel.resize();
         threePanel.start();
-        centerCamera.call(threePanel, gameBoard);
+        focusCameraOnBoard(gameBoard);
+
+        setTimeout(function(){focusCameraOnCube();}, 2000);
 
 
-        gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
-
-
-        possibilityCube3D = new Sudoku.PossibilityCube3D(gameBoard, assistant, threePanel);
-        threePanel.add(possibilityCube3D);
-
-        threePanel.controls.target.z = Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * gameBoard.getGameSize() * gameBoard.getGameSize();
-
-        Utils.AnimationMaster.turnOnAnimationSmoothing();
+        //Utils.AnimationMaster.turnOnAnimationSmoothing();
         //Utils.FrameRateMonitor.enableLogging();
-        Utils.FrameRateMonitor.start();
+        //Utils.FrameRateMonitor.start();
+
 
         function initialiseDomControls(){
 
@@ -40,50 +36,146 @@
             toggleAssistantTab.addEventListener(
                 'click',
                 function(){
-                    if(possibilityCube3D.isHidden){
-                        threePanel.add(possibilityCube3D)
-                        possibilityCube3D.showAll(300);
-                        possibilityCube3D.isHidden = false;
-                    } else {
-                        centerCamera.call(threePanel, gameBoard);
-                        possibilityCube3D.hideAll(300);
-                        setTimeout(function(){threePanel.remove(possibilityCube3D);possibilityCube3D.isHidden = true;},300)
-                    }
+                   //TODO
+                },
+                false
+            );
+            newGameTab.addEventListener(
+                'click',
+                function(){
+                    gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig())
+                },
+                false
+            );
+            clearBoardTab.addEventListener(
+                'click',
+                function(){
+                    gameBoard.wipeClean()
+                },
+                false
+            );
+            saveStartingConfigTab.addEventListener(
+                'click',
+                function(){
+                    gameBoard.saveStartingConfiguration();
                 },
                 false
             );
         }
 
+
+        function focusCameraOnBoard() {
+
+            var n = gameBoard.getGameSize()
+                , nSqrd = n * n
+                , len = 500
+                , cam = threePanel.camera
+                , tar = threePanel.controls.target
+                ;
+
+            threePanel.controls.noRotate = true;
+
+            Utils.animate({
+                obj:tar,
+                prop:"x",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:tar,
+                prop:"y",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:tar,
+                prop:"z",
+                targetValue:0,
+                length:len
+            });
+
+            Utils.animate({
+                obj:cam.rotation,
+                prop:"z",
+                targetValue:0,
+                length:len
+            });
+
+            Utils.animate({
+                obj:cam.position,
+                prop:"x",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:cam.position,
+                prop:"y",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:cam.position,
+                prop:"z",
+                targetValue: 0.8 * ((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
+                length:len
+            });
+
+        }
+
+
+        function focusCameraOnCube() {
+
+            var n = gameBoard.getGameSize()
+                , nSqrd = n * n
+                , len = 500
+                , cam = threePanel.camera
+                , tar = threePanel.controls.target
+                ;
+
+            threePanel.controls.noRotate = false;
+
+            Utils.animate({
+                obj:tar,
+                prop:"x",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:tar,
+                prop:"y",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:tar,
+                prop:"z",
+                targetValue:Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd,
+                length:len
+            });
+
+            Utils.animate({
+                obj:cam.position,
+                prop:"x",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:cam.position,
+                prop:"y",
+                targetValue:0,
+                length:len
+            });
+            Utils.animate({
+                obj:cam.position,
+                prop:"z",
+                targetValue: 2.3 * (Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd),
+                length:len
+            });
+
+        }
+
     }
 
-    function centerCamera(gameBoard) {
-
-        var n = gameBoard.getGameSize()
-            , nSqrd = n * n
-            , len = 500
-            , cam = this.camera
-            ;
-
-        Utils.animate({
-            obj:cam.position,
-            prop:"x",
-            targetValue:0,
-            length:len
-        });
-        Utils.animate({
-            obj:cam.position,
-            prop:"y",
-            targetValue:0,
-            length:len
-        });
-        Utils.animate({
-            obj:cam.position,
-            prop:"z",
-            targetValue:2*((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
-            length:len
-        });
-
-    }
 
     window.addEventListener("load", app, false);
 

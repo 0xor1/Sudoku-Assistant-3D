@@ -12,12 +12,14 @@ THREE.TrackballControls = function ( object, domElement ) {
     this.object = object;
     this.domElement = ( domElement !== undefined ) ? domElement : document;
 
+    var rect = this.domElement.getBoundingClientRect();
+
     // API
 
     this.enabled = true;
 
     this.screen = { width: 0, height: 0, offsetLeft: 0, offsetTop: 0 };
-    this.radius = ( this.screen.width + this.screen.height ) / 4;
+    this.radius = ( rect.width + rect.height ) / 4;
 
     this.rotateSpeed = 1.0;
     this.zoomSpeed = 1.2;

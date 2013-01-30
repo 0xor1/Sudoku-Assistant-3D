@@ -8,10 +8,10 @@ html, body, .xor.threePanel, .xor.viewport {
 }
 
 .xor.threePanel {
-    background-image: linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
-    background-image: -o-linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
-    background-image: -moz-linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
-    background-image: -webkit-linear-gradient(top, rgb(0, 0, 80) 60%, rgb(40, 40, 120) 85%);
+    background-image: linear-gradient(top, rgb(0, 0, 50) 60%, rgb(15, 15, 80) 85%);
+    background-image: -o-linear-gradient(top, rgb(0, 0, 50) 60%, rgb(15, 15, 80) 85%);
+    background-image: -moz-linear-gradient(top, rgb(0, 0, 50) 60%, rgb(15, 15, 80) 85%);
+    background-image: -webkit-linear-gradient(top, rgb(0, 0, 50) 60%, rgb(15, 15, 80) 85%);
 }
 
 .xor.sliderTab {
@@ -52,12 +52,12 @@ html, body, .xor.threePanel, .xor.viewport {
 
 #newGameTab {
     top:90px;
-    left: -93px;
+    left: -94px;
 }
 
 #clearBoardTab {
     top:150px;
-    left: -100px;
+    left: -101px;
 }
 
 #saveStartingConfigTab {
