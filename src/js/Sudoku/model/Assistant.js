@@ -149,7 +149,13 @@
 
         },
 
-        possibilityHasError:function (i, j, k){
+        possibilityIsCertainty:function(i,j,k){
+
+            return this._possibilityCube[i][j][k].isCertainty();
+
+        },
+
+        possibilityHasErrors:function (i, j, k){
 
             return this._possibilityCube[i][j][k].hasErrors();
 

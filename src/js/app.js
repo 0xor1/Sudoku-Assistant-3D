@@ -12,12 +12,9 @@
 
         initialiseDomControls();
         threePanel.add(gameBoard3D);
-        threePanel.add(possibilityCube3D);
         threePanel.resize();
         threePanel.start();
         focusCameraOnBoard(gameBoard);
-
-        setTimeout(function(){focusCameraOnCube();}, 2000);
 
 
         //Utils.AnimationMaster.turnOnAnimationSmoothing();
@@ -36,7 +33,13 @@
             toggleAssistantTab.addEventListener(
                 'click',
                 function(){
-                   //TODO
+                    if(possibilityCube3D._isHidden){
+                        focusCameraOnCube();
+                        possibilityCube3D.showAll()
+                    } else {
+                        focusCameraOnBoard();
+                        possibilityCube3D.hideAll();
+                    }
                 },
                 false
             );

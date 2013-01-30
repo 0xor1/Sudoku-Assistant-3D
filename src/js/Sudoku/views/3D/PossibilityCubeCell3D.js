@@ -2,26 +2,7 @@
 
     Sudoku.PossibilityCubeCell3D = function (i, j, k) {
 
-        THREE.Object3D.call(this);
-
-        this.geometry = new THREE.CubeGeometry(
-            Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing,
-            Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing,
-            Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing
-        );
-
-        this.geometry.computeBoundingSphere();
-        this.boundRadius = this.geometry.boundingSphere.radius;
-
-        this.material = new THREE.MeshBasicMaterial({
-            color:0xffffff
-        });
-
-        this.color = this.material.color;
-
-        this.material.opacity = 0;
-
-        this.material.transparent = true;
+        this.geometry = Sudoku.PossibilityCube3D.geometry;
 
         this.i = i;
         this.j = j;
@@ -37,7 +18,13 @@
     };
 
 
-    Sudoku.PossibilityCubeCell3D.prototype = Object.create(THREE.Object3D);
+    Sudoku.PossibilityCube3D.geometry = new THREE.CubeGeometry(
+        Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing,
+        Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing,
+        Sudoku.GameBoard3D.cellSize - Sudoku.PossibilityCube3D.cellSpacing
+    );
+    Sudoku.PossibilityCube3D.geometry.computeBoundingSphere();
+    Sudoku.PossibilityCube3D.geometry.boundRadius = Sudoku.PossibilityCube3D.geometry.boundingSphere.radius;
 
 
     Sudoku.PossibilityCubeCell3D.prototype.constructor = Sudoku.PossibilityCubeCell3D;
@@ -57,8 +44,17 @@
                 obj:this.material,
                 prop:'opacity',
                 targetValue:this.defaultOpacity,
+                length:length
+            });
+            Utils.animate({
+                obj:this.rotation,
+                prop:'z',
+                targetValue:Math.PI*4,
                 length:length,
-                callback:callback
+                callback:function(obj,prop){
+                    obj[prop] = 0;
+                    callback();
+                }
             });
 
         }
@@ -80,21 +76,21 @@
                 obj:this.material,
                 prop:'opacity',
                 targetValue:0,
+                length:length
+            });
+            Utils.animate({
+                obj:this.rotation,
+                prop:'z',
+                targetValue:Math.PI*4,
                 length:length,
                 callback:function(obj,prop){
-                    this._isHidden = true;
+                    obj[prop] = 0;
+                    self._isHidden = true;
                     callback();
                 }
             });
 
         }
-
-    }
-
-
-    Sudoku.PossibilityCubeCell3D.prototype.spin = function(length, callback) {
-
-        length = length || 500;
 
     }
 

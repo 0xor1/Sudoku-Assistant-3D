@@ -31,4 +31,50 @@
     }
 
 
+    Sudoku.DeadPossibilityCubeCell3D.prototype.hasErrors = function(length){
+
+        var self = this;
+
+        length = length || 500;
+
+        if(this._isHidden){
+            this.material.opacity = 0.65;
+            this.material.wireframe = false;
+        } else {
+            this.hide(
+                length,
+                function(){
+                    self.material.opacity = 0.65;
+                    self.material.wireframe = false;
+                    self.show(length);
+                }
+            );
+        }
+
+    };
+
+
+    Sudoku.DeadPossibilityCubeCell3D.prototype.hasNoErrors = function(length){
+
+        var self = this;
+
+        length = length || 500;
+
+        if(this._isHidden){
+            this.material.opacity = this.defaultOpacity;
+            this.material.wireframe = true;
+        } else {
+            this.hide(
+                length,
+                function(){
+                    self.material.opacity = this.defaultOpacity;
+                    self.material.wireframe = true;
+                    self.show(length);
+                }
+            );
+        }
+
+    };
+
+
 })();
