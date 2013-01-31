@@ -49,24 +49,12 @@
             for (j = 0; j < this._nSqrd; j++) {
                 for (k = 0; k < this._nSqrd; k++) {
                     this._possibilityCube[i][j][k] = new Possibility(i, j, k);
-                    this._possibilityCube[i][j][k].addEventListener(killed, function (event) {
-                        killedHandler.call(this, event)
-                    }.bind(this));
-                    this._possibilityCube[i][j][k].addEventListener(revived, function (event) {
-                        revivedHandler.call(this, event)
-                    }.bind(this));
-                    this._possibilityCube[i][j][k].addEventListener(isCertainty, function (event) {
-                        newCertaintyHandler.call(this, event)
-                    }.bind(this));
-                    this._possibilityCube[i][j][k].addEventListener(isNotCertainty, function (event) {
-                        oldCertaintyHandler.call(this, event)
-                    }.bind(this));
-                    this._possibilityCube[i][j][k].addEventListener(hasErrors, function (event) {
-                        newErrorHandler.call(this, event)
-                    }.bind(this));
-                    this._possibilityCube[i][j][k].addEventListener(hasNoErrors, function (event) {
-                        oldErrorHandler.call(this, event)
-                    }.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(killed, killedHandler.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(revived, revivedHandler.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(isCertainty, newCertaintyHandler.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(isNotCertainty, oldCertaintyHandler.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(hasErrors, newErrorHandler.bind(this));
+                    this._possibilityCube[i][j][k].addEventListener(hasNoErrors, oldErrorHandler.bind(this));
                 }
             }
         }
