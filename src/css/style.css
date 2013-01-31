@@ -8,10 +8,10 @@ html, body, .xor.threePanel, .xor.viewport {
 }
 
 .xor.threePanel {
-    background-image: linear-gradient(top, rgb(0, 0, 40) 60%, rgb(10, 10, 70) 85%);
-    background-image: -o-linear-gradient(top, rgb(0, 0, 40) 60%, rgb(10, 10, 70) 85%);
-    background-image: -moz-linear-gradient(top, rgb(0, 0, 40) 60%, rgb(10, 10, 70) 85%);
-    background-image: -webkit-linear-gradient(top, rgb(0, 0, 40) 60%, rgb(10, 10, 70) 85%);
+    background-image: linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background-image: -o-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background-image: -moz-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background-image: -webkit-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
 }
 
 .xor.sliderTab {
