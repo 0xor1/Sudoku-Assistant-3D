@@ -60,8 +60,6 @@
         }
 
 
-        this._masterCounter = [];
-
         this._rowCounters = Utils.MultiArray(this._nSqrd, this._nSqrd);
 
         for (i = 0; i < this._nSqrd; i++) {
@@ -71,7 +69,6 @@
                     tempArray.push(this._possibilityCube[i][j][k]);
                 }
                 this._rowCounters[i][k] = new Counter(row, tempArray);
-                this._masterCounter.push(this._rowCounters[i][k]);
             }
         }
 
@@ -84,7 +81,6 @@
                     tempArray.push(this._possibilityCube[i][j][k]);
                 }
                 this._columnCounters[j][k] = new Counter(column, tempArray);
-                this._masterCounter.push(this._columnCounters[j][k]);
             }
         }
 
@@ -97,7 +93,6 @@
                     tempArray.push(this._possibilityCube[i][j][k]);
                 }
                 this._elementCounters[i][j] = new Counter(element, tempArray);
-                this._masterCounter.push(this._elementCounters[i][j]);
             }
         }
 
@@ -113,7 +108,6 @@
                         }
                     }
                     this._subGridCounters[i][j][k] = new Counter(subGrid, tempArray);
-                    this._masterCounter.push(this._subGridCounters[i][j][k]);
                 }
             }
         }
@@ -170,39 +164,6 @@
             }
 
             return arr;
-
-        },
-
-
-        getBestPossibilities:function () {
-
-            var smallestFork = {branches:this._nSqrd + 1, cells:[], type:null}
-                , bestPos = []
-                , sgb
-                ;
-
-            if (this._certainties.length > 0) {
-                bestPos = this.getCertainties();
-                bestPos.type = isCertainty;
-                return bestPos;
-            }
-
-            //find fork with least branches
-            for (var i = 0, l = this._masterCounter.length; i < l; i++) {
-                if (this._masterCounter[i]._value > 0 && this._masterCounter[i]._value < smallestFork.branches) {
-                    smallestFork.branches = this._masterCounter[i]._value;
-                    smallestFork.cells = [];
-                }
-                for(var j = 0; j < this._nSqrd; j++){
-                    if(this._masterCounter[i]._cells[j].isAlive()){
-                        smallestFork.cells.push(this._masterCounter[i]._cells[j].getIndices())
-                    }
-                }
-            }
-
-            bestPos = smallestFork.cells;
-            bestPos.type = isNotCertainty;
-            return bestPos;
 
         }
 
