@@ -162,7 +162,7 @@
             Utils.animate({
                 obj:tar,
                 prop:"z",
-                targetValue:Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd,
+                targetValue: 0.5 * (((Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd) + Sudoku.PossibilityCube3D.zOffset ),
                 length:len
             });
 
