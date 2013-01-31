@@ -28,7 +28,7 @@
 
 
     Sudoku.DeadPossibilityCubeCell3D.defaultMaterial = new THREE.MeshBasicMaterial({
-        color:0xff2222,
+        color:0x2222ff,
         transparent:true,
         opacity:0,
         wireframe:true

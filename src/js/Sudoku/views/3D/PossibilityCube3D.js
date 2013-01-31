@@ -99,7 +99,7 @@
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.certaintyMaterial,
             prop:'opacity',
-            targetValue:Sudoku.LivePossibilityCubeCell3D.defaultOpacity,
+            targetValue:Sudoku.LivePossibilityCubeCell3D.certaintyOpacity,
             length:length
         });
         Utils.animate({

@@ -11,6 +11,9 @@
             ;
 
         initialiseDomControls();
+
+        gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
+
         threePanel.add(gameBoard3D);
         threePanel.resize();
         threePanel.start();

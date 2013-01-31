@@ -47,6 +47,9 @@
     Sudoku.LivePossibilityCubeCell3D.defaultOpacity = 0.65;
 
 
+    Sudoku.LivePossibilityCubeCell3D.certaintyOpacity = 0.8;
+
+
     Sudoku.LivePossibilityCubeCell3D.prototype.isCertainty = function(){
 
         this.material = Sudoku.LivePossibilityCubeCell3D.certaintyMaterial;
