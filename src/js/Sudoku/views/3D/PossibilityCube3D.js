@@ -60,17 +60,17 @@
             }
         }
 
-        /*assistant.addEventListener('killed', killed.bind(this));
+        assistant.addEventListener('killed', killed.bind(this));
 
-         assistant.addEventListener('revived', revived.bind(this));
+        assistant.addEventListener('revived', revived.bind(this));
 
-         assistant.addEventListener('isCertainty', isCertainty.bind(this));
+        assistant.addEventListener('isCertainty', isCertainty.bind(this));
 
-         assistant.addEventListener('isNotCertainty', isNotCertainty.bind(this));
+        assistant.addEventListener('isNotCertainty', isNotCertainty.bind(this));
 
-         assistant.addEventListener('hasErrors', hasErrors.bind(this));
+        assistant.addEventListener('hasErrors', hasErrors.bind(this));
 
-         assistant.addEventListener('hasNoErrors', hasNoErrors.bind(this));*/
+        assistant.addEventListener('hasNoErrors', hasNoErrors.bind(this));
 
     };
 
@@ -164,74 +164,71 @@
     }
 
 
-    function showCell(i, j, k, length) {
+    function killed(event) {
 
-        var self = this
-            , cell
-            ;
+        var cell = this._cells[event.i][event.j][event.k];
 
-        length = length || 300;
+        this.remove(cell.active);
 
-        if(this._cells[i][j][k].active !== null){
-            hideCell.call(
-                this,
-                i,
-                j,
-                k,
-                length,
-                function(){
-                    showCell.call(self, i, j, k, length);
-                }
-            );
-        } else if(this._assistant.possibilityIsAlive(i,j,k)){
-            cell = this._cells[i][j][k].live;
-        } else {
-            cell = this._cells[i][j][k].dead;
-        }
+        cell.active = cell.dead;
 
-        this._cells[i][j][k].active = cell;
-
-        this._threePanel.add(cell);
-        cell.show(length);
-
-        return this;
+        this.add(cell.active);
 
     }
 
 
-    function hideCell(i, j, k, length, callback) {
 
-        var self = this
-            , cell = this._cells[i][j][k].active;
-            ;
+    function revived(event) {
 
-        length = length || 300;
-        callback = callback || function () {};
+        var cell = this._cells[event.i][event.j][event.k];
 
-        cell.hide(
-            length,
-            function () {
-                self._threePanel.remove(cell);
-                self._cells[i][j][k].active = null;
-                callback();
-            }
-        );
+        this.remove(cell.active);
 
-        return this;
+        cell.active = cell.live;
+
+        this.add(cell.active);
+
+    }
+
+
+    function isCertainty(event) {
+
+        var cell = this._cells[event.i][event.j][event.k].live.isCertainty();
+
+    }
+
+
+    function isNotCertainty(event) {
+
+        var cell = this._cells[event.i][event.j][event.k].live.isNotCertainty();
+
+    }
+
+
+    function hasErrors(event) {
+
+        var cell = this._cells[event.i][event.j][event.k].dead.hasErrors();
+
+    }
+
+
+    function hasNoErrors(event) {
+
+        var cell = this._cells[event.i][event.j][event.k].dead.hasNoErrors();
 
     }
 
 
     function clicked(event) {
 
-
+        //TODO
 
     }
 
 
     function dblClicked(event) {
 
-
+        //TODO
 
     }
 
