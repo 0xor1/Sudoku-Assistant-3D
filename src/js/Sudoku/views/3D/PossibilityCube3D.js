@@ -11,8 +11,6 @@
         cSize = Sudoku.GameBoard3D.cellSize;
         gSGB = gameBoard.getSubGridBoundsContainingCell.bind(gameBoard);
 
-        THREE.Object3D.call(this);
-
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
         this._assistant = assistant;
@@ -43,7 +41,6 @@
                         }
                         cell.active = cell.dead;
                     }
-                    this.add(cell.active);
 
                     x = (j * (cSize + cSpace) + gSGB(i, j).jSubGrid * sgSpace) - 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
                     y = -(i * (cSize + cSpace) + gSGB(i, j).iSubGrid * sgSpace) + 0.5 * ((nSqrd - 1) * (cSize + cSpace) + (n - 1) * sgSpace);
@@ -75,9 +72,6 @@
     };
 
 
-    Sudoku.PossibilityCube3D.prototype = Object.create(THREE.Object3D.prototype);
-
-
     Sudoku.PossibilityCube3D.zOffset = Sudoku.GameBoard3D.cellSize * 3.5;
 
 
@@ -88,7 +82,13 @@
 
         length = length || 300;
 
-        this._threePanel.add(this);
+        for (var i = 0; i < this._nSqrd; i++) {
+            for (var j = 0; j < this._nSqrd; j++) {
+                for (var k = 0; k < this._nSqrd; k++) {
+                    this._threePanel.add(this._cells[i][j][k].active);
+                }
+            }
+        }
 
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.defaultMaterial,
@@ -155,7 +155,13 @@
             length:length,
             callback:function(){
                 self._isHidden = true;
-                self._threePanel.remove(self);
+                for (var i = 0; i < this._nSqrd; i++) {
+                    for (var j = 0; j < this._nSqrd; j++) {
+                        for (var k = 0; k < this._nSqrd; k++) {
+                            self._threePanel.add(this._cells[i][j][k].active);
+                        }
+                    }
+                }
             }
         });
 
@@ -168,11 +174,11 @@
 
         var cell = this._cells[event.i][event.j][event.k];
 
-        this.remove(cell.active);
+        this._threePanel.remove(cell.active);
 
         cell.active = cell.dead;
 
-        this.add(cell.active);
+        this._threePanel.add(cell.active);
 
     }
 
@@ -182,11 +188,11 @@
 
         var cell = this._cells[event.i][event.j][event.k];
 
-        this.remove(cell.active);
+        this._threePanel.remove(cell.active);
 
         cell.active = cell.live;
 
-        this.add(cell.active);
+        this._threePanel.add(cell.active);
 
     }
 
