@@ -102,6 +102,18 @@
             targetValue:Sudoku.LivePossibilityCubeCell3D.defaultOpacity,
             length:length
         });
+        Utils.animate({
+            obj:Sudoku.DeadPossibilityCubeCell3D.defaultMaterial,
+            prop:'opacity',
+            targetValue:Sudoku.DeadPossibilityCubeCell3D.defaultOpacity,
+            length:length
+        });
+        Utils.animate({
+            obj:Sudoku.DeadPossibilityCubeCell3D.errorMaterial,
+            prop:'opacity',
+            targetValue:Sudoku.DeadPossibilityCubeCell3D.errorOpacity,
+            length:length
+        });
 
         this._isHidden = false;
 
@@ -126,6 +138,18 @@
         });
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.certaintyMaterial,
+            prop:'opacity',
+            targetValue:0,
+            length:length
+        });
+        Utils.animate({
+            obj:Sudoku.DeadPossibilityCubeCell3D.defaultMaterial,
+            prop:'opacity',
+            targetValue:0,
+            length:length
+        });
+        Utils.animate({
+            obj:Sudoku.DeadPossibilityCubeCell3D.errorMaterial,
             prop:'opacity',
             targetValue:0,
             length:length,

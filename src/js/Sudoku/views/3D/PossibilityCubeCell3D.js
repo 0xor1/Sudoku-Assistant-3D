@@ -9,7 +9,6 @@
         this.k = k;
 
         //states
-        this._isHidden = true;
 
         this._tempStateTimer = null;
 

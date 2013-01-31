@@ -6,11 +6,7 @@
 
         Sudoku.PossibilityCubeCell3D.call(this, i, j, k);
 
-        this.material.wireframe = true;
-
-        this.material.color.g = this.material.color.b = 0;
-
-        this.defaultOpacity = 0.1;
+        this.material = Sudoku.DeadPossibilityCubeCell3D.defaultMaterial;
 
     };
 
@@ -31,48 +27,38 @@
     }
 
 
-    Sudoku.DeadPossibilityCubeCell3D.prototype.hasErrors = function(length){
+    Sudoku.DeadPossibilityCubeCell3D.defaultMaterial = new THREE.MeshBasicMaterial({
+        color:0xffffff,
+        transparent:true,
+        opacity:0,
+        wireframe:true
+    });
 
-        var self = this;
 
-        length = length || 500;
+    Sudoku.DeadPossibilityCubeCell3D.errorMaterial = new THREE.MeshBasicMaterial({
+        color:0xff2222,
+        transparent:true,
+        opacity:0,
+        wireframe:false
+    });
 
-        if(this._isHidden){
-            this.material.opacity = 0.65;
-            this.material.wireframe = false;
-        } else {
-            this.hide(
-                length,
-                function(){
-                    self.material.opacity = 0.65;
-                    self.material.wireframe = false;
-                    self.show(length);
-                }
-            );
-        }
+
+    Sudoku.DeadPossibilityCubeCell3D.defaultOpacity = 0.15;
+
+
+    Sudoku.DeadPossibilityCubeCell3D.errorOpacity = 0.65;
+
+
+    Sudoku.DeadPossibilityCubeCell3D.prototype.hasErrors = function(){
+
+        this.material = Sudoku.DeadPossibilityCubeCell3D.errorMaterial;
 
     };
 
 
     Sudoku.DeadPossibilityCubeCell3D.prototype.hasNoErrors = function(length){
 
-        var self = this;
-
-        length = length || 500;
-
-        if(this._isHidden){
-            this.material.opacity = this.defaultOpacity;
-            this.material.wireframe = true;
-        } else {
-            this.hide(
-                length,
-                function(){
-                    self.material.opacity = this.defaultOpacity;
-                    self.material.wireframe = true;
-                    self.show(length);
-                }
-            );
-        }
+        this.material = Sudoku.DeadPossibilityCubeCell3D.defaultMaterial;
 
     };
 

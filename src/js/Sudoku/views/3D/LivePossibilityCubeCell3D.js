@@ -47,66 +47,16 @@
     Sudoku.LivePossibilityCubeCell3D.defaultOpacity = 0.65;
 
 
-    Sudoku.LivePossibilityCubeCell3D.prototype.isCertainty = function(length){
+    Sudoku.LivePossibilityCubeCell3D.prototype.isCertainty = function(){
 
-        length = length || 500;
-
-        if(this._isHidden){
-            this.material.color.r = 0.2;
-            this.material.color.g = 1;
-            this.material.color.b = 0.2;
-        } else {
-            Utils.animate({
-                obj:this.material,
-                prop:'r',
-                targetValue:0.2,
-                length:length
-            });
-            Utils.animate({
-                obj:this.material,
-                prop:'g',
-                targetValue:1,
-                length:length
-            });
-            Utils.animate({
-                obj:this.material,
-                prop:'r',
-                targetValue:0.2,
-                length:length
-            });
-        }
+        this.material = Sudoku.LivePossibilityCubeCell3D.certaintyMaterial;
 
     };
 
 
-    Sudoku.LivePossibilityCubeCell3D.prototype.isNotCertainty = function(length){
+    Sudoku.LivePossibilityCubeCell3D.prototype.isNotCertainty = function(){
 
-        length = length || 500;
-
-        if(this._isHidden){
-            this.material.color.r = 1;
-            this.material.color.g = 1;
-            this.material.color.b = 1;
-        } else {
-            Utils.animate({
-                obj:this.material,
-                prop:'r',
-                targetValue:1,
-                length:length
-            });
-            Utils.animate({
-                obj:this.material,
-                prop:'g',
-                targetValue:1,
-                length:length
-            });
-            Utils.animate({
-                obj:this.material,
-                prop:'r',
-                targetValue:1,
-                length:length
-            });
-        }
+        this.material = Sudoku.LivePossibilityCubeCell3D.defaultMaterial;
 
     };
 

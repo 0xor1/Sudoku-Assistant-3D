@@ -14,8 +14,7 @@
         threePanel.add(gameBoard3D);
         threePanel.resize();
         threePanel.start();
-        focusCameraOnBoard(gameBoard);
-
+        focusCameraOnBoard();
 
         //Utils.AnimationMaster.turnOnAnimationSmoothing();
         //Utils.FrameRateMonitor.enableLogging();

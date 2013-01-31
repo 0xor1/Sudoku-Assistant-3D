@@ -19,9 +19,7 @@
             }
         };
 
-        this.geometry = new THREE.PlaneGeometry(Sudoku.GameBoard3D.cellSize, Sudoku.GameBoard3D.cellSize);
-        this.geometry.computeBoundingSphere();
-        this.boundRadius = this.geometry.boundingSphere.radius;
+        this.geometry = Sudoku.GameBoardCell3D.geometry;
 
 
         this.material = new THREE.ShaderMaterial({
@@ -52,6 +50,11 @@
         this.addEventListener('click', this.select.bind(this));
 
     };
+
+
+    Sudoku.GameBoardCell3D.geometry = new THREE.PlaneGeometry(Sudoku.GameBoard3D.cellSize, Sudoku.GameBoard3D.cellSize);
+    Sudoku.GameBoardCell3D.geometry.computeBoundingSphere();
+    Sudoku.GameBoardCell3D.geometry.boundRadius = Sudoku.GameBoardCell3D.geometry.boundingSphere.radius;
 
 
     gbc3d.prototype = Object.create(UIControls.ClickableMesh.prototype);
