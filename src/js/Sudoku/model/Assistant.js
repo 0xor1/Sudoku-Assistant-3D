@@ -553,7 +553,7 @@
 
         hasErrors:function () {
 
-            return this._errors > 0;
+            return this._errors.length > 0;
 
         },
 
@@ -618,7 +618,7 @@
 
         isCertainty:function () {
 
-            return this._certainties > 0;
+            return this._certainties.length > 0;
 
         },
 
