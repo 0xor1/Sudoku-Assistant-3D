@@ -40,8 +40,9 @@ html, body, .xor.threePanel, .xor.viewport {
 
 #newGameTab:hover,
 #toggleAssistantTab:hover,
-#clearBoardTab:hover,
-#saveStartingConfigTab:hover{
+#resetBoardTab:hover,
+#saveStartingConfigTab:hover,
+#clearBoardTab:hover{
     cursor: pointer;
     left:-10px;
 }
@@ -55,7 +56,7 @@ html, body, .xor.threePanel, .xor.viewport {
     left: -94px;
 }
 
-#clearBoardTab {
+#resetBoardTab {
     top:150px;
     left: -101px;
 }
@@ -65,8 +66,9 @@ html, body, .xor.threePanel, .xor.viewport {
     left:-145px;
 }
 
-#saveStartingConfigTab.disabled {
-    left:-170px;
+#clearBoardTab {
+    top:270px;
+    left: -101px;
 }
 
 #gitHubTab {

@@ -28,8 +28,9 @@
 
             var toggleAssistantTab = document.getElementById('toggleAssistantTab')
                 , newGameTab = document.getElementById('newGameTab')
-                , clearBoardTab = document.getElementById('clearBoardTab')
+                , resetBoardTab = document.getElementById('resetBoardTab')
                 , saveStartingConfigTab = document.getElementById('saveStartingConfigTab')
+                , clearBoardTab = document.getElementById('clearBoardTab')
                 ;
 
             toggleAssistantTab.addEventListener(
@@ -52,10 +53,10 @@
                 },
                 false
             );
-            clearBoardTab.addEventListener(
+            resetBoardTab.addEventListener(
                 'click',
                 function(){
-                    gameBoard.wipeClean()
+                    gameBoard.setToStartingConfiguration();
                 },
                 false
             );
@@ -63,6 +64,13 @@
                 'click',
                 function(){
                     gameBoard.saveStartingConfiguration();
+                },
+                false
+            );
+            clearBoardTab.addEventListener(
+                'click',
+                function(){
+                    gameBoard.wipeClean()
                 },
                 false
             );
