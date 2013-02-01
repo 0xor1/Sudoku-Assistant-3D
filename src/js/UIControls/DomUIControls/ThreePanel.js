@@ -199,6 +199,7 @@
 
         if (typeof idx !== 'undefined') {
             this._clickables.splice(idx, 1);
+            delete obj._clickableIdx;
             for(var i = idx, l = this._clickables.length; i < l; i++ ){
                 this._clickables[i]._clickableIdx = i;
             }
