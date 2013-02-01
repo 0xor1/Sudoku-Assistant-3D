@@ -27,12 +27,14 @@ THREE.SphericalPolarControls = function (obj, dom) {
     this.phiSpeed = 1;
 
     this.center = new THREE.Vector3();
-    this.axesRotations = new THREE.Vector3();
+    this.centerRotation = new THREE.Vector3();
 
     this.focusTypes = {point:'point', direction:'direction'};
-    this.focusPoint = new THREE.Vector3();
-    this.focusDirection = new THREE.Vector3(0,0,-1);
     this.focusType = this.focusTypes.point;
+    this.focusPoint = new THREE.Vector3();
+    this.focusDirection = null;
+
+
 
 
 
