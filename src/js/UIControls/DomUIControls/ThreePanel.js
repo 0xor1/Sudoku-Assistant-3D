@@ -177,9 +177,9 @@
 
         if (obj instanceof UIControls.ClickableMesh) {
 
-            if (this._clickables.indexOf(obj) === -1) {
+            if (typeof obj._clickableIdx === 'undefined') {
                 this._clickables.push(obj);
-                obj.clickableIdx = this._clickables.length - 1;
+                obj._clickableIdx = this._clickables.length - 1;
             }
 
         }
@@ -195,12 +195,12 @@
 
     function removeClickable(obj) {
 
-        var idx = obj.clickableIdx;
+        var idx = obj._clickableIdx;
 
         if (typeof idx !== 'undefined') {
             this._clickables.splice(idx, 1);
             for(var i = idx, l = this._clickables.length; i < l; i++ ){
-                this._clickables[i].clickableIdx--;
+                this._clickables[i]._clickableIdx = i;
             }
         }
 
