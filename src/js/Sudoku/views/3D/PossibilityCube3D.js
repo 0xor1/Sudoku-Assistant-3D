@@ -158,7 +158,7 @@
                 for (var i = 0; i < this._nSqrd; i++) {
                     for (var j = 0; j < this._nSqrd; j++) {
                         for (var k = 0; k < this._nSqrd; k++) {
-                            self._threePanel.add(this._cells[i][j][k].active);
+                            self._threePanel.remove(this._cells[i][j][k].active);
                         }
                     }
                 }
