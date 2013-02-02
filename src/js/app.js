@@ -19,9 +19,6 @@
         threePanel.start();
         focusCameraOnBoard();
 
-        Utils.FrameRateMonitor.start();
-        Utils.FrameRateMonitor.enableLowFrameRateSmoothing();
-
 
         function initialiseDomControls(){
 
