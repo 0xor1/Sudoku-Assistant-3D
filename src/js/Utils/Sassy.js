@@ -175,10 +175,6 @@
 
         var prevTime
             , fps = 0
-            , fpsMin = Infinity
-            , fpsMax = 0
-            , fpsAve = null
-            , fpsAveCount = 1
             , criticalFps = 20
             , frames = 0
             , stopMonitoring = false
@@ -240,14 +236,6 @@
 
             if (time > prevTime + 1000) {
                 fps = Math.round((frames * 1000 ) / (time - prevTime ));
-                fpsMin = Math.min(fpsMin, fps);
-                fpsMax = Math.max(fpsMax, fps);
-                if (fpsAve === null) {
-                    fpsAve = fps;
-                } else {
-                    fpsAve = ((fpsAve * fpsAveCount) + fps) / (fpsAveCount + 1);
-                    fpsAveCount++;
-                }
 
                 if (inCriticalMode && fps > criticalFps) {
                     console.log("CRITICAL FRAME RATE RECOVERED");
@@ -258,7 +246,7 @@
                 }
 
                 if (log) {
-                    console.log("\nfps = " + fps + "\nfpsAve = " + fpsAve + "\nfpsMin = " + fpsMin + "\nfpsMax = " + fpsMax);
+                    console.log("\nfps = " + fps);
                 }
 
                 prevTime = time;
