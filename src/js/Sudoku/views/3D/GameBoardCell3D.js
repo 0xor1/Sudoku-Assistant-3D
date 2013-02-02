@@ -122,7 +122,7 @@
             length:len * 2,
             callback:function (obj, prop) {
                 obj[prop] = 0;
-            }.bind(this)
+            }
         });
 
         Utils.animate({
@@ -137,7 +137,7 @@
                     targetValue:0,
                     length:len
                 });
-            }.bind(this)
+            }
         });
 
         this.uniforms.texture.value = Sudoku.textures[value];
@@ -158,7 +158,7 @@
             length:len * 2,
             callback:function (obj, prop) {
                 obj[prop] = 0;
-            }.bind(this)
+            }
         });
 
         Utils.animate({
@@ -173,7 +173,7 @@
                     targetValue:0,
                     length:len
                 });
-            }.bind(this)
+            }
         });
 
         this.uniforms.texture.value = Sudoku.textures[0];

@@ -3,18 +3,19 @@
  *
  *  0xor1    http://github.com/0xor1
  *
- *  Rename NameSpace and sfx on the last line.
+ *  Rename NameSpace, sfx and countSfx on the last line.
  *
  */
 
 
-(function (NS, sfx) {
+(function (NS, sfx, countSfx) {
 
 
     var ns = window[NS] = window[NS] || {}
         , scalingFactor = 1
         , tmpScalingFactor = scalingFactor
         , math = Math
+        , cos = math.cos
         , pi = math.PI
         ;
 
@@ -29,9 +30,10 @@
             , inverseLength = 1 / param.length
             , progress = 0
             , callback = param.callback
+            , thisSfx
             , progressFn = param.progressFn ||
                 function (s, t, p) {
-                    return (s - t) * (Math.cos(p * Math.PI) + 1) * 0.5 + t;
+                    return (s - t) * (cos(p * pi) + 1) * 0.5 + t;
                 }
             , lastTime = Date.now()
             , jumpStartRequired = !(obj[prop + sfx] instanceof Function)
@@ -47,11 +49,27 @@
         }
 
 
-        obj[prop + sfx] = function () {
+        getThisSfxAndCancelPreviousAnimation();
 
-            var thisTime = Date.now();
+
+        obj[prop + thisSfx] = function () {
+
+
+            var thisTime
+                ;
+
+
+            if(typeof obj[prop + thisSfx] === 'undefined' || obj[prop + thisSfx].cancelled) {
+                obj[prop + countSfx]--;
+                delete obj[prop + thisSfx];
+                return;
+            }
+
+
+            thisTime = Date.now();
             progress += (thisTime - lastTime) * inverseLength * scalingFactor;
             lastTime = thisTime;
+
 
             if (progress >= 1) {
 
@@ -66,25 +84,59 @@
                     );
                 }
 
-                delete obj[prop + sfx];
+                obj[prop + countSfx]--;
+                delete obj[prop + thisSfx];
 
             } else {
 
                 obj[prop] = progressFn(start, target, progress);
 
-                requestAnimationFrame(obj[prop + sfx]);
+                requestAnimationFrame(obj[prop + thisSfx]);
 
             }
 
         };
 
 
-        if (jumpStartRequired) {
-            requestAnimationFrame(obj[prop + sfx]);
+        requestAnimationFrame(obj[prop + thisSfx]);
+
+
+        return obj[prop + thisSfx];
+
+
+        function getThisSfxAndCancelPreviousAnimation() {
+
+            var j = 0
+                , jIsSet = false
+                , previousIsCancelled = false
+                , i = 0
+                ;
+
+            if (typeof obj[prop + countSfx] === "undefined" || obj[prop + countSfx] === 0) {
+                j = 0;
+                obj[prop + countSfx] = 1;
+            } else {
+                while (!previousIsCancelled) {
+                    if (obj[prop + sfx + i] instanceof Function) {
+                        if (obj[prop + sfx + i].cancelled !== true) {
+                            obj[prop + sfx + i].cancelled = true;
+                            previousIsCancelled = true;
+                            if (!jIsSet) {
+                                j = i + 1;
+                                jIsSet = true;
+                            }
+                        }
+                    } else if (!jIsSet && i === 0) {
+                        j = 0;
+                        jIsSet = true;
+                    }
+                    i++;
+                }
+                obj[prop + countSfx]++;
+            }
+            thisSfx = sfx + j;
+
         }
-
-
-        return obj[prop + sfx];
 
     };
 
@@ -252,4 +304,4 @@
 
     })();
 
-})('Utils', '__animation__');
+})('Utils', '__animation__', '__animation__counts__');
