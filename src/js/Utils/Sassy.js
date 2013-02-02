@@ -31,7 +31,7 @@
             , callback = param.callback
             , progressFn = param.progressFn ||
                 function (s, t, p) {
-                    return (t - s) * (Math.cos(p * pi + pi) + 1) + s;
+                    return (s - t) * (Math.cos(p * Math.PI) + 1) * 0.5 + t;
                 }
             , lastTime = Date.now()
             , jumpStartRequired = !(obj[prop + sfx] instanceof Function)
