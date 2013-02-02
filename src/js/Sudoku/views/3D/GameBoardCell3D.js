@@ -396,7 +396,7 @@
             }
         }
         , defaultChange = {
-            length:100,
+            length:200,
             color:{
                 r:1,
                 g:1,
