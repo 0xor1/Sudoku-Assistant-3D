@@ -19,9 +19,8 @@
         threePanel.start();
         focusCameraOnBoard();
 
-        //Utils.AnimationMaster.turnOnAnimationSmoothing();
-        //Utils.FrameRateMonitor.enableLogging();
-        //Utils.FrameRateMonitor.start();
+        Utils.FrameRateMonitor.start();
+        Utils.FrameRateMonitor.enableLowFrameRateSmoothing();
 
 
         function initialiseDomControls(){
@@ -91,45 +90,45 @@
             Utils.animate({
                 obj:tar,
                 prop:"x",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:tar,
                 prop:"y",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:tar,
                 prop:"z",
-                targetValue:0,
+                target:0,
                 length:len
             });
 
             Utils.animate({
                 obj:cam.rotation,
                 prop:"z",
-                targetValue:0,
+                target:0,
                 length:len
             });
 
             Utils.animate({
                 obj:cam.position,
                 prop:"x",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:cam.position,
                 prop:"y",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:cam.position,
                 prop:"z",
-                targetValue: 0.8 * ((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
+                target: 0.8 * ((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
                 length:len
             });
 
@@ -150,38 +149,38 @@
             Utils.animate({
                 obj:tar,
                 prop:"x",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:tar,
                 prop:"y",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:tar,
                 prop:"z",
-                targetValue: 0.5 * (((Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd) + Sudoku.PossibilityCube3D.zOffset ),
+                target: 0.5 * (((Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd) + Sudoku.PossibilityCube3D.zOffset ),
                 length:len
             });
 
             Utils.animate({
                 obj:cam.position,
                 prop:"x",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:cam.position,
                 prop:"y",
-                targetValue:0,
+                target:0,
                 length:len
             });
             Utils.animate({
                 obj:cam.position,
                 prop:"z",
-                targetValue: 2.3 * (Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd),
+                target: 2.3 * (Sudoku.PossibilityCube3D.zOffset + 0.5 * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) * nSqrd),
                 length:len
             });
 

@@ -26,7 +26,7 @@
         var obj = param.obj
             , prop = param.prop
             , start = obj[prop]
-            , target = param.targetValue
+            , target = param.target
             , inverseLength = 1 / param.length
             , progress = 0
             , callback = param.callback
@@ -245,7 +245,7 @@
                 if (fpsAve === null) {
                     fpsAve = fps;
                 } else {
-                    fpsAve = (fpsAve * fpsAveCount) + fps / (fpsAveCount + 1);
+                    fpsAve = ((fpsAve * fpsAveCount) + fps) / (fpsAveCount + 1);
                     fpsAveCount++;
                 }
 
@@ -258,7 +258,7 @@
                 }
 
                 if (log) {
-                    console.log("\n\nfps = " + fps + "\nfpsAve = " + fpsAve + "\nfpsMin = " + fpsMin + "\nfpsMax = " + fpsMax);
+                    console.log("\nfps = " + fps + "\nfpsAve = " + fpsAve + "\nfpsMin = " + fpsMin + "\nfpsMax = " + fpsMax);
                 }
 
                 prevTime = time;

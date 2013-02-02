@@ -118,7 +118,7 @@
         Utils.animate({
             obj:this.rotation,
             prop:"y",
-            targetValue:-Math.PI * 2,
+            target:-Math.PI * 2,
             length:len * 2,
             callback:function (obj, prop) {
                 obj[prop] = 0;
@@ -128,13 +128,13 @@
         Utils.animate({
             obj:this.position,
             prop:"z",
-            targetValue:Sudoku.GameBoard3D.cellSize * 2,
+            target:Sudoku.GameBoard3D.cellSize * 2,
             length:len,
             callback:function (obj, prop) {
                 Utils.animate({
                     obj:obj,
                     prop:prop,
-                    targetValue:0,
+                    target:0,
                     length:len
                 });
             }
@@ -154,7 +154,7 @@
         Utils.animate({
             obj:this.rotation,
             prop:"y",
-            targetValue:Math.PI,
+            target:Math.PI,
             length:len * 2,
             callback:function (obj, prop) {
                 obj[prop] = 0;
@@ -164,13 +164,13 @@
         Utils.animate({
             obj:this.position,
             prop:"z",
-            targetValue:Sudoku.GameBoard3D.cellSize * 2,
+            target:Sudoku.GameBoard3D.cellSize * 2,
             length:len,
             callback:function (obj, prop) {
                 Utils.animate({
                     obj:obj,
                     prop:prop,
-                    targetValue:0,
+                    target:0,
                     length:len
                 });
             }
@@ -294,7 +294,7 @@
             Utils.animate({
                 obj:this.color,
                 prop:i,
-                targetValue:statusChange.color[i],
+                target:statusChange.color[i],
                 length:statusChange.length
             });
 
@@ -315,19 +315,19 @@
         Utils.animate({
             obj:this.color,
             prop:"r",
-            targetValue:dipTo,
+            target:dipTo,
             length:len
         });
         Utils.animate({
             obj:this.color,
             prop:"g",
-            targetValue:1,
+            target:1,
             length:len
         });
         Utils.animate({
             obj:this.color,
             prop:"b",
-            targetValue:dipTo,
+            target:dipTo,
             length:len,
             callback:function (obj, prop) {
                 statusChangedAnimation.call(self);

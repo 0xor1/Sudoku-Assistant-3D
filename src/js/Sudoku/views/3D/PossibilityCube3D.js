@@ -93,25 +93,25 @@
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.defaultMaterial,
             prop:'opacity',
-            targetValue:Sudoku.LivePossibilityCubeCell3D.defaultOpacity,
+            target:Sudoku.LivePossibilityCubeCell3D.defaultOpacity,
             length:length
         });
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.certaintyMaterial,
             prop:'opacity',
-            targetValue:Sudoku.LivePossibilityCubeCell3D.certaintyOpacity,
+            target:Sudoku.LivePossibilityCubeCell3D.certaintyOpacity,
             length:length
         });
         Utils.animate({
             obj:Sudoku.DeadPossibilityCubeCell3D.defaultMaterial,
             prop:'opacity',
-            targetValue:Sudoku.DeadPossibilityCubeCell3D.defaultOpacity,
+            target:Sudoku.DeadPossibilityCubeCell3D.defaultOpacity,
             length:length
         });
         Utils.animate({
             obj:Sudoku.DeadPossibilityCubeCell3D.errorMaterial,
             prop:'opacity',
-            targetValue:Sudoku.DeadPossibilityCubeCell3D.errorOpacity,
+            target:Sudoku.DeadPossibilityCubeCell3D.errorOpacity,
             length:length
         });
 
@@ -133,25 +133,25 @@
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.defaultMaterial,
             prop:'opacity',
-            targetValue:0,
+            target:0,
             length:length
         });
         Utils.animate({
             obj:Sudoku.LivePossibilityCubeCell3D.certaintyMaterial,
             prop:'opacity',
-            targetValue:0,
+            target:0,
             length:length
         });
         Utils.animate({
             obj:Sudoku.DeadPossibilityCubeCell3D.defaultMaterial,
             prop:'opacity',
-            targetValue:0,
+            target:0,
             length:length
         });
         Utils.animate({
             obj:Sudoku.DeadPossibilityCubeCell3D.errorMaterial,
             prop:'opacity',
-            targetValue:0,
+            target:0,
             length:length,
             callback:function(){
                 self._isHidden = true;
