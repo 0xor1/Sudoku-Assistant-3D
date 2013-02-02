@@ -238,7 +238,6 @@
 
         if (this._tempStateTimer !== null) {
             clearTimeout(this._tempStateTimer);
-            this._tempStateTimer = null;
         }
 
         this._tempStateTimer = setTimeout(undoClash.bind(this), primaryClashChange.length + primaryClashChange.delay);
