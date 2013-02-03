@@ -34,7 +34,7 @@
                 function(){
                     if(possibilityCube3D._isHidden){
                         focusCameraOnCube();
-                        possibilityCube3D.showAll()
+                        possibilityCube3D.showAll();
                     } else {
                         focusCameraOnBoard();
                         possibilityCube3D.hideAll();
@@ -44,9 +44,7 @@
             );
             newGameTab.addEventListener(
                 'click',
-                function(){
-                    gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig())
-                },
+                getNewStartingConfig,
                 false
             );
             resetBoardTab.addEventListener(
@@ -70,6 +68,14 @@
                 },
                 false
             );
+
+
+            function getNewStartingConfig(){
+                newGameTab.removeEventListener('click',getNewStartingConfig);
+                gameBoard.loadStartingConfiguration(Sudoku.getNewStartingConfig());
+                setTimeout(function(){newGameTab.addEventListener('click',getNewStartingConfig,false);},1000);
+            }
+
         }
 
 
