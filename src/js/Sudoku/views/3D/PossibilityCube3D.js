@@ -175,11 +175,12 @@
 
         var cell = this._cells[event.i][event.j][event.k];
 
-        this._threePanel.remove(cell.active);
+        if(!this._isHidden){
+            this._threePanel.remove(cell.active);
+            this._threePanel.add(cell.dead);
+        }
 
         cell.active = cell.dead;
-
-        this._threePanel.add(cell.active);
 
     }
 
@@ -189,11 +190,12 @@
 
         var cell = this._cells[event.i][event.j][event.k];
 
-        this._threePanel.remove(cell.active);
+        if(!this._isHidden){
+            this._threePanel.remove(cell.active);
+            this._threePanel.add(cell.live);
+        }
 
         cell.active = cell.live;
-
-        this._threePanel.add(cell.active);
 
     }
 
