@@ -93,14 +93,14 @@
         }
 
         function setTargetValue() {
-            if (typeof param.targetValue === "string") {
+            if (typeof param.target === "string") {
                 if (param.targetValue.substring(0, 2) === "+=") {
-                    targetValue = startValue + Number(param.targetValue.substring(2));
+                    targetValue = startValue + Number(param.target.substring(2));
                 } else {
-                    targetValue = startValue - Number(param.targetValue.substring(2));
+                    targetValue = startValue - Number(param.target.substring(2));
                 }
             } else {
-                targetValue = param.targetValue;
+                targetValue = param.target;
             }
         }
 
