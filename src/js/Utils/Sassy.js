@@ -3,20 +3,54 @@
  *
  *  0xor1    http://github.com/0xor1
  *
- *  Rename NameSpace, sfx and countSfx on the last line.
+ *  Rename NameSpace and sfx on the last line.
  *
  */
 
 
-(function (NS, sfx, countSfx) {
+// requestAnimationFrame polyfill by Erik Möller
+// fixes from Paul Irish and Tino Zijdel
+
+// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+// http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+( function () {
+
+    var lastTime = 0;
+    var vendors = [ 'ms', 'moz', 'webkit', 'o' ];
+
+    for ( var x = 0; x < vendors.length && !window.requestAnimationFrame; ++ x ) {
+
+        window.requestAnimationFrame = window[ vendors[ x ] + 'RequestAnimationFrame' ];
+        window.cancelAnimationFrame = window[ vendors[ x ] + 'CancelAnimationFrame' ] || window[ vendors[ x ] + 'CancelRequestAnimationFrame' ];
+
+    }
+
+    if ( window.requestAnimationFrame === undefined ) {
+
+        window.requestAnimationFrame = function ( callback, element ) {
+
+            var currTime = Date.now(), timeToCall = Math.max( 0, 16 - ( currTime - lastTime ) );
+            var id = window.setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall );
+            lastTime = currTime + timeToCall;
+            return id;
+
+        };
+
+    }
+
+    window.cancelAnimationFrame = window.cancelAnimationFrame || function ( id ) { window.clearTimeout( id ) };
+
+}() );
+
+
+
+(function (NS, sfx) {
 
 
     var ns = window[NS] = window[NS] || {}
         , scalingFactor = 1
         , tmpScalingFactor = scalingFactor
         , math = Math
-        , cos = math.cos
-        , pi = math.PI
         ;
 
 
@@ -30,16 +64,24 @@
             , inverseLength = 1 / param.length
             , progress = 0
             , callback = param.callback
-            , thisSfx
+            , dcc = (start - target) * 0.5  //defaultConstCoefficient
+            , cos = math.cos
+            , pi = math.PI
             , progressFn = param.progressFn ||
                 function (s, t, p) {
-                    return (s - t) * (cos(p * pi) + 1) * 0.5 + t;
+                    return dcc * (cos(p * pi) + 1) + t;
                 }
             , lastTime = Date.now()
-            , jumpStartRequired = !(obj[prop + sfx] instanceof Function)
-        ;
+            ;
 
 
+        //process cancel requests
+        if(param.cancel === true && obj[prop + sfx].req !== null){
+            cancelAnimationFrame(obj[prop + sfx].req);
+        }
+
+
+        //process relative animations
         if (typeof target === "string") {
             if (target.substring(0, 2) === "+=") {
                 target = start + Number(target.substring(2));
@@ -49,24 +91,13 @@
         }
 
 
-        getThisSfxAndCancelPreviousAnimation();
+        obj[prop + sfx] = obj[prop + sfx] || {fn:null,req:null};
 
 
-        obj[prop + thisSfx] = function () {
+        obj[prop + sfx].fn = function () {
 
 
-            var thisTime
-                ;
-
-
-            if(typeof obj[prop + thisSfx] === 'undefined' || obj[prop + thisSfx].cancelled) {
-                obj[prop + countSfx]--;
-                delete obj[prop + thisSfx];
-                return;
-            }
-
-
-            thisTime = Date.now();
+            var thisTime = Date.now();
             progress += (thisTime - lastTime) * inverseLength * scalingFactor;
             lastTime = thisTime;
 
@@ -84,62 +115,23 @@
                     );
                 }
 
-                obj[prop + countSfx]--;
-                delete obj[prop + thisSfx];
+                obj[prop + sfx].fn = obj[prop + sfx].req = null;
 
             } else {
 
                 obj[prop] = progressFn(start, target, progress);
 
-                requestAnimationFrame(obj[prop + thisSfx]);
+                obj[prop + sfx].req = requestAnimationFrame(function(){obj[prop + sfx].fn();});
 
             }
 
         };
 
-
-        requestAnimationFrame(obj[prop + thisSfx]);
-
-
-        return obj[prop + thisSfx];
-
-
-        function getThisSfxAndCancelPreviousAnimation() {
-
-            var j = 0
-                , jIsSet = false
-                , previousIsCancelled = false
-                , i = 0
-                ;
-
-            if (typeof obj[prop + countSfx] === "undefined" || obj[prop + countSfx] === 0) {
-                j = 0;
-                obj[prop + countSfx] = 1;
-            } else {
-                while (!previousIsCancelled) {
-                    if (obj[prop + sfx + i] instanceof Function) {
-                        if (obj[prop + sfx + i].cancelled !== true) {
-                            obj[prop + sfx + i].cancelled = true;
-                            previousIsCancelled = true;
-                            if (!jIsSet) {
-                                j = i + 1;
-                                jIsSet = true;
-                            }
-                        }
-                    } else if (!jIsSet && i === 0) {
-                        j = 0;
-                        jIsSet = true;
-                    }
-                    i++;
-                }
-                obj[prop + countSfx]++;
-            }
-            thisSfx = sfx + j;
-
+        if(obj[prop + sfx].req === null){
+            obj[prop + sfx].req = requestAnimationFrame(function(){obj[prop + sfx].fn();});
         }
 
     };
-
 
     ns.AnimationMaster = {};
 
@@ -197,9 +189,11 @@
         };
 
         ns.FrameRateMonitor.start = function () {
-            stopMonitoring = false;
-            prevTime = Date.now();
-            requestAnimationFrame(update);
+            if(stopMonitoring === true){
+                stopMonitoring = false;
+                prevTime = Date.now();
+                requestAnimationFrame(update);
+            }
         };
 
         ns.FrameRateMonitor.stop = function () {
@@ -213,7 +207,7 @@
         ns.FrameRateMonitor.disableLogging = function () {
             log = false;
         };
-        
+
         ns.FrameRateMonitor.enableLowFrameRateSmoothing = function(){
             animationSmoothingEnabled = true;
         };
@@ -292,4 +286,4 @@
 
     })();
 
-})('Utils', '__animation__', '__animation__counts__');
+})('Utils', '_sassy_animation_');
