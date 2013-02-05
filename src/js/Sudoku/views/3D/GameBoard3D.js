@@ -1,3 +1,6 @@
+/*
+0xor1   http://github.com/0xor1
+*/
 (function () {
 
 
