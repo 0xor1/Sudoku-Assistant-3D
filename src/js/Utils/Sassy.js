@@ -61,7 +61,8 @@
             , prop = param.prop
             , start = obj[prop]
             , target = param.target
-            , inverseLength = 1 / param.length
+            , length = (typeof param.length === 'undefined' || param.length === 0) ? 1 : param.length
+            , inverseLength = 1 / length
             , progress = 0
             , callback = param.callback
             , dcc = (start - target) * 0.5  //defaultConstCoefficient
@@ -76,8 +77,12 @@
 
 
         //process cancel requests
-        if(param.cancel === true && obj[prop + sfx].req !== null){
-            cancelAnimationFrame(obj[prop + sfx].req);
+        if(param.cancel === true){
+            if(obj[prop + sfx].req !== null){
+                cancelAnimationFrame(obj[prop + sfx].req);
+                obj[prop + sfx].fn = obj[prop + sfx].req = null;
+            }
+            return;
         }
 
 
@@ -109,7 +114,7 @@
                 if (callback instanceof Function) {
                     setTimeout(
                         function () {
-                            callback(obj, prop);
+                            callback(obj, prop, start, target, length, progressFn);
                         },
                         0
                     );
@@ -133,34 +138,38 @@
 
     };
 
-    ns.AnimationMaster = {};
+    ns.animationMaster = {};
 
 
-    ns.AnimationMaster.pause = function () {
+    ns.animationMaster.pause = function () {
 
-        tmpScalingFactor = scalingFactor;
-        scalingFactor = 0;
+        if(scalingFactor !== 0){
+            tmpScalingFactor = scalingFactor;
+            scalingFactor = 0;
+        }
 
     };
 
 
-    ns.AnimationMaster.play = function () {
+    ns.animationMaster.play = function () {
 
         scalingFactor = tmpScalingFactor;
 
     };
 
 
-    ns.AnimationMaster.setAnimationScalingFactor = function (sf) {
+    ns.animationMaster.setAnimationScalingFactor = function (sf) {
 
-        scalingFactor = tmpScalingFactor = sf;
+        if(sf > 0){
+            scalingFactor = tmpScalingFactor = sf;
+        }
 
     };
 
 
     /*
      *
-     * FrameRateMonitor Adapted from mrdoob's Stats.js  https://github.com/mrdoob/stats.js
+     * frameRateMonitor Adapted from mrdoob's Stats.js  https://github.com/mrdoob/stats.js
      *
      */
     (function () {
@@ -177,10 +186,10 @@
             ;
 
 
-        ns.FrameRateMonitor = {};
+        ns.frameRateMonitor = {};
 
 
-        ns.FrameRateMonitor.setCriticalFps = function (val) {
+        ns.frameRateMonitor.setCriticalFps = function (val) {
 
             if (val < 60 && val > 0) {
                 criticalFps = val;
@@ -188,7 +197,7 @@
 
         };
 
-        ns.FrameRateMonitor.start = function () {
+        ns.frameRateMonitor.start = function () {
             if(stopMonitoring === true){
                 stopMonitoring = false;
                 prevTime = Date.now();
@@ -196,23 +205,24 @@
             }
         };
 
-        ns.FrameRateMonitor.stop = function () {
+        ns.frameRateMonitor.stop = function () {
             stopMonitoring = true;
         };
 
-        ns.FrameRateMonitor.enableLogging = function () {
+        ns.frameRateMonitor.enableLogging = function () {
             log = true;
         };
 
-        ns.FrameRateMonitor.disableLogging = function () {
+        ns.frameRateMonitor.disableLogging = function () {
             log = false;
         };
 
-        ns.FrameRateMonitor.enableLowFrameRateSmoothing = function(){
+        ns.frameRateMonitor.enableLowFrameRateSmoothing = function(){
+            ns.frameRateMonitor.start();
             animationSmoothingEnabled = true;
         };
 
-        ns.FrameRateMonitor.disableLowFrameRateSmoothing = function(){
+        ns.frameRateMonitor.disableLowFrameRateSmoothing = function(){
             animationSmoothingEnabled = false;
         };
 
