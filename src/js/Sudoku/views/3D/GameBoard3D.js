@@ -74,6 +74,12 @@
     Sudoku.GameBoard3D.prototype = Object.create(THREE.Object3D.prototype);
 
 
+    Sudoku.GameBoard3D.prototype.select = function(i, j){
+
+        this._cells[i][j].select();
+
+    }
+
     function valueEntered(event) {
 
         this._cells[event.i][event.j].valueEntered(event.value);

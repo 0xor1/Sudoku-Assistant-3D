@@ -4,7 +4,7 @@
 (function () {
 
 
-    Sudoku.PossibilityCube3D = function (gameBoard, assistant, threePanel) {
+    Sudoku.PossibilityCube3D = function (gameBoard, assistant, gameBoard3D, threePanel) {
 
         var n, nSqrd, cSpace, sgSpace, cSize, gSGB, x, y, z, cell;
         n = gameBoard.getGameSize();
@@ -17,6 +17,7 @@
         this._n = gameBoard.getGameSize();
         this._nSqrd = this._n * this._n;
         this._assistant = assistant;
+        this._gameBoard3D = gameBoard3D;
         this._threePanel = threePanel;
 
         this._isHidden = true;
@@ -157,7 +158,6 @@
             target:0,
             length:length,
             callback:function(){
-                self._isHidden = true;
                 for (var i = 0; i < self._nSqrd; i++) {
                     for (var j = 0; j < self._nSqrd; j++) {
                         for (var k = 0; k < self._nSqrd; k++) {
@@ -165,6 +165,7 @@
                         }
                     }
                 }
+                self._isHidden = true;
                 callback();
             }
         });
@@ -233,14 +234,14 @@
 
     function clicked(event) {
 
-        //TODO
+        this._gameBoard3D.select(event.i, event.j);
 
     }
 
 
     function dblClicked(event) {
 
-        //TODO
+        this._assistant.enterValue(event.i, event.j, event.k);
 
     }
 

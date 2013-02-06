@@ -11,7 +11,7 @@
             , gameBoard = new Sudoku.GameBoard(3)
             , assistant = new Sudoku.Assistant(gameBoard)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)
-            , possibilityCube3D = new Sudoku.PossibilityCube3D(gameBoard, assistant, threePanel)
+            , possibilityCube3D = new Sudoku.PossibilityCube3D(gameBoard, assistant, gameBoard3D, threePanel)
             ;
 
         initialiseDomControls();
