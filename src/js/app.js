@@ -96,23 +96,10 @@
 
             Utils.animate({
                 obj:tar,
-                prop:"x",
-                target:0,
-                length:len
-            });
-            Utils.animate({
-                obj:tar,
-                prop:"y",
-                target:0,
-                length:len
-            });
-            Utils.animate({
-                obj:tar,
                 prop:"z",
                 target:0,
                 length:len
             });
-
             Utils.animate({
                 obj:cam.rotation,
                 prop:"z",
@@ -136,7 +123,10 @@
                 obj:cam.position,
                 prop:"z",
                 target: 0.8 * ((nSqrd - 1) * (Sudoku.GameBoard3D.cellSize + Sudoku.GameBoard3D.cellSpacing) + (n - 1) * Sudoku.GameBoard3D.subGridSpacing),
-                length:len
+                length:len,
+                callback:function(){
+                    threePanel.camera.up = new THREE.Vector3(0,1,0);
+                }
             });
 
         }
