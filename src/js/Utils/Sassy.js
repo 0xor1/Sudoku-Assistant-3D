@@ -69,8 +69,8 @@
             , cos = math.cos
             , pi = math.PI
             , progressFn = param.progressFn ||
-                function (s, t, p) {
-                    return dcc * (cos(p * pi) + 1) + t;
+                function (obj, prop, s, t, p) {
+                    obj[prop] = dcc * (cos(p * pi) + 1) + t;
                 }
             , lastTime = Date.now()
             ;
@@ -109,7 +109,7 @@
 
             if (progress >= 1) {
 
-                obj[prop] = progressFn(start, target, 1);
+                progressFn(obj, prop, start, target, 1);
 
                 if (callback instanceof Function) {
                     setTimeout(
@@ -124,7 +124,7 @@
 
             } else {
 
-                obj[prop] = progressFn(start, target, progress);
+                progressFn(obj, prop, start, target, progress);
 
                 obj[prop + sfx].req = requestAnimationFrame(function(){obj[prop + sfx].fn();});
 
