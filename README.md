@@ -49,4 +49,4 @@ When an individual cell contains a stack of red cubes above it, this means that 
 
 ####Clickable cubes
 
-Live possibility cubes (**White** and **Green**) are included in click hit tests. clicking on a live cube will automatically select the relevant gameboard cell beneath it. Double clicking on a live possibility cube will automaticall enter the value that cell represents into the relevant gamboard cell.
+Live possibility cubes, **White** and **Green**, are included in click hit tests. clicking on a live cube will automatically select the relevant gameboard cell beneath it. Double clicking on a live possibility cube will automaticall enter the value that cell represents into the relevant gamboard cell.
