@@ -17,7 +17,7 @@
         THREE.ImageUtils.loadTexture("textures/7.png"),
         THREE.ImageUtils.loadTexture("textures/8.png"),
         THREE.ImageUtils.loadTexture("textures/9.png"),
-        THREE.ImageUtils.loadTexture("textures/A.png"),
+        /*THREE.ImageUtils.loadTexture("textures/A.png"),
         THREE.ImageUtils.loadTexture("textures/B.png"),
         THREE.ImageUtils.loadTexture("textures/C.png"),
         THREE.ImageUtils.loadTexture("textures/D.png"),
@@ -43,7 +43,7 @@
         THREE.ImageUtils.loadTexture("textures/X.png"),
         THREE.ImageUtils.loadTexture("textures/Y.png"),
         THREE.ImageUtils.loadTexture("textures/Z.png"),
-        THREE.ImageUtils.loadTexture("textures/hash.png")
+        THREE.ImageUtils.loadTexture("textures/hash.png")*/
     ];
 
     Sudoku.getTextureIndexFromKeyCode = function (kc) {
