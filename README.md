@@ -46,3 +46,7 @@ Read the assistant cubes as:
 The way to read an Error message from the assistant is, for example, if the **i th** row of the **k th** plane above the board was showing **Red** cells, this would be saying that row **i** of the gameboard does not contain the value **k** and of its empty cells non of them can accept the value **k**, therefore the game is insolvable.
 Error messages can be given for **Row**, **Column**, **SubGrid** and **Individual Cell**.
 When an individual cell contains a stack of red cubes above it, this means that that particular cell is empty and there are no possibilities left alive which could be entered into it.
+
+####Clickable cubes
+
+Live possibility cubes (**White** and **Green**) are included in click hit tests. clicking on a live cube will automatically select the relevant gameboard cell beneath it. Double clicking on a live possibility cube will automaticall enter the value that cell represents into the relevant gamboard cell.
