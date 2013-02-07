@@ -4,7 +4,7 @@ Sudoku Assistant 3D
 ##Summary
 
 
-A demo webGL application implemented using [mrdoob's](https://twitter.com/mrdoob) [three.js](https://github.com/mrdoob/three.js) library.
+A demo webGL application implemented using [mrdoob's](https://github.com/mrdoob/three.js/graphs/contributors) [three.js](https://github.com/mrdoob/three.js) library.
 
 Users can enter a new Sudoku game and use the assistant to see the possible entries that can be made in any given state.
 
