@@ -43,5 +43,5 @@ Read the assistant cubes as:
 + **Red** - Error, if there are red cells in the assistant the game is in an insolvable state and will require entries to be removed in order to continue playing to completion.
 
 **Red** Error cells always appear in groups, this is because the information doesn't ever relate to one particular cell/value combination.
-The way to read an Error message from the assistant is, for example, if the *i th* row of the **k th** plane above the board was showing **Red** cells, this would be saying that row **i** of the gameboard does not contain the value **k** and of its empty cells non of them can accept the value **k**, therefore the game is insolvable.
+The way to read an Error message from the assistant is, for example, if the **i th** row of the **k th** plane above the board was showing **Red** cells, this would be saying that row **i** of the gameboard does not contain the value **k** and of its empty cells non of them can accept the value **k**, therefore the game is insolvable.
 Error messages can be given for **Row**, **Column**, **SubGrid** and **individual cell**. When an individual cell contains a stack of red cubes above it, this means that that particular cell is empty and there is no possible value to be entered into it.
