@@ -8,8 +8,6 @@ A demo webGL application implemented using [mrdoob's](https://github.com/mrdoob/
 
 Users can enter a new Sudoku game and use the assistant to see the possible entries that can be made in any given state.
 
-Current progress demo available [here](http://0xor1.com/Sudoku).
-
 ##Controls
 
 ###GameBoard
