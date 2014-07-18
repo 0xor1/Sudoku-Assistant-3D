@@ -1,0 +1,129 @@
+<!--0xor1   http://github.com/0xor1-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <title>Sudoku Assistant 3D</title>
+
+    <meta charset="utf-8">
+
+    <script src="js/lib/Three/three-r55-mini.js"></script>
+    <script src='js/lib/Three/TrackBallControls.js'></script>
+
+
+    <script src="js/lib/Utils/EventDispatcher.js"></script>
+    <script src="js/Utils/Sassy.js"></script>
+    <script src="js/Utils/Error.js"></script>
+    <script src="js/Utils/Log.js"></script>
+    <script src="js/Utils/MultiArray.js"></script>
+
+
+    <script src="js/UIControls/UIControl.js"></script>
+
+    <script src="js/UIControls/DomUIControls/ThreePanel.js"></script>
+
+    <script src="js/UIControls/ThreeUIControls/ClickableMesh.js"></script>
+
+
+    <script src="js/Sudoku/Sudoku.js"></script>
+
+    <script src="js/Sudoku/model/StartingConfigs.js"></script>
+    <script src="js/Sudoku/model/GameBoard.js"></script>
+    <script src="js/Sudoku/model/Assistant.js"></script>
+
+    <script src="js/Sudoku/views/3D/GameBoard3D.js"></script>
+    <script src="js/Sudoku/views/3D/GameBoardCell3D.js"></script>
+
+    <script src="js/Sudoku/views/3D/PossibilityCube3D.js"></script>
+    <script src="js/Sudoku/views/3D/PossibilityCubeCell3D.js"></script>
+    <script src="js/Sudoku/views/3D/LivePossibilityCubeCell3D.js"></script>
+    <script src="js/Sudoku/views/3D/DeadPossibilityCubeCell3D.js"></script>
+
+
+    <script src="js/app.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+
+
+</head>
+
+<body>
+
+<div id="masterViewport" class="xor viewport">
+
+    <div id="threeViewport" class="xor viewport">
+
+        <canvas id="threeDView" class="xor threePanel">
+
+        </canvas>
+
+    </div>
+
+    <div id="toggleAssistantTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    Toggle Assistant
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="newGameTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    New Game
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="resetBoardTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    Reset Board
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="saveStartingConfigTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    Save Starting Cells
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="clearBoardTab" class="xor sliderTab menu">
+        <p>
+            <em>
+                <strong>
+                    Clear Board
+                </strong>
+            </em>
+        </p>
+    </div>
+
+    <div id="gitHubTab" class="xor sliderTab">
+        <a href="https://github.com/0xor1/Sudoku-Assistant-3D#sudoku-assistant-3d" target="_blank">
+            <p>
+                <em>
+                    <strong>
+                        GitHub
+                    </strong>
+                </em>
+            </p>
+        </a>
+    </div>
+
+</div>
+
+</body>
+
+</html>
