@@ -7,7 +7,7 @@
 
     function app() {
 
-        var threePanel = new UIControls.ThreePanel(document.getElementById("threeDView"))
+        var threePanel = new UIControls.ThreePanel(document.getElementById("threeViewport"))
             , gameBoard = new Sudoku.GameBoard(3)
             , assistant = new Sudoku.Assistant(gameBoard)
             , gameBoard3D = new Sudoku.GameBoard3D(gameBoard)

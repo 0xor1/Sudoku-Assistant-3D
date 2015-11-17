@@ -1,6 +1,6 @@
 (function () {
 
-    UIControls.ThreePanel = function (dom) {
+    UIControls.ThreePanel = function (container) {
 
         UIControls.UIControl.call(this);
 
@@ -10,26 +10,28 @@
         this._resizeTimer = null;
         this.resize = resize.bind(this);
 
-        this.renderer = new THREE.WebGLRenderer({canvas:dom});
-        this.dom = this.renderer.domElement;
+        this.renderer = new THREE.WebGLRenderer();
+        this.container = container;
+        this.canvas = this.renderer.domElement;
+        this.container.appendChild(this.canvas);
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, this.dom.width / this.dom.height, 1, 100000);
-        this.controls = new THREE.TrackballControls(this.camera, this.dom);
+        this.camera = new THREE.PerspectiveCamera(75, this.container.width / this.container.height, 1, 100000);
+        this.controls = new THREE.TrackballControls(this.camera, this.canvas);
 
         this.scene.add(this.camera);
 
         this.addEventListener('resize', canvasResized.bind(this));
 
-        this.addUIEventListener(this.dom, 'mousedown', mouseDown.bind(this), false);
+        this.addUIEventListener(this.canvas, 'mousedown', mouseDown.bind(this), false);
 
-        this.addUIEventListener(this.dom, 'mouseup', mouseUp.bind(this), false);
+        this.addUIEventListener(this.canvas, 'mouseup', mouseUp.bind(this), false);
 
-        this.addUIEventListener(this.dom, 'click', click.bind(this), false);
+        this.addUIEventListener(this.canvas, 'click', click.bind(this), false);
 
-        this.addUIEventListener(this.dom, 'dblclick', dblClick.bind(this), false);
+        this.addUIEventListener(this.canvas, 'dblclick', dblClick.bind(this), false);
 
         //commented out for performance
-        //this.addUIEventListener(this.dom, 'mousemove', mouseMove.bind(this), false);
+        //this.addUIEventListener(this.canvas, 'mousemove', mouseMove.bind(this), false);
 
         this.addUIEventListener(window, 'resize', canvasResized.bind(this), false);
 
@@ -124,7 +126,7 @@
     };
 
     function resize() {
-        var rect = this.dom.getBoundingClientRect();
+        var rect = this.container.getBoundingClientRect();
         this.renderer.setSize(rect.width, rect.height);
         this.camera.aspect = rect.width / rect.height;
         this.controls.handleResize();
@@ -159,7 +161,7 @@
 
     function mouse(type, event) {
 
-        var rect = this.dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
+        var rect = this.canvas.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
         vector.unproject(this.camera);
 
         var raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
