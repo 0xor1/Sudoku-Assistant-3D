@@ -159,8 +159,8 @@
 
     function mouse(type, event) {
 
-        var projector = new THREE.Projector(), rect = this.dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
-        projector.unprojectVector(vector, this.camera);
+        var rect = this.dom.getBoundingClientRect(), vector = new THREE.Vector3(((event.clientX - rect.left) / rect.width ) * 2 - 1, -((event.clientY - rect.top) / rect.height ) * 2 + 1, 0.5);
+        vector.unproject(this.camera);
 
         var raycaster = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
 
