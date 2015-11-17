@@ -11,12 +11,12 @@ html, body, .xor.threePanel, .xor.viewport {
     overflow: hidden;
 }
 
-.xor.threePanel {
-    background-image: linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
-    background-image: -ms-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
-    background-image: -o-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
-    background-image: -moz-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
-    background-image: -webkit-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+.xor.viewport > canvas{
+    background: linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background: -ms-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background: -o-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background: -moz-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
+    background: -webkit-linear-gradient(top, rgb(0, 0, 30) 60%, rgb(10, 10, 60) 85%);
 }
 
 .xor.sliderTab {

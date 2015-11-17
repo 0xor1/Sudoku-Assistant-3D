@@ -5,18 +5,19 @@
 (function () {
 
     window.Sudoku = {};
+    var loader = new THREE.TextureLoader()
 
     Sudoku.textures = [
-        THREE.ImageUtils.loadTexture("textures/empty.png"),
-        THREE.ImageUtils.loadTexture("textures/1.png"),
-        THREE.ImageUtils.loadTexture("textures/2.png"),
-        THREE.ImageUtils.loadTexture("textures/3.png"),
-        THREE.ImageUtils.loadTexture("textures/4.png"),
-        THREE.ImageUtils.loadTexture("textures/5.png"),
-        THREE.ImageUtils.loadTexture("textures/6.png"),
-        THREE.ImageUtils.loadTexture("textures/7.png"),
-        THREE.ImageUtils.loadTexture("textures/8.png"),
-        THREE.ImageUtils.loadTexture("textures/9.png"),
+        loader.load("textures/empty.png"),
+        loader.load("textures/1.png"),
+        loader.load("textures/2.png"),
+        loader.load("textures/3.png"),
+        loader.load("textures/4.png"),
+        loader.load("textures/5.png"),
+        loader.load("textures/6.png"),
+        loader.load("textures/7.png"),
+        loader.load("textures/8.png"),
+        loader.load("textures/9.png"),
         /*THREE.ImageUtils.loadTexture("textures/A.png"),
         THREE.ImageUtils.loadTexture("textures/B.png"),
         THREE.ImageUtils.loadTexture("textures/C.png"),
